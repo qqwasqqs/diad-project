@@ -1,0 +1,26 @@
+trigger:
+  branches:
+    include:
+      - master
+      - dev
+      - main
+  paths:
+    exclude:
+      - azure-pipelines.yml
+      - README.md
+
+pool:
+  name: DataServices-TEVAONLINE-AGENT-DEV-02
+
+resources:
+  repositories:  
+  - repository: DevOps_templates
+    type: git
+    name: DevOps_templates
+    ref: main
+
+variables:
+- ${{ if eq(variables['build.SourceBranchName'], 'dev') }}:
+  - group: integrity-webapp_wap_dev
+jobs:
+  - template: OpenAI_container_template.yaml@DevOps_templates

@@ -1,0 +1,50 @@
+{
+  "generatedAt": "2026-08-18T00:00:00.000Z",
+  "summary": {
+    "title": "Local Design Sample",
+    "totalItems": 128,
+    "healthyItems": 121,
+    "warningItems": 5,
+    "criticalItems": 2
+  },
+  "cards": [
+    {
+      "id": "card-1",
+      "label": "Throughput",
+      "value": 842,
+      "unit": "jobs/day",
+      "trend": "up"
+    },
+    {
+      "id": "card-2",
+      "label": "Error Rate",
+      "value": 1.7,
+      "unit": "%",
+      "trend": "down"
+    },
+    {
+      "id": "card-3",
+      "label": "Latency",
+      "value": 12.4,
+      "unit": "min",
+      "trend": "flat"
+    }
+  ],
+  "table": [
+    {
+      "name": "dataset_alpha",
+      "status": "healthy",
+      "score": 98.2
+    },
+    {
+      "name": "dataset_beta",
+      "status": "warning",
+      "score": 89.1
+    },
+    {
+      "name": "dataset_gamma",
+      "status": "critical",
+      "score": 71.6
+    }
+  ]
+}

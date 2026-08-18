@@ -1,0 +1,118 @@
+/*
+  Project Name: Teva Data Integrity
+  Business Owner, Team: Keerthi Pusuloori
+  Script Author, Team: Radhe Raman Tiwari
+  Date: 10 November 2025
+
+  Purpose of the script:
+    This script defines global CSS variables for the Teva Data Integrity Automation Dashboard's theme.
+    - The variables are used to ensure consistent styling across the entire application.
+    - The root theme variables define colors, fonts, and background/foreground settings for the application.
+    - The Tailwind CSS theme layer is customized to map the defined variables to Tailwind's utility classes.
+    - Global base styles, including background, font, and specific component styles, are also applied.
+*/
+
+/* Import Tailwind's base styles and utility classes */
+@import "tailwindcss";
+
+/* === Root Theme Variables === */
+
+/* Define global CSS variables for the theme */
+:root {
+  /* Base colors */
+  --background: #ffffff; /* Background color for the entire page */
+  --foreground: #00a03b; /* Default foreground (text) color */
+
+  /* Neutral foreground colors (shades of green/blue for text) */
+  --color-neutral-foreground-1: #00a03b; /* Main text color */
+  --color-neutral-foreground-2: #00567a; /* Secondary text color */
+  --color-neutral-foreground-3: #ffffff; /* White text color */
+  --color-neutral-foreground-4: #00567a; /* Similar to foreground-2 */
+  --color-neutral-foreground-5: #f6f6f6; /* Light grey text color */
+  --color-neutral-foreground-disabled: #c8c6c4; /* Disabled text color */
+
+  /* Neutral background colors (shades of green/grey for backgrounds) */
+  --color-neutral-background-1: #ffffff; /* White background */
+  --color-neutral-background-2: #3c7e79; /* Dark greenish background */
+  --color-neutral-background-3: #f6f6f6; /* Light grey background */
+  --color-neutral-background-4: #00a03b; /* Green background for emphasis */
+  --color-neutral-background-5: #eeeeee; /* Very light grey background */
+  --color-neutral-background-6: #d0d0d0; /* Medium grey background */
+
+  /* Font family stack: Segoe UI (system) → Open Sans → Noto Sans → sans-serif */
+  --font-family: "Segoe UI", var(--font-open-sans), var(--font-noto-sans),
+    -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* === Tailwind Theme Layer === */
+/* Map your CSS variables to Tailwind color tokens to use with Tailwind utilities */
+@theme inline {
+  /* Background and foreground colors using CSS variables */
+  --color-background: var(--color-neutral-background-1); /* Default background color */
+  --color-foreground: var(--color-neutral-foreground-2); /* Default foreground color */
+
+  /* Foreground colors for text */
+  --color-neutral-foreground-1: var(--color-neutral-foreground-1); /* Primary text color */
+  --color-neutral-foreground-2: var(--color-neutral-foreground-2); /* Secondary text color */
+  --color-neutral-foreground-3: var(--color-neutral-foreground-3); /* White text color */
+  --color-neutral-foreground-4: var(--color-neutral-foreground-4); /* Used in highlights */
+  --color-neutral-foreground-5: var(--color-neutral-foreground-5); /* Lighter text color */
+  --color-neutral-foreground-disabled: var(--color-neutral-foreground-disabled); /* Disabled text color */
+
+  /* Background colors for elements */
+  --color-neutral-background-1: var(--color-neutral-background-1); /* Default background color */
+  --color-neutral-background-2: var(--color-neutral-background-2); /* Dark background color */
+  --color-neutral-background-3: var(--color-neutral-background-3); /* Light background color */
+  --color-neutral-background-4: var(--color-neutral-background-4); /* Accent background */
+  --color-neutral-background-5: var(--color-neutral-background-5); /* Light grey background */
+  --color-neutral-background-6: var(--color-neutral-background-6); /* Medium grey background */
+
+  /* Font family for consistent typography across the app */
+  --font-family: var(--font-family); /* Font stack includes Segoe UI, Open Sans, Noto Sans */
+}
+
+/* === Global Base Styles === */
+
+/* Apply the root background and foreground colors globally */
+body {
+  background: var(--background); /* Set the background color to the root's background variable */
+  color: var(--foreground); /* Set the text color to the root's foreground variable */
+  font-family: var(--font-family); /* Use the root's font family for consistent typography */
+}
+
+/* Style the input components' content before and after the input field */
+.fui-Input__contentBefore, .fui-Input__contentAfter {
+  color: var(--color-neutral-foreground-1) !important; /* Use primary text color for input labels and icons */
+}
+
+/* Style the input components' hint text the input field */
+.fui-Field__hint {
+  color: var(--color-neutral-foreground-2) !important; /* Use secondary text color for input hint text */
+}
+
+/* Style the calendar picker items (buttons) for date selection */
+.fui-CalendarPicker__itemButton:not(.fui-CalendarPicker__disabled) {
+  color: var(--color-neutral-foreground-2) !important; /* Use secondary text color for active calendar buttons */
+}
+
+/* Style the calendar day header icons (buttons) for date selection */
+.fui-CalendarDay__headerIconButton:not(.fui-CalendarDay__disabledStyle) {
+  color: var(--color-neutral-foreground-1) !important; /* Use primary text color for active calendar buttons */
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  width: 6px; /* Width of the scrollbar */
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  border-radius: 8px; /* Round the thumb */
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  border-radius: 8px;
+}
+
+/* For Firefox */
+.scrollbar-custom {
+  scrollbar-width: thin; /* Thin scrollbar */
+}
