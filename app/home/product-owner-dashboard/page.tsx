@@ -8,6 +8,7 @@ import DashboardSectionAction from "@/components/shared/dashboard/DashboardSecti
 import DashboardDrawer from "@/components/shared/dashboard/DashboardDrawer";
 import DashboardKpiCard from "@/components/shared/dashboard/DashboardKpiCard";
 import DashboardKpiGrid from "@/components/shared/dashboard/DashboardKpiGrid";
+import DashboardPanel from "@/components/shared/dashboard/DashboardPanel";
 
 export default function ProductOwnerDashboard() {
   const [pulseOpen, setPulseOpen] = useState(false);
@@ -21,7 +22,27 @@ export default function ProductOwnerDashboard() {
       description="Understand adoption, user experience, and business value"
     >
       <DashboardGrid>
-        <DashboardSection
+        <DashboardPanel template="single" title="Shared Panel - single region">
+          <div className="text-sm text-slate-700">
+            This is a generic shared panel container used as a structural test.
+          </div>
+        </DashboardPanel>
+
+        <DashboardPanel
+          template="segmented"
+          title="Shared Panel - segmented"
+          sections={[
+            { id: "left", title: "Primary" },
+            { id: "middle", title: "Secondary" },
+            { id: "right", title: "Tertiary" },
+          ]}
+        >
+          <div className="text-sm text-slate-700">Region one</div>
+          <div className="text-sm text-slate-700">Region two</div>
+          <div className="text-sm text-slate-700">Region three</div>
+        </DashboardPanel>
+
+        {/* <DashboardSection
           title="Product experience pulse"
           actions={
             <DashboardSectionAction
@@ -196,7 +217,7 @@ export default function ProductOwnerDashboard() {
             This is a product decision gate, not a security incident signal; the goal is
             to confirm whether these measurements are suitable for outcome-level decisions.
           </p>
-        </DashboardDrawer>
+        </DashboardDrawer> */}
       </DashboardGrid>
     </DashboardPage>
   );
