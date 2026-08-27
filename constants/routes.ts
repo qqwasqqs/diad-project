@@ -108,6 +108,7 @@ export const DATA_REFRESH_ROUTE = "/home/data-refresh";
 export const ROLES_MANAGEMENT_ROUTE = "/home/roles-management";
 
 export const TECH_TEAM_DASHBOARD_ROUTE = "/home/tech-team-dashboard";
+
 export const PRODUCT_OWNER_DASHBOARD_ROUTE = "/home/product-owner-dashboard";
 
-
+export const OPERATIONS_TEAM_DASHBOARD_ROUTE = "/home/operations-team-dashboard";

@@ -29,6 +29,7 @@
   --color-neutral-foreground-3: #ffffff; /* White text color */
   --color-neutral-foreground-4: #00567a; /* Similar to foreground-2 */
   --color-neutral-foreground-5: #f6f6f6; /* Light grey text color */
+  --color-neutral-foreground-6: #030000; /* Light grey text color */
   --color-neutral-foreground-disabled: #c8c6c4; /* Disabled text color */
 
   /* Neutral background colors (shades of green/grey for backgrounds) */
@@ -42,6 +43,25 @@
   /* Font family stack: Segoe UI (system) → Open Sans → Noto Sans → sans-serif */
   --font-family: "Segoe UI", var(--font-open-sans), var(--font-noto-sans),
     -apple-system, BlinkMacSystemFont, sans-serif;
+
+
+  /* Warning */
+  --color-warning-icon: #8b5e3c;
+  --color-warning-bg: #faf4ea;
+  --color-warning-content: #f7630c;
+
+  /* Success */
+  --color-success-icon: #107c41;
+  --color-success-bg: #e8f5ec;
+  --color-success-content: #107c41;
+
+  /* Danger */
+  --color-danger-icon: #d13438;
+  --color-danger-bg: #fde7e9;
+  --color-danger-content: #d13438;
+
+  /* violet */
+  --color-violet-bg: #EDE9FE;
 }
 
 /* === Tailwind Theme Layer === */
@@ -69,6 +89,28 @@
 
   /* Font family for consistent typography across the app */
   --font-family: var(--font-family); /* Font stack includes Segoe UI, Open Sans, Noto Sans */
+
+  /* Colors for inner block elements */
+
+ 
+    --color-title: var(--color-neutral-foreground-6);
+  
+    /* Warning */
+    --color-status-warning-icon: var(--color-warning-icon);
+    --color-status-warning-bg:var(--color-warning-bg);
+    --color-status-warning-content: var(--color-warning-content);
+  
+    /* Success */
+    --color-status-success-icon: var(--color-success-icon);
+    --color-status-success-bg: var(--color-success-bg);
+    --color-status-success-content: var(--color-success-content);
+  
+    /* Danger */
+    --color-danger-icon: var(--color-danger-icon);
+    --color-danger-bg: var(--color-danger-bg);
+    --color-danger-content: var(--color-danger-content);
+  
+    --color-violet-bg: var(--color-violet-bg);
 }
 
 /* === Global Base Styles === */
@@ -115,4 +157,59 @@ body {
 /* For Firefox */
 .scrollbar-custom {
   scrollbar-width: thin; /* Thin scrollbar */
+}
+
+
+.statusCallout-warning{
+  float: left;
+  padding-right: 15px;
+  .iconBackground{ 
+    background-color: var(--color--warning-bg);
+  }
+  .iconColor{ 
+    color: var(--color-warning-icon);
+  }
+  .contentColor{
+    color: var(--color-warning-content)
+  }
+}
+.statusCallout-success{
+  float: left;
+  padding-right: 15px;
+  .iconBackground{ 
+    background-color: var(--color-success-bg);
+  }
+  .iconColor{ 
+    color: var(--color-success-icon);
+  }
+  .contentColor{
+    color: var(--color-success-content)
+  }
+}
+.statusCallout-danger{ 
+  float: left;
+  padding-right: 15px;
+  .iconBackground{ 
+    background-color: var(--color-danger-bg);
+  }
+  .iconColor{ 
+    color: var(--color-danger-icon);
+  }
+  .contentColor{
+    color: var(--color-danger-content);
+  }
+}
+
+
+.metricCard-warning .icon-bg{ 
+  background-color: var(--color-warning-bg);
+}
+.metricCard-success .icon-bg{ 
+background-color: var(--color-success-bg);
+}
+.metricCard-danger .icon-bg{ 
+background-color: var(--color-danger-bg);
+}
+.metricCard-violet .icon-bg{ 
+background-color: var(--color-violet-bg);
 }
