@@ -48,40 +48,36 @@ const useStyles = makeStyles({
   },
 });
 interface DashboardSectionProps {
-  title: string;
+  title?: string;
   description?: string;
   actions?: ReactNode;
-  children: ReactNode;
+  children?: ReactNode;
+  className?: string;
 }
 export default function DashboardSection({
   title,
   description,
   actions,
   children,
+  className,
 }: DashboardSectionProps) {
   const styles = useStyles();
+
   return (
-    <section className={styles.root}>
-      <div className={styles.header}>
-        <div className={styles.titleContainer}>
-          <Title3 className={styles.title}>
-            {title}
-          </Title3>
-          {description && (
-            <Text className={styles.description}>
-              {description}
-            </Text>
-          )}
-        </div>
-        {actions && (
-          <div className={styles.actions}>
-            {actions}
+    <section className={[styles.root, className].filter(Boolean).join(" ")}>
+      {(title || description || actions) && (
+        <div className={styles.header}>
+          <div className={styles.titleContainer}>
+            {title && <Title3 className={styles.title}>{title}</Title3>}
+            {description && (
+              <Text className={styles.description}>{description}</Text>
+            )}
           </div>
-        )}
-      </div>
-      <div className={styles.content}>
-        {children}
-      </div>
+          {actions && <div className={styles.actions}>{actions}</div>}
+        </div>
+      )}
+
+      <div className={styles.content}>{children}</div>
     </section>
   );
 }
