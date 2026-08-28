@@ -1,3 +1,12 @@
+const modules: Array<{
+    moduleId: string;
+    moduleSlug: string;
+    displayName: string;
+    iconPath: string;
+    requiredPermissions: string[];
+    children: unknown[];
+  }> = [];
+
 const demoModule = {
     moduleId: "tech-team-dashboard",
     moduleSlug: "/tech-team-dashboard",
@@ -8,3 +17,5 @@ const demoModule = {
   };
   
   modules.push(demoModule);
+
+export default modules;

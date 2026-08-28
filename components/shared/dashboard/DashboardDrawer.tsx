@@ -30,7 +30,7 @@ const useStyles = makeStyles({
 interface DashboardDrawerProps {
     open: boolean;
     title: string;
-    children: ReactNode;
+    children?: ReactNode;
     onClose: () => void;
     footer?: ReactNode;
 }

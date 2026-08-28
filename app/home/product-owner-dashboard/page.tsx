@@ -4,6 +4,7 @@ import DashboardPage from "@/components/shared/dashboard/DashboardPage";
 import DashboardGrid from "@/components/shared/dashboard/DashboardGrid";
 import DashboardLineChart from "@/components/shared/dashboard/DashboardLineChart";
 import DashboardPanel from "@/components/shared/dashboard/DashboardPanel";
+import CostByBusinessUnitChart from "@/components/charts/CostByBusinessUnitChart";
 
 export default function ProductOwnerDashboard() {
   return (
@@ -108,6 +109,34 @@ export default function ProductOwnerDashboard() {
                 icon: <span aria-hidden="true">⏱</span>,
                 value: "8.2 min",
                 text: "avg session",
+              },
+            ]}
+          />
+        </DashboardPanel>
+
+        <DashboardPanel template="single" title="Cost by BU and Project">
+          <CostByBusinessUnitChart
+            data={[
+              {
+                name: "Business Unit A",
+                totalCost: 7.68,
+                topProjectName: "Project A1",
+                topProjectCost: 4.21,
+                color: "#1f7a5f",
+              },
+              {
+                name: "Business Unit B",
+                totalCost: 5.42,
+                topProjectName: "Project B1",
+                topProjectCost: 2.93,
+                color: "#1f7a5f",
+              },
+              {
+                name: "Business Unit C",
+                totalCost: 3.76,
+                topProjectName: "Project C1",
+                topProjectCost: 1.94,
+                color: "#1f7a5f",
               },
             ]}
           />
