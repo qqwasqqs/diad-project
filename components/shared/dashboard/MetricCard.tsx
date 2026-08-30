@@ -56,8 +56,6 @@ export const MetricCard: React.FC<MetricCardProps> = ({
         basis-0
         flex-col
         rounded-xl
-        border
-        border-neutral-200
         bg-white
         shadow-sm
 
