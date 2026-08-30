@@ -160,46 +160,7 @@ body {
 }
 
 
-.statusCallout-warning{
-  float: left;
-  padding-right: 15px;
-  .iconBackground{ 
-    background-color: var(--color--warning-bg);
-  }
-  .iconColor{ 
-    color: var(--color-warning-icon);
-  }
-  .contentColor{
-    color: var(--color-warning-content)
-  }
-}
-.statusCallout-success{
-  float: left;
-  padding-right: 15px;
-  .iconBackground{ 
-    background-color: var(--color-success-bg);
-  }
-  .iconColor{ 
-    color: var(--color-success-icon);
-  }
-  .contentColor{
-    color: var(--color-success-content)
-  }
-}
-.statusCallout-danger{ 
-  float: left;
-  padding-right: 15px;
-  .iconBackground{ 
-    background-color: var(--color-danger-bg);
-  }
-  .iconColor{ 
-    color: var(--color-danger-icon);
-  }
-  .contentColor{
-    color: var(--color-danger-content);
-  }
-}
-
+/* Status callout variant styling is now handled in the component via a stable variant API. */
 
 .metricCard-warning .icon-bg{ 
   background-color: var(--color-warning-bg);
