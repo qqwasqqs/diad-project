@@ -142,6 +142,32 @@ function formatRow(row: MockRow, factor: number): TechTeamMetricRow {
   return { id: row.id, label: row.label, value };
 }
 
+/*
+  Applies the selected scope to the mock.
+
+  IMPORTANT — this is deliberately more permissive than the real source may be.
+
+  Every metric here responds to every filter, because the mock exists to exercise
+  the UI. The calculation specifications do not permit that in production: a
+  metric may apply a business-unit, project, or channel filter only where its
+  source event is reliably attributed through an approved Splunk
+  correlation/enrichment contract.
+
+  When `loadFromSource` is implemented, each metric must be classified:
+
+  - attribution approved for the selected scope -> return the filtered value;
+  - attribution not approved -> return that row with
+    `pendingState: "filter-breakdown"`, which renders as
+    FILTER BREAKDOWN UNAVAILABLE.
+
+  Never return a portfolio-wide value while a narrower scope is selected, and
+  never substitute zero for a scope that cannot be attributed. Doing either makes
+  an unfiltered number indistinguishable from a filtered one.
+
+  The drawers already state `filter-breakdown` as their coverage for every
+  metric, so today the main view is more confident about attribution than the
+  provenance tables behind it. That gap closes when the real contract lands.
+*/
 function applyFilters(
   mock: MockPayload,
   filters: TechTeamDashboardFilters,
@@ -211,9 +237,12 @@ async function loadMockPayload(
   Replace this with the approved source call.
 
   The implementation must return `TechTeamDashboardPayload` with the selected
-  filters already applied. Where a metric's attribution is not approved for a
-  selected scope, return that row with `pendingState: "filter-breakdown"`
-  instead of an unfiltered portfolio value.
+  filters already applied, per metric, following the attribution rule documented
+  on `applyFilters` above: filter where attribution is approved, and return
+  `pendingState: "filter-breakdown"` where it is not.
+
+  Do not copy the mock's behaviour of scoping everything unconditionally. It is
+  a UI fixture, not a model of what the source is allowed to claim.
 
   Suggested shape once the contract exists:
 
