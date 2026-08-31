@@ -234,10 +234,24 @@ export default function DashboardLineChart({
               axisLine={{ stroke: "#cbd5e1" }}
               tickLine={false}
               tickMargin={10}
-              width={axis.width ?? 50}
+              width={axis.width ?? (axis.label ? 72 : 50)}
               domain={axis.domain}
               tickFormatter={axis.tickFormatter}
               tick={{ fill: "#64748b", fontSize: 12 }}
+              label={
+                axis.label
+                  ? {
+                      value: axis.label,
+                      angle: -90,
+                      position: "insideLeft",
+                      style: {
+                        fill: "#64748b",
+                        fontSize: 12,
+                        textAnchor: "middle",
+                      },
+                    }
+                  : undefined
+              }
             />
           ))}
 
