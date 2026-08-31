@@ -6,7 +6,7 @@
   moving from local mock data to Splunk (or any approved API) means replacing
   `loadFromSource` below and changing nothing else.
 
-  In local design mode the payload is read from the static mock so the page can
+  In local design mode the payload is built from the static mock so the page can
   be developed without external systems. Outside local design mode the real
   source is required: the route fails loudly rather than serving illustrative
   numbers that would be indistinguishable from measured ones.
@@ -20,6 +20,7 @@ import { isLocalDesignModeServer } from "@/lib/localDesignMode";
 import type {
   TechTeamDashboardFilters,
   TechTeamDashboardPayload,
+  TechTeamMetricRow,
 } from "@/types/techTeamDashboard";
 
 const MOCK_PATH = path.join(
@@ -29,6 +30,44 @@ const MOCK_PATH = path.join(
   "new-pages",
   "tech-team-dashboard.json",
 );
+
+const PERIOD_DAYS: Record<string, number> = {
+  "7d": 7,
+  "30d": 30,
+  "90d": 90,
+};
+
+/*
+  Shape of the mock file. It holds numeric amounts and a full 90-day range,
+  because the mock is a source to be filtered and formatted, not a
+  ready-made response. Mapping it onto the public contract is this route's job,
+  exactly as mapping a Splunk report would be.
+*/
+interface MockRow extends TechTeamMetricRow {
+  amount?: number;
+  unit?: string;
+  prefix?: string;
+  decimals?: number;
+  // Upper bound for bounded scores, so scaling cannot push them past their scale.
+  max?: number;
+}
+
+interface MockPayload
+  extends Omit<
+    TechTeamDashboardPayload,
+    "requestPathHealth" | "capacityAndEfficiency" | "aiModelQuality" | "evaluatorReadiness"
+  > {
+  requestPathHealth: {
+    latencySeries: TechTeamDashboardPayload["requestPathHealth"]["latencySeries"];
+    diagnostics: MockRow[];
+  };
+  capacityAndEfficiency: MockRow[];
+  aiModelQuality: {
+    series: TechTeamDashboardPayload["aiModelQuality"]["series"];
+    supporting: (MockRow & { label: string })[];
+  };
+  evaluatorReadiness: MockRow[];
+}
 
 function readFilters(request: NextRequest): TechTeamDashboardFilters {
   const params = request.nextUrl.searchParams;
@@ -41,9 +80,131 @@ function readFilters(request: NextRequest): TechTeamDashboardFilters {
   };
 }
 
-async function loadMockPayload(): Promise<TechTeamDashboardPayload> {
+/*
+  Illustrative weight per filter dimension.
+
+  Each selection has its own explicit weight rather than a hash, so a scope's
+  numbers are readable from the code and every selection visibly moves the
+  values. These are presentation weights for mock data, not measured ratios.
+*/
+const SCOPE_WEIGHTS: Record<string, Record<string, number>> = {
+  businessUnit: { all: 1, a: 0.84, b: 1.19 },
+  project: { all: 1, a1: 0.91, b1: 1.12 },
+  channel: { all: 1, web: 1.08, api: 0.86, mobile: 0.73 },
+};
+
+function scopeFactor(filters: TechTeamDashboardFilters): number {
+  const weight = (dimension: string, selected?: string) =>
+    SCOPE_WEIGHTS[dimension][selected ?? "all"] ?? 1;
+
+  return (
+    weight("businessUnit", filters.businessUnit) *
+    weight("project", filters.project) *
+    weight("channel", filters.channel)
+  );
+}
+
+/*
+  Bounded scores (a 1-5 or 0-1 rating) must not move like a volume or a cost.
+  Multiplying them by the scope factor drives them to a perfect score, which is
+  implausible and, on a quality metric, actively misleading.
+
+  They shift in the same direction but consume only a fraction of the headroom
+  that remains to their bound, so a wider scope never produces a flawless score.
+*/
+function shiftBounded(amount: number, max: number, factor: number): number {
+  const delta = (factor - 1) * 0.35;
+
+  return delta >= 0
+    ? amount + (max - amount) * delta
+    : amount * (1 + delta);
+}
+
+function formatRow(row: MockRow, factor: number): TechTeamMetricRow {
+  // A pending state is never replaced by a number, whatever the scope.
+  if (row.pendingState || row.amount === undefined) {
+    return {
+      id: row.id,
+      label: row.label,
+      value: row.value,
+      pendingState: row.pendingState,
+    };
+  }
+
+  const scaled =
+    row.max !== undefined
+      ? shiftBounded(row.amount, row.max, factor)
+      : row.amount * factor;
+
+  const decimals = row.decimals ?? 0;
+  const value = `${row.prefix ?? ""}${scaled.toFixed(decimals)}${row.unit ?? ""}`;
+
+  return { id: row.id, label: row.label, value };
+}
+
+function applyFilters(
+  mock: MockPayload,
+  filters: TechTeamDashboardFilters,
+): TechTeamDashboardPayload {
+  const days = PERIOD_DAYS[filters.period ?? "30d"] ?? 30;
+  const factor = scopeFactor(filters);
+
+  const sliceSeries = (
+    series: TechTeamDashboardPayload["aiModelQuality"]["series"],
+    max?: number,
+  ) =>
+    series.map((item) => ({
+      ...item,
+      points: item.points.slice(-days).map((point) => {
+        const scaled =
+          max !== undefined
+            ? shiftBounded(point.y, max, factor)
+            : point.y * factor;
+        return { x: point.x, y: Number(scaled.toFixed(2)) };
+      }),
+    }));
+
+  return {
+    ...mock,
+    requestPathHealth: {
+      latencySeries: sliceSeries(mock.requestPathHealth.latencySeries),
+      diagnostics: mock.requestPathHealth.diagnostics.map((row) =>
+        formatRow(row, factor),
+      ),
+    },
+    failureLocalization: {
+      ...mock.failureLocalization,
+      items: mock.failureLocalization.items.map((item) => ({
+        ...item,
+        value: Number((item.value * factor).toFixed(2)),
+      })),
+    },
+    capacityAndEfficiency: mock.capacityAndEfficiency.map((row) =>
+      formatRow(row, factor),
+    ),
+    aiModelQuality: {
+      // Quality scores are bounded by their scale; scaling must not exceed it.
+      series: sliceSeries(mock.aiModelQuality.series, 5),
+      supporting: mock.aiModelQuality.supporting.map((row) => {
+        const formatted = formatRow(row, factor);
+        return {
+          id: row.id,
+          label: row.label,
+          value: formatted.value ?? "",
+        };
+      }),
+    },
+    evaluatorReadiness: mock.evaluatorReadiness.map((row) =>
+      formatRow(row, factor),
+    ),
+  };
+}
+
+async function loadMockPayload(
+  filters: TechTeamDashboardFilters,
+): Promise<TechTeamDashboardPayload> {
   const file = await fs.readFile(MOCK_PATH, "utf-8");
-  return JSON.parse(file) as TechTeamDashboardPayload;
+  return applyFilters(JSON.parse(file) as MockPayload, filters);
 }
 
 /*
@@ -75,7 +236,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const payload = isLocalDesignModeServer()
-      ? await loadMockPayload()
+      ? await loadMockPayload(filters)
       : await loadFromSource(filters);
 
     return NextResponse.json(payload);

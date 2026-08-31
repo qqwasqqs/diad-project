@@ -27,6 +27,7 @@ import { MetricCard } from "@/components/shared/dashboard/MetricCard";
 import DashboardSectionAction from "@/components/shared/dashboard/DashboardSectionAction";
 import TechTeamDetailDrawer from "@/components/ui/tech-team-dashboard/TechTeamDetailDrawer";
 import { useTechTeamMainView } from "@/hooks/useTechTeamDashboard";
+import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
 import type {
   TechTeamMetricRow,
   TechTeamSeries,
@@ -115,7 +116,22 @@ const toRows = (
   }));
 
 export default function TechTeamDashboard() {
-  const { mainViewData: data } = useTechTeamMainView();
+  /*
+    The page opts in to the global filter bar: the selected scope is passed to
+    the hook, which keys its cache on it, so changing a filter refetches the
+    payload for that scope.
+  */
+  const period = useDashboardFiltersStore((state) => state.period);
+  const businessUnit = useDashboardFiltersStore((state) => state.businessUnit);
+  const project = useDashboardFiltersStore((state) => state.project);
+  const channel = useDashboardFiltersStore((state) => state.channel);
+
+  const { mainViewData: data } = useTechTeamMainView({
+    period,
+    businessUnit,
+    project,
+    channel,
+  });
 
   /*
     One drawer at a time. The six keys match the six clickable elements in the
