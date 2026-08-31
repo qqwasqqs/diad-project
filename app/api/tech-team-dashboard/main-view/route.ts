@@ -17,11 +17,15 @@ import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 
 import { isLocalDesignModeServer } from "@/lib/localDesignMode";
-import type {
-  TechTeamDashboardFilters,
-  TechTeamDashboardPayload,
-  TechTeamMetricRow,
-} from "@/types/techTeamDashboard";
+import {
+  formatRow,
+  readFilters,
+  scopeFactor,
+  sliceSeries,
+  type MockMetricRow,
+} from "@/lib/dashboard/mockSource";
+import type { DashboardFilters, Series } from "@/types/dashboard";
+import type { TechTeamDashboardPayload } from "@/types/techTeamDashboard";
 
 const MOCK_PATH = path.join(
   process.cwd(),
@@ -31,169 +35,50 @@ const MOCK_PATH = path.join(
   "tech-team-dashboard.json",
 );
 
-const PERIOD_DAYS: Record<string, number> = {
-  "7d": 7,
-  "30d": 30,
-  "90d": 90,
-};
-
 /*
-  Shape of the mock file. It holds numeric amounts and a full 90-day range,
-  because the mock is a source to be filtered and formatted, not a
-  ready-made response. Mapping it onto the public contract is this route's job,
-  exactly as mapping a Splunk report would be.
+  Shape of the mock file: numeric amounts and a full 90-day range, because the
+  mock is a source to be filtered and formatted rather than a ready-made
+  response. Mapping it onto the public contract is this route's job, exactly as
+  mapping a Splunk report would be.
 */
-interface MockRow extends TechTeamMetricRow {
-  amount?: number;
-  unit?: string;
-  prefix?: string;
-  decimals?: number;
-  // Upper bound for bounded scores, so scaling cannot push them past their scale.
-  max?: number;
-}
-
 interface MockPayload
   extends Omit<
     TechTeamDashboardPayload,
-    "requestPathHealth" | "capacityAndEfficiency" | "aiModelQuality" | "evaluatorReadiness"
+    | "requestPathHealth"
+    | "capacityAndEfficiency"
+    | "aiModelQuality"
+    | "evaluatorReadiness"
   > {
   requestPathHealth: {
-    latencySeries: TechTeamDashboardPayload["requestPathHealth"]["latencySeries"];
-    diagnostics: MockRow[];
+    latencySeries: Series[];
+    diagnostics: MockMetricRow[];
   };
-  capacityAndEfficiency: MockRow[];
+  capacityAndEfficiency: MockMetricRow[];
   aiModelQuality: {
-    series: TechTeamDashboardPayload["aiModelQuality"]["series"];
-    supporting: (MockRow & { label: string })[];
+    series: Series[];
+    supporting: (MockMetricRow & { label: string })[];
   };
-  evaluatorReadiness: MockRow[];
-}
-
-function readFilters(request: NextRequest): TechTeamDashboardFilters {
-  const params = request.nextUrl.searchParams;
-
-  return {
-    period: params.get("period") ?? undefined,
-    businessUnit: params.get("businessUnit") ?? undefined,
-    project: params.get("project") ?? undefined,
-    channel: params.get("channel") ?? undefined,
-  };
-}
-
-/*
-  Illustrative weight per filter dimension.
-
-  Each selection has its own explicit weight rather than a hash, so a scope's
-  numbers are readable from the code and every selection visibly moves the
-  values. These are presentation weights for mock data, not measured ratios.
-*/
-const SCOPE_WEIGHTS: Record<string, Record<string, number>> = {
-  businessUnit: { all: 1, a: 0.84, b: 1.19 },
-  project: { all: 1, a1: 0.91, b1: 1.12 },
-  channel: { all: 1, web: 1.08, api: 0.86, mobile: 0.73 },
-};
-
-function scopeFactor(filters: TechTeamDashboardFilters): number {
-  const weight = (dimension: string, selected?: string) =>
-    SCOPE_WEIGHTS[dimension][selected ?? "all"] ?? 1;
-
-  return (
-    weight("businessUnit", filters.businessUnit) *
-    weight("project", filters.project) *
-    weight("channel", filters.channel)
-  );
-}
-
-/*
-  Bounded scores (a 1-5 or 0-1 rating) must not move like a volume or a cost.
-  Multiplying them by the scope factor drives them to a perfect score, which is
-  implausible and, on a quality metric, actively misleading.
-
-  They shift in the same direction but consume only a fraction of the headroom
-  that remains to their bound, so a wider scope never produces a flawless score.
-*/
-function shiftBounded(amount: number, max: number, factor: number): number {
-  const delta = (factor - 1) * 0.35;
-
-  return delta >= 0
-    ? amount + (max - amount) * delta
-    : amount * (1 + delta);
-}
-
-function formatRow(row: MockRow, factor: number): TechTeamMetricRow {
-  // A pending state is never replaced by a number, whatever the scope.
-  if (row.pendingState || row.amount === undefined) {
-    return {
-      id: row.id,
-      label: row.label,
-      value: row.value,
-      pendingState: row.pendingState,
-    };
-  }
-
-  const scaled =
-    row.max !== undefined
-      ? shiftBounded(row.amount, row.max, factor)
-      : row.amount * factor;
-
-  const decimals = row.decimals ?? 0;
-  const value = `${row.prefix ?? ""}${scaled.toFixed(decimals)}${row.unit ?? ""}`;
-
-  return { id: row.id, label: row.label, value };
+  evaluatorReadiness: MockMetricRow[];
 }
 
 /*
   Applies the selected scope to the mock.
 
-  IMPORTANT — this is deliberately more permissive than the real source may be.
-
-  Every metric here responds to every filter, because the mock exists to exercise
-  the UI. The calculation specifications do not permit that in production: a
-  metric may apply a business-unit, project, or channel filter only where its
-  source event is reliably attributed through an approved Splunk
-  correlation/enrichment contract.
-
-  When `loadFromSource` is implemented, each metric must be classified:
-
-  - attribution approved for the selected scope -> return the filtered value;
-  - attribution not approved -> return that row with
-    `pendingState: "filter-breakdown"`, which renders as
-    FILTER BREAKDOWN UNAVAILABLE.
-
-  Never return a portfolio-wide value while a narrower scope is selected, and
-  never substitute zero for a scope that cannot be attributed. Doing either makes
-  an unfiltered number indistinguishable from a filtered one.
-
-  The drawers already state `filter-breakdown` as their coverage for every
-  metric, so today the main view is more confident about attribution than the
-  provenance tables behind it. That gap closes when the real contract lands.
+  Deliberately more permissive than a real source may be: every metric here
+  responds to every filter, because the mock exists to exercise the UI. See
+  `attributionRule` in lib/dashboard/mockSource for what the real source must do
+  instead, and the note on `loadFromSource` below.
 */
 function applyFilters(
   mock: MockPayload,
-  filters: TechTeamDashboardFilters,
+  filters: DashboardFilters,
 ): TechTeamDashboardPayload {
-  const days = PERIOD_DAYS[filters.period ?? "30d"] ?? 30;
   const factor = scopeFactor(filters);
-
-  const sliceSeries = (
-    series: TechTeamDashboardPayload["aiModelQuality"]["series"],
-    max?: number,
-  ) =>
-    series.map((item) => ({
-      ...item,
-      points: item.points.slice(-days).map((point) => {
-        const scaled =
-          max !== undefined
-            ? shiftBounded(point.y, max, factor)
-            : point.y * factor;
-        return { x: point.x, y: Number(scaled.toFixed(2)) };
-      }),
-    }));
 
   return {
     ...mock,
     requestPathHealth: {
-      latencySeries: sliceSeries(mock.requestPathHealth.latencySeries),
+      latencySeries: sliceSeries(mock.requestPathHealth.latencySeries, filters),
       diagnostics: mock.requestPathHealth.diagnostics.map((row) =>
         formatRow(row, factor),
       ),
@@ -209,16 +94,13 @@ function applyFilters(
       formatRow(row, factor),
     ),
     aiModelQuality: {
-      // Quality scores are bounded by their scale; scaling must not exceed it.
-      series: sliceSeries(mock.aiModelQuality.series, 5),
-      supporting: mock.aiModelQuality.supporting.map((row) => {
-        const formatted = formatRow(row, factor);
-        return {
-          id: row.id,
-          label: row.label,
-          value: formatted.value ?? "",
-        };
-      }),
+      // Quality scores are bounded by their scale, so they shift rather than scale.
+      series: sliceSeries(mock.aiModelQuality.series, filters, 5),
+      supporting: mock.aiModelQuality.supporting.map((row) => ({
+        id: row.id,
+        label: row.label,
+        value: formatRow(row, factor).value ?? "",
+      })),
     },
     evaluatorReadiness: mock.evaluatorReadiness.map((row) =>
       formatRow(row, factor),
@@ -227,7 +109,7 @@ function applyFilters(
 }
 
 async function loadMockPayload(
-  filters: TechTeamDashboardFilters,
+  filters: DashboardFilters,
 ): Promise<TechTeamDashboardPayload> {
   const file = await fs.readFile(MOCK_PATH, "utf-8");
   return applyFilters(JSON.parse(file) as MockPayload, filters);
@@ -238,7 +120,7 @@ async function loadMockPayload(
 
   The implementation must return `TechTeamDashboardPayload` with the selected
   filters already applied, per metric, following the attribution rule documented
-  on `applyFilters` above: filter where attribution is approved, and return
+  in lib/dashboard/mockSource: filter where attribution is approved, and return
   `pendingState: "filter-breakdown"` where it is not.
 
   Do not copy the mock's behaviour of scoping everything unconditionally. It is
@@ -250,7 +132,7 @@ async function loadMockPayload(
     return mapSplunkReportToPayload(report);
 */
 async function loadFromSource(
-  filters: TechTeamDashboardFilters,
+  filters: DashboardFilters,
 ): Promise<TechTeamDashboardPayload> {
   void filters;
 

@@ -25,13 +25,10 @@ import PanelFootnote from "@/components/shared/dashboard/PanelFootnote";
 import PendingStateValue from "@/components/shared/dashboard/PendingStateValue";
 import { MetricCard } from "@/components/shared/dashboard/MetricCard";
 import DashboardSectionAction from "@/components/shared/dashboard/DashboardSectionAction";
-import TechTeamDetailDrawer from "@/components/ui/tech-team-dashboard/TechTeamDetailDrawer";
+import DetailDrawer from "@/components/shared/dashboard/DetailDrawer";
 import { useTechTeamMainView } from "@/hooks/useTechTeamDashboard";
 import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
-import type {
-  TechTeamMetricRow,
-  TechTeamSeries,
-} from "@/types/techTeamDashboard";
+import type { MetricRow, Series } from "@/types/dashboard";
 
 /*
   Technical Teams main view.
@@ -101,7 +98,7 @@ const formatDay = (value: string) =>
   });
 
 const toRows = (
-  rows: TechTeamMetricRow[],
+  rows: MetricRow[],
   icons?: Record<string, React.ReactNode>,
 ): MetricListItem[] =>
   rows.map((row) => ({
@@ -143,7 +140,7 @@ export default function TechTeamDashboard() {
   const drawers = data?.drawers;
 
   const latencySeries =
-    data?.requestPathHealth.latencySeries.map((series: TechTeamSeries, index: number) => ({
+    data?.requestPathHealth.latencySeries.map((series: Series, index: number) => ({
       id: series.id,
       label: series.label,
       color: SERIES_COLORS[index],
@@ -154,7 +151,7 @@ export default function TechTeamDashboard() {
     })) ?? [];
 
   const qualitySeries =
-    data?.aiModelQuality.series.map((series: TechTeamSeries, index: number) => ({
+    data?.aiModelQuality.series.map((series: Series, index: number) => ({
       id: series.id,
       label: series.label,
       color: SERIES_COLORS[index],
@@ -313,7 +310,7 @@ export default function TechTeamDashboard() {
 
       {/* Detail drawers. Each deepens exactly one main-view element. */}
 
-      <TechTeamDetailDrawer
+      <DetailDrawer
         open={openDrawer === "latencyChart"}
         onClose={closeDrawer}
         content={drawers?.latencyChart}
@@ -347,9 +344,9 @@ export default function TechTeamDashboard() {
           />
           <PanelFootnote>Component times are not additive</PanelFootnote>
         </section>
-      </TechTeamDetailDrawer>
+      </DetailDrawer>
 
-      <TechTeamDetailDrawer
+      <DetailDrawer
         open={openDrawer === "diagnostics"}
         onClose={closeDrawer}
         content={drawers?.diagnostics}
@@ -371,9 +368,9 @@ export default function TechTeamDashboard() {
             />
           ))}
         </div>
-      </TechTeamDetailDrawer>
+      </DetailDrawer>
 
-      <TechTeamDetailDrawer
+      <DetailDrawer
         open={openDrawer === "failureLocalization"}
         onClose={closeDrawer}
         content={drawers?.failureLocalization}
@@ -384,9 +381,9 @@ export default function TechTeamDashboard() {
           rowsPerColumn={4}
           max={data?.failureLocalization.scaleMax ?? 2}
         />
-      </TechTeamDetailDrawer>
+      </DetailDrawer>
 
-      <TechTeamDetailDrawer
+      <DetailDrawer
         open={openDrawer === "capacityAndEfficiency"}
         onClose={closeDrawer}
         content={drawers?.capacityAndEfficiency}
@@ -407,9 +404,9 @@ export default function TechTeamDashboard() {
               />
             ))}
         </div>
-      </TechTeamDetailDrawer>
+      </DetailDrawer>
 
-      <TechTeamDetailDrawer
+      <DetailDrawer
         open={openDrawer === "aiModelQuality"}
         onClose={closeDrawer}
         content={drawers?.aiModelQuality}
@@ -444,9 +441,9 @@ export default function TechTeamDashboard() {
             />
           ))}
         </div>
-      </TechTeamDetailDrawer>
+      </DetailDrawer>
 
-      <TechTeamDetailDrawer
+      <DetailDrawer
         open={openDrawer === "evaluatorReadiness"}
         onClose={closeDrawer}
         content={drawers?.evaluatorReadiness}
@@ -463,7 +460,7 @@ export default function TechTeamDashboard() {
             items={toRows(data?.evaluatorReadiness ?? [], READINESS_ICONS)}
           />
         </section>
-      </TechTeamDetailDrawer>
+      </DetailDrawer>
     </DashboardPage>
   );
 }

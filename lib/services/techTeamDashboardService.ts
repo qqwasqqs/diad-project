@@ -1,9 +1,7 @@
 import apiClient from "@/lib/apiClient";
 
-import type {
-   TechTeamDashboardFilters,
-   TechTeamDashboardPayload,
-} from "@/types/techTeamDashboard";
+import type { DashboardFilters } from "@/types/dashboard";
+import type { TechTeamDashboardPayload } from "@/types/techTeamDashboard";
 
 export const techTeamDashboardService = {
    /*
@@ -13,7 +11,7 @@ export const techTeamDashboardService = {
      route moves from local mock data to Splunk.
    */
    getMainView: async (
-      filters: TechTeamDashboardFilters = {},
+      filters: DashboardFilters = {},
    ): Promise<TechTeamDashboardPayload> => {
       const res = await apiClient.get<TechTeamDashboardPayload>(
          "/api/tech-team-dashboard/main-view",

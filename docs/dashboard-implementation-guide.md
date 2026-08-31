@@ -20,13 +20,15 @@ unclear, read those files:
 
 | Layer | File |
 | --- | --- |
+| Shared vocabulary | `types/dashboard.ts` |
 | Contract | `types/techTeamDashboard.ts` |
 | Mock source | `public/mocks/new-pages/tech-team-dashboard.json` |
 | Route (the data seam) | `app/api/tech-team-dashboard/main-view/route.ts` |
+| Mock filter/format helpers | `lib/dashboard/mockSource.ts` (shared) |
 | Service | `lib/services/techTeamDashboardService.ts` |
 | Hook | `hooks/useTechTeamDashboard.ts` |
 | Page | `app/home/tech-team-dashboard/page.tsx` |
-| Drawer shell | `components/ui/tech-team-dashboard/TechTeamDetailDrawer.tsx` |
+| Drawer shell | `components/shared/dashboard/DetailDrawer.tsx` (shared) |
 
 ## The path
 
@@ -119,6 +121,7 @@ element-specific content differs.
 | Panel, one or several regions | `DashboardPanel` (`sections[].weight` for unequal splits) |
 | The `...` control that opens a drawer | `DashboardSectionAction` |
 | Right-side detail drawer | `DashboardDrawer` |
+| Detail-drawer shell (header, banner, provenance table, decisions, notes) | `DetailDrawer` |
 | Trend chart, one or more series | `DashboardLineChart` (left/right axes, supporting stats) |
 | Horizontal rate/share bars | `HorizontalBarList` (`rowsPerColumn`, `max`) |
 | Positive/negative split bar | `PositiveNegativeBar` |

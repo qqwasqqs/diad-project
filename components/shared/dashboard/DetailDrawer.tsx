@@ -2,43 +2,43 @@
 
 import type { ReactNode } from "react";
 
-import DashboardDrawer from "@/components/shared/dashboard/DashboardDrawer";
-import IllustrativeValuesBanner from "@/components/shared/dashboard/IllustrativeValuesBanner";
+import DashboardDrawer from "./DashboardDrawer";
+import IllustrativeValuesBanner from "./IllustrativeValuesBanner";
 import MetricContextTable, {
   type MetricContextColumn,
   type MetricContextRow,
-} from "@/components/shared/dashboard/MetricContextTable";
-import PanelFootnote from "@/components/shared/dashboard/PanelFootnote";
-import PendingStateValue from "@/components/shared/dashboard/PendingStateValue";
-import type { TechTeamDrawerContent } from "@/types/techTeamDashboard";
+} from "./MetricContextTable";
+import PanelFootnote from "./PanelFootnote";
+import PendingStateValue from "./PendingStateValue";
+import type { DrawerContent } from "@/types/dashboard";
 
 /*
-  Shared shell for the six approved Technical Teams detail drawers.
+  Shell for a persona dashboard's detail drawer.
 
-  Every drawer deepens exactly one main-view element and has the same anatomy:
-  header, illustrative-values banner, element-specific content, a provenance
-  table, any blocking decisions, and qualifying notes. Only the middle section
-  differs, so it arrives as children.
+  Every approved drawer across the four personas has the same anatomy: header,
+  illustrative-values banner, element-specific content, a provenance table, any
+  blocking decisions, and qualifying notes. Only the middle section differs, so
+  it arrives as children.
 
-  A drawer adds provenance and readiness context. It is not a page, and it never
-  merges two main-view elements.
+  A drawer deepens exactly one main-view element. It is not a page, and it never
+  merges two elements, even when they share a panel.
 */
 
-interface TechTeamDetailDrawerProps {
+interface DetailDrawerProps {
   open: boolean;
   onClose: () => void;
-  content?: TechTeamDrawerContent;
+  content?: DrawerContent;
   size?: "default" | "wide";
   children?: ReactNode;
 }
 
-export default function TechTeamDetailDrawer({
+export default function DetailDrawer({
   open,
   onClose,
   content,
   size = "default",
   children,
-}: TechTeamDetailDrawerProps) {
+}: DetailDrawerProps) {
   if (!content) {
     return null;
   }
