@@ -1,42 +1,125 @@
 "use client";
 
+import { useState } from "react";
+
 import DashboardPage from "@/components/shared/dashboard/DashboardPage";
 import DashboardGrid from "@/components/shared/dashboard/DashboardGrid";
-import DashboardLineChart from "@/components/shared/dashboard/DashboardLineChart";
 import DashboardPanel from "@/components/shared/dashboard/DashboardPanel";
-import CostByBusinessUnitChart from "@/components/charts/CostByBusinessUnitChart";
+import DashboardDrawer from "@/components/shared/dashboard/DashboardDrawer";
+import { MetricCard } from "@/components/shared/dashboard/MetricCard";
+import { PositiveNegativeBar } from "@/components/shared/charts/PositiveNegativeBar";
+import HorizontalBarList from "@/components/shared/charts/HorizontalBarList";
+import DashboardLineChart from "@/components/shared/dashboard/DashboardLineChart";
+import DataPendingCard from "@/components/shared/dashboard/DataPendingCard";
+import {
+  ArrowSync24Regular,
+  Clock24Regular,
+  DataTrending24Regular,
+  Hourglass24Regular,
+  Person24Regular,
+  ThumbLike24Regular,
+} from "@fluentui/react-icons";
+
+const channelMixValues = [
+  { label: "Web", value: 52 },
+  { label: "Teams", value: 28 },
+  { label: "Mobile", value: 14 },
+  { label: "API", value: 6 },
+];
+
+const channelMixComparison = [
+  { label: "Web", queriesPerSession: 4.8, avgSession: "8.6 min" },
+  { label: "Teams", queriesPerSession: 4.2, avgSession: "7.9 min" },
+  { label: "Mobile", queriesPerSession: 3.7, avgSession: "6.4 min" },
+  { label: "API", queriesPerSession: 5.1, avgSession: "9.1 min" },
+];
 
 export default function ProductOwnerDashboard() {
-  return (
-    <DashboardPage
-      title="AI Observability — Product Owner Dashboard"
-      description="Understand adoption, user experience, and business value"
-    >
-      <DashboardGrid>
-        <DashboardPanel template="single" title="Shared Panel - single region">
-          <div className="text-sm text-slate-700">
-            This is a generic shared panel container used as a structural test.
-          </div>
-        </DashboardPanel>
+  const [channelMixOpen, setChannelMixOpen] = useState(false);
 
+  return (
+    <>
+      <DashboardPage
+        title="AI Observability — Product Owner Dashboard"
+        description="Understand adoption, user experience, and business value"
+      >
+        <DashboardGrid>
         <DashboardPanel
           template="segmented"
-          title="Shared Panel - segmented"
+          title="Product experience pulse"
           sections={[
-            { id: "left", title: "Primary" },
-            { id: "middle", title: "Secondary" },
-            { id: "right", title: "Tertiary" },
+            { id: "session-query-volume" },
+            { id: "user-satisfaction-rate" },
+            { id: "end-to-end-latency" },
+            { id: "workflow-completion" },
           ]}
+          className="xl:col-span-2"
         >
-          <div className="text-sm text-slate-700">Region one</div>
-          <div className="text-sm text-slate-700">Region two</div>
-          <div className="text-sm text-slate-700">Region three</div>
+          <MetricCard
+            icon={<DataTrending24Regular className="text-blue-600" />}
+            title="Session & Query Volume"
+            className="h-[170px] metricCard-violet"
+            primaryContent={
+              <div className="text-[38px] leading-none font-semibold text-neutral-950">
+                316K <span className="text-4xl font-normal">queries</span>
+              </div>
+            }
+            supportingContent={
+              <span className="text-xs text-neutral-500">
+                68K sessions • 4.6 queries/session
+              </span>
+            }
+          />
+          <MetricCard
+            icon={<ThumbLike24Regular className="text-green-600" />}
+            title="User Satisfaction Rate"
+            className="h-[170px] metricCard-success"
+            primaryContent={
+              <div className="text-[38px] leading-none font-semibold text-neutral-950">
+                84% <span className="text-4xl font-normal">positive</span>
+              </div>
+            }
+            supportingContent={
+              <PositiveNegativeBar
+                positive={84}
+                negative={16}
+              />
+            }
+          />
+          <MetricCard
+            icon={<ArrowSync24Regular className="text-green-600" />}
+            title="End-to-End Latency"
+            className="h-[170px] metricCard-success"
+            primaryContent={
+              <div className="text-[38px] leading-none font-semibold text-neutral-950">
+                P95 <span className="text-4xl font-normal">1.20 s</span>
+              </div>
+            }
+          />
+          <MetricCard
+            icon={<Hourglass24Regular className="text-amber-700" />}
+            title="Workflow Completion"
+            className="h-[170px] metricCard-warning"
+            primaryContent={
+              <div className="text-[30px] leading-none font-semibold text-slate-500">
+                DATA PENDING
+              </div>
+            }
+            supportingContent={
+              <span className="text-xs text-neutral-500">
+                Completion event and formula not supplied
+              </span>
+            }
+          />
         </DashboardPanel>
 
-        <DashboardPanel template="single" title="Session & Query Volume">
+
+
+        <DashboardPanel template="single" title="Adoption and engagement">
           <DashboardLineChart
-            description="Session Length / Query per session"
+            description=""
             height={320}
+            supportingStatsVariant="productOwner"
             series={[
               {
                 id: "sessions",
@@ -100,49 +183,211 @@ export default function ProductOwnerDashboard() {
             supportingStats={[
               {
                 id: "queries-per-session",
-                icon: <span aria-hidden="true">👥</span>,
+                icon: <Person24Regular aria-hidden="true" />,
                 value: "4.6",
                 text: "queries/session",
+                iconColor: "#4f46e5",
               },
               {
                 id: "avg-session",
-                icon: <span aria-hidden="true">⏱</span>,
+                icon: <Clock24Regular aria-hidden="true" />,
                 value: "8.2 min",
                 text: "avg session",
+                iconColor: "#2563eb",
               },
             ]}
           />
         </DashboardPanel>
 
-        <DashboardPanel template="single" title="Cost by BU and Project">
-          <CostByBusinessUnitChart
-            data={[
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setChannelMixOpen(true)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              setChannelMixOpen(true);
+            }
+          }}
+          className="cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+        >
+          <DashboardPanel template="single" title="Channel mix">
+            <HorizontalBarList values={channelMixValues} />
+            <div className="mt-2 text-[11px] font-medium text-neutral-500">
+              Illustrative channel breakdown
+            </div>
+          </DashboardPanel>
+        </div>
+
+        <DashboardPanel template="single" title="Experience and response quality">
+          <DashboardLineChart
+            height={300}
+            supportingStatsVariant="productOwner"
+            supportingStatsTemplate="right"
+            series={[
               {
-                name: "Business Unit A",
-                totalCost: 7.68,
-                topProjectName: "Project A1",
-                topProjectCost: 4.21,
-                color: "#1f7a5f",
+                id: "groundedness",
+                label: "Groundedness",
+                color: "#4f46e5",
+                points: [
+                  { x: "Apr 20", y: 4.1 },
+                  { x: "Apr 22", y: 4.3 },
+                  { x: "Apr 24", y: 4.2 },
+                  { x: "Apr 26", y: 4.4 },
+                  { x: "Apr 28", y: 4.3 },
+                  { x: "Apr 30", y: 4.2 },
+                  { x: "May 2", y: 4.5 },
+                  { x: "May 4", y: 4.4 },
+                  { x: "May 6", y: 4.3 },
+                  { x: "May 8", y: 4.5 },
+                  { x: "May 10", y: 4.6 },
+                  { x: "May 12", y: 4.5 },
+                ],
               },
               {
-                name: "Business Unit B",
-                totalCost: 5.42,
-                topProjectName: "Project B1",
-                topProjectCost: 2.93,
-                color: "#1f7a5f",
+                id: "relevance-quality",
+                label: "Relevance Quality",
+                color: "#7c3aed",
+                points: [
+                  { x: "Apr 20", y: 3.8 },
+                  { x: "Apr 22", y: 3.9 },
+                  { x: "Apr 24", y: 4.0 },
+                  { x: "Apr 26", y: 4.1 },
+                  { x: "Apr 28", y: 4.0 },
+                  { x: "Apr 30", y: 4.2 },
+                  { x: "May 2", y: 4.1 },
+                  { x: "May 4", y: 4.2 },
+                  { x: "May 6", y: 4.1 },
+                  { x: "May 8", y: 4.3 },
+                  { x: "May 10", y: 4.2 },
+                  { x: "May 12", y: 4.4 },
+                ],
               },
               {
-                name: "Business Unit C",
-                totalCost: 3.76,
-                topProjectName: "Project C1",
-                topProjectCost: 1.94,
-                color: "#1f7a5f",
+                id: "intent-resolution",
+                label: "Intent Resolution",
+                color: "#0f766e",
+                points: [
+                  { x: "Apr 20", y: 3.2 },
+                  { x: "Apr 22", y: 3.4 },
+                  { x: "Apr 24", y: 3.3 },
+                  { x: "Apr 26", y: 3.5 },
+                  { x: "Apr 28", y: 3.4 },
+                  { x: "Apr 30", y: 3.6 },
+                  { x: "May 2", y: 3.7 },
+                  { x: "May 4", y: 3.6 },
+                  { x: "May 6", y: 3.8 },
+                  { x: "May 8", y: 3.7 },
+                  { x: "May 10", y: 3.9 },
+                  { x: "May 12", y: 3.8 },
+                ],
+              },
+            ]}
+            axes={[
+              {
+                id: "left",
+                domain: [0, 5],
+                tickFormatter: (value) => `${value}`,
+              },
+            ]}
+            supportingStats={[
+              {
+                id: "retrieval-quality",
+                value: "4.0 / 5",
+                text: "Retrieval Quality",
+              },
+              {
+                id: "task-adherence",
+                value: "4.2 / 5",
+                text: "Task Adherence",
               },
             ]}
           />
+        </DashboardPanel>
+
+        <DashboardPanel title="Feature usage evidence" template="single">
+          <DataPendingCard description="No feature identifier or usage formula supplied" />
         </DashboardPanel>
 
       </DashboardGrid>
     </DashboardPage>
+
+    <DashboardDrawer
+      open={channelMixOpen}
+      title="Channel engagement patterns"
+      onClose={() => setChannelMixOpen(false)}
+    >
+      <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-800">
+        Illustrative values
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+        <div className="mb-3 text-xs font-semibold text-slate-700">
+          Channel share evolution
+        </div>
+
+        <div className="space-y-2.5 text-xs text-slate-600">
+          {channelMixValues.map((item) => (
+            <div key={item.label} className="grid grid-cols-[34px_minmax(0,1fr)_32px] items-center gap-2">
+              <span className="font-medium text-slate-700">{item.label}</span>
+              <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+                <div
+                  className="h-full rounded-full bg-blue-600"
+                  style={{ width: `${item.value}%` }}
+                />
+              </div>
+              <span className="text-right font-medium text-slate-700">{item.value}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white p-3">
+        <div className="text-xs font-semibold text-slate-700">
+          Engagement by entry channel
+        </div>
+
+        <div className="mt-3 rounded-lg border border-slate-200">
+          <div className="grid grid-cols-[1.2fr_1fr_1fr] border-b border-slate-200 bg-slate-50 px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+            <span>Channel</span>
+            <span>Queries / session</span>
+            <span>Avg session</span>
+          </div>
+
+          {channelMixComparison.map((item) => (
+            <div
+              key={item.label}
+              className="grid grid-cols-[1.2fr_1fr_1fr] items-center border-b border-slate-200 px-2 py-2 text-xs text-slate-700 last:border-b-0"
+            >
+              <span>{item.label}</span>
+              <span>{item.queriesPerSession}</span>
+              <span>{item.avgSession}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+        <div className="text-xs font-semibold text-slate-700">
+          Calculation context
+        </div>
+
+        <ul className="mt-2 space-y-2 text-xs text-slate-600">
+          <li>
+            <span className="font-medium text-slate-700">Share evolution:</span> classified queries by entry channel and day.
+          </li>
+          <li>
+            <span className="font-medium text-slate-700">Queries / session:</span> distinct query key per assigned channel session.
+          </li>
+          <li>
+            <span className="font-medium text-slate-700">Session duration:</span> max minus min timestamp per approved session rule.
+          </li>
+          <li>
+            <span className="font-medium text-slate-700">Channel assignment:</span> pending validation for entry-channel mapping.
+          </li>
+        </ul>
+      </div>
+    </DashboardDrawer>
+    </>
   );
 }

@@ -2,7 +2,7 @@
 import DashboardPage from "@/components/shared/dashboard/DashboardPage";
 import  DashboardGrid  from "@/components/shared/dashboard/DashboardGrid";
 import  DashboardSection  from "@/components/shared/dashboard/DashboardSection";
-import StatusCallout from "@/components/shared/StatusCallout";
+import StatusCallout from "@/components/shared/dashboard/StatusCallout";
 import { Scales32Regular,ShieldCheckmark24Regular, LockClosed24Regular, ArrowSync24Regular, DataTrending24Regular, ThumbLike24Regular } from "@fluentui/react-icons";
 import { Badge, Text } from "@fluentui/react-components";
 import DashboardPanel from "@/components/shared/dashboard/DashboardPanel";
@@ -23,7 +23,7 @@ export default function ExecutiveDashboard() {
               icon={<ShieldCheckmark24Regular />}
               title="Safety Evaluators"
               primaryContent="CALCULATION PENDING"
-              className="statusCallout-warning"
+              variant="warning"
             />
 
             <StatusCallout
@@ -33,19 +33,18 @@ export default function ExecutiveDashboard() {
                 <Text size={600} weight="semibold">
                 98.4%
                 </Text>
-              
               }
-              className="statusCallout-success"
+              variant="success"
             />
             <StatusCallout
               icon={<LockClosed24Regular />}
               title="PII Leakage (Agent Only)"
               primaryContent={
-                <Badge  color="warning">
-                Calculation Pending
+                <Badge color="warning">
+                  Calculation Pending
                 </Badge>
               }
-              className="statusCallout-danger"
+              variant="danger"
             />
           </div>
         </DashboardPanel>

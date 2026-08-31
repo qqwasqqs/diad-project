@@ -1,15 +1,21 @@
 import { makeStyles, Text, tokens } from "@fluentui/react-components";
 import type { ReactNode } from "react";
 
+export type DashboardSupportingStatsVariant = "default" | "productOwner";
+export type DashboardSupportingStatsLayout = "bottom" | "right";
+
 export interface DashboardSupportingStatItem {
   id: string;
   icon?: ReactNode;
   value: string;
   text: string;
+  iconColor?: string;
 }
 
 interface DashboardSupportingStatsProps {
   items: DashboardSupportingStatItem[];
+  variant?: DashboardSupportingStatsVariant;
+  layout?: DashboardSupportingStatsLayout;
 }
 
 const useStyles = makeStyles({
@@ -49,10 +55,112 @@ const useStyles = makeStyles({
     lineHeight: 1.2,
     color: tokens.colorNeutralForeground1,
   },
+  productOwnerRoot: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "20px 32px",
+    paddingTop: "14px",
+    marginTop: "2px",
+  },
+  productOwnerItem: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "10px",
+    minWidth: 0,
+    flex: "0 1 auto",
+    color: tokens.colorNeutralForeground1,
+  },
+  productOwnerIcon: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "28px",
+    height: "28px",
+    borderRadius: "999px",
+    border: `1.5px solid currentColor`,
+    padding: "4px",
+    flexShrink: 0,
+    color: tokens.colorBrandForeground1,
+  },
+  productOwnerValue: {
+    fontSize: "1.9rem",
+    lineHeight: 1.1,
+    fontWeight: 600,
+    letterSpacing: "-0.04em",
+    color: tokens.colorNeutralForeground1,
+  },
+  productOwnerText: {
+    fontSize: "1.1rem",
+    lineHeight: 1.25,
+    color: tokens.colorNeutralForeground2,
+    fontWeight: 500,
+  },
+  rightRoot: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 0,
+    width: "150px",
+    flexShrink: 0,
+    paddingLeft: "8px",
+    "@media (max-width: 768px)": {
+      width: "100%",
+      paddingLeft: 0,
+      paddingTop: "12px",
+    },
+  },
+  rightItem: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    width: "100%",
+    minWidth: 0,
+    color: tokens.colorNeutralForeground1,
+    paddingTop: "14px",
+    marginTop: "12px",
+  },
+  rightItemHasDivider: {
+    borderTop: `1px solid ${tokens.colorNeutralStroke1}`,
+  },
+  rightItemFirst: {
+    paddingTop: 0,
+    marginTop: 0,
+    borderTop: "none",
+  },
+  rightIcon: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "22px",
+    height: "22px",
+    color: tokens.colorNeutralForeground1,
+    flexShrink: 0,
+  },
+  rightValue: {
+    fontSize: "1.6rem",
+    lineHeight: 1.1,
+    fontWeight: 600,
+    letterSpacing: "-0.04em",
+    color: tokens.colorNeutralForeground1,
+  },
+  rightText: {
+    fontSize: "0.9rem",
+    lineHeight: 1.25,
+    color: tokens.colorNeutralForeground2,
+    fontWeight: 500,
+    marginBottom: "4px",
+    textAlign: "center",
+  },
 });
 
 export default function DashboardSupportingStats({
   items,
+  variant = "default",
+  layout = "bottom",
 }: DashboardSupportingStatsProps) {
   const styles = useStyles();
 
@@ -60,17 +168,79 @@ export default function DashboardSupportingStats({
     return null;
   }
 
+  const isProductOwner = variant === "productOwner";
+  const isRight = layout === "right";
+
+  const rootClass = isRight
+    ? styles.rightRoot
+    : isProductOwner
+      ? styles.productOwnerRoot
+      : styles.root;
+
+  const itemClass = isRight
+    ? styles.rightItem
+    : isProductOwner
+      ? styles.productOwnerItem
+      : styles.item;
+
+  const iconClass = isRight
+    ? styles.rightIcon
+    : isProductOwner
+      ? styles.productOwnerIcon
+      : styles.icon;
+
+  const valueClass = isRight
+    ? styles.rightValue
+    : isProductOwner
+      ? styles.productOwnerValue
+      : styles.value;
+
+  const textClass = isRight
+    ? styles.rightText
+    : isProductOwner
+      ? styles.productOwnerText
+      : styles.text;
+
   return (
-    <div className={styles.root}>
-      {items.map((item) => (
-        <div key={item.id} className={styles.item}>
-          {item.icon && <span className={styles.icon}>{item.icon}</span>}
-          <Text as="span" className={styles.value}>
-            {item.value}
-          </Text>
-          <Text as="span" className={styles.text}>
-            {item.text}
-          </Text>
+    <div className={rootClass}>
+      {items.map((item, index) => (
+        <div
+          key={item.id}
+          className={[
+            itemClass,
+            isRight && index === 0 ? styles.rightItemFirst : "",
+            isRight && index > 0 ? styles.rightItemHasDivider : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {isRight ? (
+            <>
+              <Text as="span" className={textClass}>
+                {item.text}
+              </Text>
+              <Text as="span" className={valueClass}>
+                {item.value}
+              </Text>
+            </>
+          ) : (
+            <>
+              {item.icon && (
+                <span
+                  className={iconClass}
+                  style={item.iconColor ? { color: item.iconColor } : undefined}
+                >
+                  {item.icon}
+                </span>
+              )}
+              <Text as="span" className={valueClass}>
+                {item.value}
+              </Text>
+              <Text as="span" className={textClass}>
+                {item.text}
+              </Text>
+            </>
+          )}
         </div>
       ))}
     </div>

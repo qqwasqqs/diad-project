@@ -1,12 +1,30 @@
 import React, { ReactNode } from "react";
-import { Card, Text } from "@fluentui/react-components";
 
 export interface MetricCardProps {
   icon: ReactNode;
   title: ReactNode;
   primaryContent: ReactNode;
   supportingContent?: ReactNode;
+
   className?: string;
+
+  // Layout
+  minWidth?: string;
+  maxWidth?: string;
+  minHeight?: string;
+  padding?: string;
+  gap?: string;
+
+  // Icon
+  iconWrapperClassName?: string;
+
+  // Typography
+  titleClassName?: string;
+  valueClassName?: string;
+
+  // Colors
+  titleColorClassName?: string;
+  valueColorClassName?: string;
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -15,58 +33,65 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   primaryContent,
   supportingContent,
   className,
+
+  minWidth = "min-w-0",
+  maxWidth = "",
+  minHeight = "min-h-[110px]",
+  padding = "p-4",
+  gap = "gap-3",
+
+  iconWrapperClassName = "h-10 w-10",
+
+  titleClassName = "text-sm font-semibold",
+  valueClassName = "text-2xl font-semibold",
+
+  titleColorClassName = "text-neutral-800",
+  valueColorClassName = "text-neutral-900",
 }) => {
+  const valueContainerSpacingClass = "mt-2";
+
   return (
-    <Card
-      
+    <div
       className={`
         flex-1
-        min-w-[10px]
-        max-w-[360px]
-        min-h-[155]
-        rounded-xl
-        border border-neutral-200
-        bg-white
-        shadow-sm
-        float-left
-        m-2
-        p-1
+        basis-0
+        flex-col
+
+        ${minWidth}
+        ${maxWidth}
+        ${minHeight}
+        ${padding}
         ${className ?? ""}
       `}
     >
       {/* Header */}
-      <div className="flex items-center h-[50]">
+      <div className={`flex items-center ${gap}`}>
         <div
-          className="
-            flex h-10 w-10 items-center justify-center
-            rounded-full
-            shrink-0 icon-bg
-          "
+          className={`${iconWrapperClassName} flex items-center justify-center rounded-full shrink-0 icon-bg`}
         >
           {icon}
         </div>
 
-        <Text
-          weight="semibold"
-          className="text-sm text-neutral-700 leading-tight m-4 mt-0 mb-0"
-        >
-          {title}
-        </Text>
-      </div>
-
-      {/* Primary Content */}
-      <div className="mt-0">
-        <div className="pl-5">
-          {primaryContent}
+        <div className="flex-1 min-w-0">
+          <div
+            className={`whitespace-normal break-words ${titleClassName} ${titleColorClassName}`}
+          >
+            {title}
+          </div>
         </div>
       </div>
 
-      {/* Optional Supporting Content */}
-      {supportingContent && (
-        <div>
-          {supportingContent}
-        </div>
-      )}
-    </Card>
+      {/* Value */}
+      <div
+        className={`${valueContainerSpacingClass}
+          ${valueClassName}
+          ${valueColorClassName}
+        `}
+      >
+        {primaryContent}
+      </div>
+
+      {supportingContent && <div className="mt-2">{supportingContent}</div>}
+    </div>
   );
 };

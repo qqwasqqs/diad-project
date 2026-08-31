@@ -37,12 +37,20 @@ export interface DashboardLineAxisConfig {
   domain?: [number, number] | [string, string];
 }
 
+export type DashboardLineChartSupportingStatsVariant =
+  | "default"
+  | "productOwner";
+
+export type DashboardLineChartSupportingStatsTemplate = "bottom" | "right";
+
 interface DashboardLineChartProps {
   title?: string;
   description?: string;
   series: DashboardLineSeries[];
   axes?: DashboardLineAxisConfig[];
   supportingStats?: DashboardSupportingStatItem[];
+  supportingStatsVariant?: DashboardLineChartSupportingStatsVariant;
+  supportingStatsTemplate?: DashboardLineChartSupportingStatsTemplate;
   height?: number;
   showGrid?: boolean;
   className?: string;
@@ -98,6 +106,31 @@ const useStyles = makeStyles({
     display: "inline-block",
     flexShrink: 0,
   },
+  chartWithStats: {
+    display: "flex",
+    alignItems: "stretch",
+    gap: "12px",
+    width: "100%",
+    "@media (max-width: 768px)": {
+      flexDirection: "column",
+    },
+  },
+  chartPane: {
+    flex: "1 1 auto",
+    minWidth: 0,
+  },
+  statsPane: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    minWidth: 0,
+    width: "150px",
+    "@media (max-width: 768px)": {
+      width: "100%",
+      justifyContent: "center",
+    },
+  },
   chartWrap: {
     width: "100%",
     marginTop: 0,
@@ -137,6 +170,8 @@ export default function DashboardLineChart({
   series,
   axes,
   supportingStats,
+  supportingStatsVariant = "default",
+  supportingStatsTemplate = "bottom",
   height = 280,
   showGrid = true,
   className = "",
@@ -168,6 +203,80 @@ export default function DashboardLineChart({
 
   const chartData = buildChartData(series);
   const visibleAxes = Array.from(axisMap.values());
+  const hasSupportingStats = Boolean(supportingStats && supportingStats.length > 0);
+
+  const chartContent = (
+    <div className={styles.chartWrap} style={{ height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 8 }}>
+          {showGrid && (
+            <CartesianGrid
+              stroke="#e2e8f0"
+              strokeDasharray="3 3"
+              vertical={false}
+            />
+          )}
+
+          <XAxis
+            dataKey="x"
+            axisLine={{ stroke: "#cbd5e1" }}
+            tickLine={false}
+            tickMargin={10}
+            tick={{ fill: "#64748b", fontSize: 12 }}
+            minTickGap={18}
+          />
+
+          {visibleAxes.map((axis) => (
+            <YAxis
+              key={axis.id}
+              yAxisId={axis.id}
+              orientation={axis.id === "right" ? "right" : "left"}
+              axisLine={{ stroke: "#cbd5e1" }}
+              tickLine={false}
+              tickMargin={10}
+              width={axis.width ?? 50}
+              domain={axis.domain}
+              tickFormatter={axis.tickFormatter}
+              tick={{ fill: "#64748b", fontSize: 12 }}
+            />
+          ))}
+
+          <Tooltip
+            cursor={{ stroke: "#94a3b8", strokeDasharray: "4 4" }}
+            formatter={(value: number | string) => [value, ""]}
+            labelFormatter={(label) => `${label}`}
+            contentStyle={{
+              borderRadius: 12,
+              border: "1px solid #e2e8f0",
+              boxShadow: "0 10px 15px -3px rgba(15, 23, 42, 0.08)",
+            }}
+          />
+
+          {series.map((item) => (
+            <Line
+              key={item.id}
+              yAxisId={item.yAxis ?? "left"}
+              type="monotone"
+              dataKey={item.id}
+              stroke={item.color}
+              strokeWidth={3}
+              dot={false}
+              activeDot={{ r: 5, fill: item.color, stroke: "white", strokeWidth: 2 }}
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+
+  const supportingStatsContent =
+    hasSupportingStats && supportingStats ? (
+      <DashboardSupportingStats
+        items={supportingStats}
+        variant={supportingStatsVariant}
+        layout={supportingStatsTemplate === "right" ? "right" : "bottom"}
+      />
+    ) : null;
 
   return (
     <div className={[styles.root, className].join(" ")}>
@@ -190,70 +299,16 @@ export default function DashboardLineChart({
         ))}
       </div>
 
-      <div className={styles.chartWrap} style={{ height }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 8 }}>
-            {showGrid && (
-              <CartesianGrid
-                stroke="#e2e8f0"
-                strokeDasharray="3 3"
-                vertical={false}
-              />
-            )}
-
-            <XAxis
-              dataKey="x"
-              axisLine={{ stroke: "#cbd5e1" }}
-              tickLine={false}
-              tickMargin={10}
-              tick={{ fill: "#64748b", fontSize: 12 }}
-              minTickGap={18}
-            />
-
-            {visibleAxes.map((axis) => (
-              <YAxis
-                key={axis.id}
-                yAxisId={axis.id}
-                orientation={axis.id === "right" ? "right" : "left"}
-                axisLine={{ stroke: "#cbd5e1" }}
-                tickLine={false}
-                tickMargin={10}
-                width={axis.width ?? 50}
-                domain={axis.domain}
-                tickFormatter={axis.tickFormatter}
-                tick={{ fill: "#64748b", fontSize: 12 }}
-              />
-            ))}
-
-            <Tooltip
-              cursor={{ stroke: "#94a3b8", strokeDasharray: "4 4" }}
-              formatter={(value: number | string) => [value, ""]}
-              labelFormatter={(label) => `${label}`}
-              contentStyle={{
-                borderRadius: 12,
-                border: "1px solid #e2e8f0",
-                boxShadow: "0 10px 15px -3px rgba(15, 23, 42, 0.08)",
-              }}
-            />
-
-            {series.map((item) => (
-              <Line
-                key={item.id}
-                yAxisId={item.yAxis ?? "left"}
-                type="monotone"
-                dataKey={item.id}
-                stroke={item.color}
-                strokeWidth={3}
-                dot={false}
-                activeDot={{ r: 5, fill: item.color, stroke: "white", strokeWidth: 2 }}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      {supportingStats && supportingStats.length > 0 && (
-        <DashboardSupportingStats items={supportingStats} />
+      {supportingStatsTemplate === "right" && hasSupportingStats ? (
+        <div className={styles.chartWithStats}>
+          <div className={styles.chartPane}>{chartContent}</div>
+          <div className={styles.statsPane}>{supportingStatsContent}</div>
+        </div>
+      ) : (
+        <>
+          {chartContent}
+          {supportingStatsContent}
+        </>
       )}
     </div>
   );
