@@ -17,15 +17,26 @@ export default function DashboardHeader({
   showFilters = true,
   showExport = true,
 }: DashboardHeaderProps) {
+  const exportButton = (
+    <Button appearance="secondary" icon={<ArrowDownload24Regular />}>
+      Export
+    </Button>
+  );
+
   return (
     <div className="w-full mb-6">
 
-      {/* Top Row */}
-      <div className="flex w-full items-start gap-6">
+      {/*
+        The title and the controls need roughly 470px and 700px respectively, so
+        they only share a row once there is room for both. Below that the header
+        stacks and the controls keep a single clean row of their own, instead of
+        the filters wrapping into a ragged block beside the title.
+      */}
+      <div className="flex w-full flex-col gap-4 2xl:flex-row 2xl:items-start 2xl:gap-6">
 
         {/* Title */}
-        <div className="shrink-0 min-w-0">
-          <h1 className="text-xl font-semibold text-slate-900 whitespace-nowrap">
+        <div className="min-w-0 2xl:shrink-0">
+          <h1 className="text-xl font-semibold text-slate-900">
             {title}
           </h1>
             {/* Description */}
@@ -36,28 +47,20 @@ export default function DashboardHeader({
             )}
         </div>
 
-        <div className="ml-auto flex min-w-0 flex-1 items-start justify-end gap-2">
-        {/* Filters */}
-        {showFilters && (
-          <div className="flex-1 min-w-0">
-            <DashboardFilters />
+        {/* Filters, with Export as the trailing item of the same wrapping row */}
+        {(showFilters || showExport) && (
+          <div className="min-w-0 2xl:ml-auto">
+            {showFilters ? (
+              <DashboardFilters trailing={showExport ? exportButton : undefined} />
+            ) : (
+              <div className="flex flex-wrap items-center gap-2 2xl:justify-end">
+                {exportButton}
+              </div>
+            )}
           </div>
         )}
+      </div>
 
-        {/* Export */}
-        {showExport && (
-          <div className="shrink-0">
-            <Button
-              appearance="secondary"
-              icon={<ArrowDownload24Regular />}
-            >
-              Export
-            </Button>
-          </div>
-        )}
-      </div>
-      </div>
-      
     </div>
   );
 }

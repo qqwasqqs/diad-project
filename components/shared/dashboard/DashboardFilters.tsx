@@ -1,17 +1,24 @@
 "use client";
 
-import {
-    Dropdown,
-    Option,
-} from "@fluentui/react-components";
+import type { ReactNode } from "react";
 import { ChannelRegular, CalendarLtrRegular, BuildingMultipleRegular, FolderRegular } from "@fluentui/react-icons";
 
 
 import DashboardFilter
     from "./DashboardFilter";
-export default function DashboardFilters() {
+
+interface DashboardFiltersProps {
+    /*
+      Rendered as the last item of the same wrapping row as the filters, so a
+      trailing action stays after them instead of being stranded mid-row when
+      the filters wrap onto a second line.
+    */
+    trailing?: ReactNode;
+}
+
+export default function DashboardFilters({ trailing }: DashboardFiltersProps) {
     return (
-        <div className="flex flex-wrap items-center justify-end gap-2">
+        <div className="flex flex-wrap items-center gap-2 2xl:justify-end">
             <DashboardFilter
                 value="30d"
                 icon={<CalendarLtrRegular />}
@@ -101,6 +108,8 @@ export default function DashboardFilters() {
                     console.log(value);
                 }}
             />
+
+            {trailing}
         </div>
     );
 }
