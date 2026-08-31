@@ -1,5 +1,4 @@
 import React, { ReactNode } from "react";
-import { Card } from "@fluentui/react-components";
 
 export interface MetricCardProps {
   icon: ReactNode;
@@ -49,15 +48,14 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   titleColorClassName = "text-neutral-800",
   valueColorClassName = "text-neutral-900",
 }) => {
+  const valueContainerSpacingClass = "mt-2";
+
   return (
-    <Card
+    <div
       className={`
         flex-1
         basis-0
         flex-col
-        rounded-xl
-        bg-white
-        shadow-sm
 
         ${minWidth}
         ${maxWidth}
@@ -85,7 +83,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 
       {/* Value */}
       <div
-        className={` mt-auto pt-3
+        className={`${valueContainerSpacingClass}
           ${valueClassName}
           ${valueColorClassName}
         `}
@@ -94,6 +92,6 @@ export const MetricCard: React.FC<MetricCardProps> = ({
       </div>
 
       {supportingContent && <div className="mt-2">{supportingContent}</div>}
-    </Card>
+    </div>
   );
 };
