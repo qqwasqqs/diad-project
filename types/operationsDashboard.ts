@@ -13,7 +13,7 @@
   `types/dashboard.ts`.
 */
 
-import type { MetricRow, Series } from "./dashboard";
+import type { DrawerContent, MetricRow, Series } from "./dashboard";
 
 export interface OperationsDashboardPayload {
   /*
@@ -63,4 +63,52 @@ export interface OperationsDashboardPayload {
   operationalControlCoverage: MetricRow[];
 
   safetyAndSecurityReadiness: MetricRow[];
+
+  drawers: OperationsDrawers;
+}
+
+/*
+  Detail drawers.
+
+  Seven section-level click targets. Service-path stability holds two of them —
+  its chart and its context list — because they are separate elements that
+  happen to share a panel.
+*/
+
+/*
+  A requirement with no reporting contract, and the category of contract that is
+  missing: a formula and target, telemetry fields, or an alert rule.
+*/
+export interface OperationsReadinessRow extends MetricRow {
+  missingContract: string;
+}
+
+/*
+  A control with the rule required before it could be calculated, and the field
+  family that would supply the evidence.
+*/
+export interface OperationsControlRow extends MetricRow {
+  missingRule: string;
+  fieldFamily: string;
+}
+
+export interface OperationsDrawers {
+  operationalSituation: DrawerContent & {
+    summary: MetricRow[];
+    /*
+      Latency and the two rates keep separate axes: seconds and percentages are
+      different units and never share a scale.
+    */
+    series: Series[];
+  };
+  requestedOperationsCoverage: DrawerContent & {
+    matrix: OperationsReadinessRow[];
+  };
+  servicePathStabilityChart: DrawerContent & { summary: MetricRow[] };
+  servicePathRuntimeContext: DrawerContent & { summary: MetricRow[] };
+  failureSurface: DrawerContent;
+  operationalControlCoverage: DrawerContent & {
+    controls: OperationsControlRow[];
+  };
+  safetyAndSecurityReadiness: DrawerContent & { readiness: MetricRow[] };
 }

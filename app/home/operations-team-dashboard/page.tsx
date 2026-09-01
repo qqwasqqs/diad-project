@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Alert24Regular,
   ArrowSync24Regular,
@@ -33,6 +34,12 @@ import MetricList, {
 } from "@/components/shared/dashboard/MetricList";
 import { MetricCard } from "@/components/shared/dashboard/MetricCard";
 import HorizontalBarList from "@/components/shared/charts/HorizontalBarList";
+import DashboardSectionAction from "@/components/shared/dashboard/DashboardSectionAction";
+import DetailDrawer from "@/components/shared/dashboard/DetailDrawer";
+import DrawerSection from "@/components/shared/dashboard/drawers/DrawerSection";
+import DrawerRowList from "@/components/shared/dashboard/drawers/DrawerRowList";
+import DrawerStatGrid from "@/components/shared/dashboard/drawers/DrawerStatGrid";
+import MetricContextTable from "@/components/shared/dashboard/MetricContextTable";
 import { useOperationsMainView } from "@/hooks/useOperationsDashboard";
 import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
 import type { MetricRow, Series } from "@/types/dashboard";
@@ -116,6 +123,20 @@ const SAFETY_ICONS: Record<string, React.ReactNode> = {
   upia: <ShieldTask24Regular />,
 };
 
+/*
+  The seven clickable sections from the approved clickability map. Service-path
+  stability contributes two: its chart and its context list are separate
+  elements that share a panel.
+*/
+type DrawerKey =
+  | "operationalSituation"
+  | "requestedOperationsCoverage"
+  | "servicePathStabilityChart"
+  | "servicePathRuntimeContext"
+  | "failureSurface"
+  | "operationalControlCoverage"
+  | "safetyAndSecurityReadiness";
+
 // Formats a day key as the short axis label used in the approved design.
 const formatDay = (value: string) =>
   new Date(`${value}T00:00:00Z`).toLocaleDateString("en-US", {
@@ -150,6 +171,9 @@ export default function OperationsTeamDashboard() {
   const project = useDashboardFiltersStore((state) => state.project);
   const channel = useDashboardFiltersStore((state) => state.channel);
 
+  const [openDrawer, setOpenDrawer] = useState<DrawerKey | null>(null);
+  const closeDrawer = () => setOpenDrawer(null);
+
   const { mainViewData: data } = useOperationsMainView({
     period,
     businessUnit,
@@ -157,12 +181,32 @@ export default function OperationsTeamDashboard() {
     channel,
   });
 
+  const drawers = data?.drawers;
+
   const latencySeries =
     data?.servicePathStability.latencySeries.map(
       (series: Series, index: number) => ({
         id: series.id,
         label: series.label,
         color: SERIES_COLORS[index],
+        points: series.points.map((point) => ({
+          x: formatDay(point.x),
+          y: point.y,
+        })),
+      }),
+    ) ?? [];
+
+  /*
+    Latency is plotted on the left axis in milliseconds; the two rates go on the
+    right in percent. They are different units and never share a scale.
+  */
+  const situationSeries =
+    data?.drawers.operationalSituation.series.map(
+      (series: Series, index: number) => ({
+        id: series.id,
+        label: series.label,
+        color: SERIES_COLORS[index],
+        yAxis: index === 0 ? ("left" as const) : ("right" as const),
         points: series.points.map((point) => ({
           x: formatDay(point.x),
           y: point.y,
@@ -184,6 +228,12 @@ export default function OperationsTeamDashboard() {
           template="single"
           title="Operational situation"
           className="xl:col-span-8"
+          actions={
+            <DashboardSectionAction
+              onClick={() => setOpenDrawer("operationalSituation")}
+              label="View operational situation details"
+            />
+          }
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {(data?.operationalSituation ?? []).map((row) => (
@@ -215,6 +265,12 @@ export default function OperationsTeamDashboard() {
           template="single"
           title="Requested operations coverage"
           className="xl:col-span-4"
+          actions={
+            <DashboardSectionAction
+              onClick={() => setOpenDrawer("requestedOperationsCoverage")}
+              label="View requested operations coverage details"
+            />
+          }
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {(data?.requestedOperationsCoverage ?? []).map((row) => (
@@ -241,8 +297,27 @@ export default function OperationsTeamDashboard() {
           title="Service-path stability"
           className="xl:col-span-12"
           sections={[
-            { id: "latency-trend", title: "Service-path stability", weight: 2 },
-            { id: "diagnostics", weight: 1 },
+            {
+              id: "latency-trend",
+              title: "Service-path stability",
+              weight: 2,
+              action: (
+                <DashboardSectionAction
+                  onClick={() => setOpenDrawer("servicePathStabilityChart")}
+                  label="View service-path stability details"
+                />
+              ),
+            },
+            {
+              id: "diagnostics",
+              weight: 1,
+              action: (
+                <DashboardSectionAction
+                  onClick={() => setOpenDrawer("servicePathRuntimeContext")}
+                  label="View runtime context details"
+                />
+              ),
+            },
           ]}
         >
           <div>
@@ -269,6 +344,12 @@ export default function OperationsTeamDashboard() {
           template="single"
           title="Failure surface"
           className="xl:col-span-7"
+          actions={
+            <DashboardSectionAction
+              onClick={() => setOpenDrawer("failureSurface")}
+              label="View failure surface details"
+            />
+          }
         >
           <HorizontalBarList
             values={data?.failureSurface.items ?? []}
@@ -285,6 +366,12 @@ export default function OperationsTeamDashboard() {
           template="single"
           title="Operational control coverage"
           className="xl:col-span-5"
+          actions={
+            <DashboardSectionAction
+              onClick={() => setOpenDrawer("operationalControlCoverage")}
+              label="View operational control coverage details"
+            />
+          }
         >
           <MetricList
             items={toRows(data?.operationalControlCoverage ?? [], CONTROL_ICONS)}
@@ -295,6 +382,12 @@ export default function OperationsTeamDashboard() {
           template="single"
           title="Safety and security readiness"
           className="xl:col-span-12"
+          actions={
+            <DashboardSectionAction
+              onClick={() => setOpenDrawer("safetyAndSecurityReadiness")}
+              label="View safety and security readiness details"
+            />
+          }
         >
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
             {(data?.safetyAndSecurityReadiness ?? []).map((row) => (
@@ -315,6 +408,165 @@ export default function OperationsTeamDashboard() {
           </div>
         </DashboardPanel>
       </DashboardGrid>
+
+      {/* Detail drawers. One per clickable element; a drawer never merges two. */}
+
+      <DetailDrawer
+        open={openDrawer === "operationalSituation"}
+        onClose={closeDrawer}
+        content={drawers?.operationalSituation}
+        size="wide"
+      >
+        <DrawerStatGrid
+          columns={4}
+          items={drawers?.operationalSituation.summary ?? []}
+        />
+
+        {/*
+          Latency and the two rates keep separate axes: seconds and percentages
+          are different units and never share a scale.
+        */}
+        <DrawerSection title="30-day direction">
+          <DashboardLineChart
+            series={situationSeries}
+            axes={[
+              { id: "left", label: "Latency (ms)" },
+              { id: "right", label: "Rate (%)" },
+            ]}
+            height={220}
+          />
+        </DrawerSection>
+      </DetailDrawer>
+
+      <DetailDrawer
+        open={openDrawer === "requestedOperationsCoverage"}
+        onClose={closeDrawer}
+        content={drawers?.requestedOperationsCoverage}
+        size="wide"
+      >
+        <DrawerSection title="Monitoring readiness">
+          <MetricContextTable
+            columns={[
+              { id: "requirement", header: "Requirement" },
+              { id: "missing", header: "Missing contract" },
+              { id: "state", header: "State" },
+            ]}
+            rows={(drawers?.requestedOperationsCoverage.matrix ?? []).map((row) => ({
+              id: row.id,
+              cells: {
+                requirement: row.label,
+                missing: row.missingContract,
+                state: row.pendingState ? (
+                  <PendingStateValue state={row.pendingState} />
+                ) : (
+                  row.value
+                ),
+              },
+            }))}
+            caption="Monitoring readiness by requirement"
+          />
+        </DrawerSection>
+      </DetailDrawer>
+
+      <DetailDrawer
+        open={openDrawer === "servicePathStabilityChart"}
+        onClose={closeDrawer}
+        content={drawers?.servicePathStabilityChart}
+        size="wide"
+      >
+        <DrawerStatGrid
+          columns={4}
+          items={drawers?.servicePathStabilityChart.summary ?? []}
+        />
+
+        <DrawerSection title="Latency trend">
+          <DashboardLineChart
+            series={latencySeries}
+            axes={[{ id: "left", label: "Latency (ms)" }]}
+            height={220}
+          />
+          <PanelFootnote>Component times are not additive</PanelFootnote>
+        </DrawerSection>
+      </DetailDrawer>
+
+      <DetailDrawer
+        open={openDrawer === "servicePathRuntimeContext"}
+        onClose={closeDrawer}
+        content={drawers?.servicePathRuntimeContext}
+        size="wide"
+      >
+        {/* The latency chart is deliberately absent: it is a separate element
+            with its own drawer. */}
+        <DrawerStatGrid
+          columns={4}
+          items={drawers?.servicePathRuntimeContext.summary ?? []}
+          icons={DIAGNOSTIC_ICONS}
+        />
+      </DetailDrawer>
+
+      <DetailDrawer
+        open={openDrawer === "failureSurface"}
+        onClose={closeDrawer}
+        content={drawers?.failureSurface}
+        size="wide"
+      >
+        <HorizontalBarList
+          values={data?.failureSurface.items ?? []}
+          rowsPerColumn={3}
+          columns={3}
+          flow="row"
+          max={data?.failureSurface.scaleMax ?? 2}
+        />
+      </DetailDrawer>
+
+      <DetailDrawer
+        open={openDrawer === "operationalControlCoverage"}
+        onClose={closeDrawer}
+        content={drawers?.operationalControlCoverage}
+        size="wide"
+      >
+        <DrawerSection title="What each control still needs">
+          <MetricContextTable
+            columns={[
+              { id: "control", header: "Control" },
+              { id: "rule", header: "Missing rule" },
+              { id: "fields", header: "Field family" },
+              { id: "state", header: "State" },
+            ]}
+            rows={(drawers?.operationalControlCoverage.controls ?? []).map(
+              (row) => ({
+                id: row.id,
+                cells: {
+                  control: row.label,
+                  rule: row.missingRule,
+                  fields: row.fieldFamily,
+                  state: row.pendingState ? (
+                    <PendingStateValue state={row.pendingState} />
+                  ) : (
+                    row.value
+                  ),
+                },
+              }),
+            )}
+            caption="Control readiness and missing rules"
+          />
+        </DrawerSection>
+      </DetailDrawer>
+
+      <DetailDrawer
+        open={openDrawer === "safetyAndSecurityReadiness"}
+        onClose={closeDrawer}
+        content={drawers?.safetyAndSecurityReadiness}
+        size="wide"
+      >
+        <DrawerSection title="Readiness matrix">
+          <DrawerRowList
+            rows={drawers?.safetyAndSecurityReadiness.readiness ?? []}
+            icons={SAFETY_ICONS}
+            variant="prominent"
+          />
+        </DrawerSection>
+      </DetailDrawer>
     </DashboardPage>
   );
 }

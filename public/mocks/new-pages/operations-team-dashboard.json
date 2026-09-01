@@ -1635,5 +1635,1493 @@
       "label": "UPIA",
       "pendingState": "test-results"
     }
-  ]
+  ],
+  "drawers": {
+    "operationalSituation": {
+      "eyebrow": "OPERATIONAL SITUATION DETAILS",
+      "title": "Operational situation",
+      "description": "Direction and calculation provenance — not a health score",
+      "bannerMessage": "ILLUSTRATIVE VALUES — TIME BUCKET AND ATTRIBUTION PENDING VALIDATION",
+      "summary": [
+        {
+          "id": "end-to-end-p95",
+          "label": "End-to-End P95",
+          "value": "1.20 s"
+        },
+        {
+          "id": "api-error-rate",
+          "label": "API Error Rate",
+          "value": "1.14%"
+        },
+        {
+          "id": "pipeline-failure-rate",
+          "label": "Pipeline Failure Rate",
+          "value": "0.7%"
+        },
+        {
+          "id": "alert-feed",
+          "label": "Alert feed",
+          "pendingState": "threshold"
+        }
+      ],
+      "series": [
+        {
+          "id": "end-to-end-p95",
+          "label": "End-to-End P95 (ms)",
+          "points": [
+            {
+              "x": "2026-02-19",
+              "y": 1200
+            },
+            {
+              "x": "2026-02-20",
+              "y": 1262
+            },
+            {
+              "x": "2026-02-21",
+              "y": 1307
+            },
+            {
+              "x": "2026-02-22",
+              "y": 1323
+            },
+            {
+              "x": "2026-02-23",
+              "y": 1307
+            },
+            {
+              "x": "2026-02-24",
+              "y": 1267
+            },
+            {
+              "x": "2026-02-25",
+              "y": 1219
+            },
+            {
+              "x": "2026-02-26",
+              "y": 1179
+            },
+            {
+              "x": "2026-02-27",
+              "y": 1162
+            },
+            {
+              "x": "2026-02-28",
+              "y": 1172
+            },
+            {
+              "x": "2026-03-01",
+              "y": 1204
+            },
+            {
+              "x": "2026-03-02",
+              "y": 1247
+            },
+            {
+              "x": "2026-03-03",
+              "y": 1282
+            },
+            {
+              "x": "2026-03-04",
+              "y": 1294
+            },
+            {
+              "x": "2026-03-05",
+              "y": 1277
+            },
+            {
+              "x": "2026-03-06",
+              "y": 1233
+            },
+            {
+              "x": "2026-03-07",
+              "y": 1172
+            },
+            {
+              "x": "2026-03-08",
+              "y": 1112
+            },
+            {
+              "x": "2026-03-09",
+              "y": 1071
+            },
+            {
+              "x": "2026-03-10",
+              "y": 1060
+            },
+            {
+              "x": "2026-03-11",
+              "y": 1081
+            },
+            {
+              "x": "2026-03-12",
+              "y": 1128
+            },
+            {
+              "x": "2026-03-13",
+              "y": 1183
+            },
+            {
+              "x": "2026-03-14",
+              "y": 1230
+            },
+            {
+              "x": "2026-03-15",
+              "y": 1255
+            },
+            {
+              "x": "2026-03-16",
+              "y": 1251
+            },
+            {
+              "x": "2026-03-17",
+              "y": 1224
+            },
+            {
+              "x": "2026-03-18",
+              "y": 1184
+            },
+            {
+              "x": "2026-03-19",
+              "y": 1150
+            },
+            {
+              "x": "2026-03-20",
+              "y": 1136
+            },
+            {
+              "x": "2026-03-21",
+              "y": 1151
+            },
+            {
+              "x": "2026-03-22",
+              "y": 1191
+            },
+            {
+              "x": "2026-03-23",
+              "y": 1247
+            },
+            {
+              "x": "2026-03-24",
+              "y": 1301
+            },
+            {
+              "x": "2026-03-25",
+              "y": 1336
+            },
+            {
+              "x": "2026-03-26",
+              "y": 1341
+            },
+            {
+              "x": "2026-03-27",
+              "y": 1312
+            },
+            {
+              "x": "2026-03-28",
+              "y": 1260
+            },
+            {
+              "x": "2026-03-29",
+              "y": 1198
+            },
+            {
+              "x": "2026-03-30",
+              "y": 1146
+            },
+            {
+              "x": "2026-03-31",
+              "y": 1117
+            },
+            {
+              "x": "2026-04-01",
+              "y": 1118
+            },
+            {
+              "x": "2026-04-02",
+              "y": 1145
+            },
+            {
+              "x": "2026-04-03",
+              "y": 1185
+            },
+            {
+              "x": "2026-04-04",
+              "y": 1222
+            },
+            {
+              "x": "2026-04-05",
+              "y": 1241
+            },
+            {
+              "x": "2026-04-06",
+              "y": 1233
+            },
+            {
+              "x": "2026-04-07",
+              "y": 1199
+            },
+            {
+              "x": "2026-04-08",
+              "y": 1150
+            },
+            {
+              "x": "2026-04-09",
+              "y": 1103
+            },
+            {
+              "x": "2026-04-10",
+              "y": 1075
+            },
+            {
+              "x": "2026-04-11",
+              "y": 1076
+            },
+            {
+              "x": "2026-04-12",
+              "y": 1109
+            },
+            {
+              "x": "2026-04-13",
+              "y": 1166
+            },
+            {
+              "x": "2026-04-14",
+              "y": 1230
+            },
+            {
+              "x": "2026-04-15",
+              "y": 1285
+            },
+            {
+              "x": "2026-04-16",
+              "y": 1314
+            },
+            {
+              "x": "2026-04-17",
+              "y": 1311
+            },
+            {
+              "x": "2026-04-18",
+              "y": 1281
+            },
+            {
+              "x": "2026-04-19",
+              "y": 1236
+            },
+            {
+              "x": "2026-04-20",
+              "y": 1193
+            },
+            {
+              "x": "2026-04-21",
+              "y": 1167
+            },
+            {
+              "x": "2026-04-22",
+              "y": 1167
+            },
+            {
+              "x": "2026-04-23",
+              "y": 1193
+            },
+            {
+              "x": "2026-04-24",
+              "y": 1235
+            },
+            {
+              "x": "2026-04-25",
+              "y": 1276
+            },
+            {
+              "x": "2026-04-26",
+              "y": 1300
+            },
+            {
+              "x": "2026-04-27",
+              "y": 1296
+            },
+            {
+              "x": "2026-04-28",
+              "y": 1261
+            },
+            {
+              "x": "2026-04-29",
+              "y": 1205
+            },
+            {
+              "x": "2026-04-30",
+              "y": 1141
+            },
+            {
+              "x": "2026-05-01",
+              "y": 1089
+            },
+            {
+              "x": "2026-05-02",
+              "y": 1064
+            },
+            {
+              "x": "2026-05-03",
+              "y": 1071
+            },
+            {
+              "x": "2026-05-04",
+              "y": 1107
+            },
+            {
+              "x": "2026-05-05",
+              "y": 1159
+            },
+            {
+              "x": "2026-05-06",
+              "y": 1210
+            },
+            {
+              "x": "2026-05-07",
+              "y": 1243
+            },
+            {
+              "x": "2026-05-08",
+              "y": 1250
+            },
+            {
+              "x": "2026-05-09",
+              "y": 1230
+            },
+            {
+              "x": "2026-05-10",
+              "y": 1193
+            },
+            {
+              "x": "2026-05-11",
+              "y": 1154
+            },
+            {
+              "x": "2026-05-12",
+              "y": 1131
+            },
+            {
+              "x": "2026-05-13",
+              "y": 1138
+            },
+            {
+              "x": "2026-05-14",
+              "y": 1178
+            },
+            {
+              "x": "2026-05-15",
+              "y": 1241
+            },
+            {
+              "x": "2026-05-16",
+              "y": 1312
+            },
+            {
+              "x": "2026-05-17",
+              "y": 1373
+            },
+            {
+              "x": "2026-05-18",
+              "y": 1410
+            },
+            {
+              "x": "2026-05-19",
+              "y": 1415
+            }
+          ]
+        },
+        {
+          "id": "api-error-rate",
+          "label": "API Error Rate (%)",
+          "points": [
+            {
+              "x": "2026-02-19",
+              "y": 1.14
+            },
+            {
+              "x": "2026-02-20",
+              "y": 1.22
+            },
+            {
+              "x": "2026-02-21",
+              "y": 1.29
+            },
+            {
+              "x": "2026-02-22",
+              "y": 1.32
+            },
+            {
+              "x": "2026-02-23",
+              "y": 1.31
+            },
+            {
+              "x": "2026-02-24",
+              "y": 1.26
+            },
+            {
+              "x": "2026-02-25",
+              "y": 1.19
+            },
+            {
+              "x": "2026-02-26",
+              "y": 1.11
+            },
+            {
+              "x": "2026-02-27",
+              "y": 1.03
+            },
+            {
+              "x": "2026-02-28",
+              "y": 0.98
+            },
+            {
+              "x": "2026-03-01",
+              "y": 0.96
+            },
+            {
+              "x": "2026-03-02",
+              "y": 0.98
+            },
+            {
+              "x": "2026-03-03",
+              "y": 1.04
+            },
+            {
+              "x": "2026-03-04",
+              "y": 1.12
+            },
+            {
+              "x": "2026-03-05",
+              "y": 1.21
+            },
+            {
+              "x": "2026-03-06",
+              "y": 1.28
+            },
+            {
+              "x": "2026-03-07",
+              "y": 1.32
+            },
+            {
+              "x": "2026-03-08",
+              "y": 1.31
+            },
+            {
+              "x": "2026-03-09",
+              "y": 1.28
+            },
+            {
+              "x": "2026-03-10",
+              "y": 1.21
+            },
+            {
+              "x": "2026-03-11",
+              "y": 1.12
+            },
+            {
+              "x": "2026-03-12",
+              "y": 1.04
+            },
+            {
+              "x": "2026-03-13",
+              "y": 0.98
+            },
+            {
+              "x": "2026-03-14",
+              "y": 0.96
+            },
+            {
+              "x": "2026-03-15",
+              "y": 0.98
+            },
+            {
+              "x": "2026-03-16",
+              "y": 1.03
+            },
+            {
+              "x": "2026-03-17",
+              "y": 1.11
+            },
+            {
+              "x": "2026-03-18",
+              "y": 1.19
+            },
+            {
+              "x": "2026-03-19",
+              "y": 1.26
+            },
+            {
+              "x": "2026-03-20",
+              "y": 1.31
+            },
+            {
+              "x": "2026-03-21",
+              "y": 1.32
+            },
+            {
+              "x": "2026-03-22",
+              "y": 1.29
+            },
+            {
+              "x": "2026-03-23",
+              "y": 1.22
+            },
+            {
+              "x": "2026-03-24",
+              "y": 1.14
+            },
+            {
+              "x": "2026-03-25",
+              "y": 1.06
+            },
+            {
+              "x": "2026-03-26",
+              "y": 0.99
+            },
+            {
+              "x": "2026-03-27",
+              "y": 0.96
+            },
+            {
+              "x": "2026-03-28",
+              "y": 0.97
+            },
+            {
+              "x": "2026-03-29",
+              "y": 1.02
+            },
+            {
+              "x": "2026-03-30",
+              "y": 1.09
+            },
+            {
+              "x": "2026-03-31",
+              "y": 1.18
+            },
+            {
+              "x": "2026-04-01",
+              "y": 1.25
+            },
+            {
+              "x": "2026-04-02",
+              "y": 1.3
+            },
+            {
+              "x": "2026-04-03",
+              "y": 1.32
+            },
+            {
+              "x": "2026-04-04",
+              "y": 1.3
+            },
+            {
+              "x": "2026-04-05",
+              "y": 1.24
+            },
+            {
+              "x": "2026-04-06",
+              "y": 1.16
+            },
+            {
+              "x": "2026-04-07",
+              "y": 1.07
+            },
+            {
+              "x": "2026-04-08",
+              "y": 1
+            },
+            {
+              "x": "2026-04-09",
+              "y": 0.96
+            },
+            {
+              "x": "2026-04-10",
+              "y": 0.97
+            },
+            {
+              "x": "2026-04-11",
+              "y": 1.01
+            },
+            {
+              "x": "2026-04-12",
+              "y": 1.07
+            },
+            {
+              "x": "2026-04-13",
+              "y": 1.16
+            },
+            {
+              "x": "2026-04-14",
+              "y": 1.24
+            },
+            {
+              "x": "2026-04-15",
+              "y": 1.3
+            },
+            {
+              "x": "2026-04-16",
+              "y": 1.32
+            },
+            {
+              "x": "2026-04-17",
+              "y": 1.3
+            },
+            {
+              "x": "2026-04-18",
+              "y": 1.25
+            },
+            {
+              "x": "2026-04-19",
+              "y": 1.17
+            },
+            {
+              "x": "2026-04-20",
+              "y": 1.09
+            },
+            {
+              "x": "2026-04-21",
+              "y": 1.01
+            },
+            {
+              "x": "2026-04-22",
+              "y": 0.97
+            },
+            {
+              "x": "2026-04-23",
+              "y": 0.96
+            },
+            {
+              "x": "2026-04-24",
+              "y": 0.99
+            },
+            {
+              "x": "2026-04-25",
+              "y": 1.06
+            },
+            {
+              "x": "2026-04-26",
+              "y": 1.14
+            },
+            {
+              "x": "2026-04-27",
+              "y": 1.22
+            },
+            {
+              "x": "2026-04-28",
+              "y": 1.29
+            },
+            {
+              "x": "2026-04-29",
+              "y": 1.32
+            },
+            {
+              "x": "2026-04-30",
+              "y": 1.31
+            },
+            {
+              "x": "2026-05-01",
+              "y": 1.26
+            },
+            {
+              "x": "2026-05-02",
+              "y": 1.19
+            },
+            {
+              "x": "2026-05-03",
+              "y": 1.1
+            },
+            {
+              "x": "2026-05-04",
+              "y": 1.03
+            },
+            {
+              "x": "2026-05-05",
+              "y": 0.98
+            },
+            {
+              "x": "2026-05-06",
+              "y": 0.96
+            },
+            {
+              "x": "2026-05-07",
+              "y": 0.99
+            },
+            {
+              "x": "2026-05-08",
+              "y": 1.04
+            },
+            {
+              "x": "2026-05-09",
+              "y": 1.13
+            },
+            {
+              "x": "2026-05-10",
+              "y": 1.21
+            },
+            {
+              "x": "2026-05-11",
+              "y": 1.28
+            },
+            {
+              "x": "2026-05-12",
+              "y": 1.32
+            },
+            {
+              "x": "2026-05-13",
+              "y": 1.31
+            },
+            {
+              "x": "2026-05-14",
+              "y": 1.27
+            },
+            {
+              "x": "2026-05-15",
+              "y": 1.2
+            },
+            {
+              "x": "2026-05-16",
+              "y": 1.12
+            },
+            {
+              "x": "2026-05-17",
+              "y": 1.04
+            },
+            {
+              "x": "2026-05-18",
+              "y": 0.98
+            },
+            {
+              "x": "2026-05-19",
+              "y": 0.96
+            }
+          ]
+        },
+        {
+          "id": "pipeline-failure-rate",
+          "label": "Pipeline Failure Rate (%)",
+          "points": [
+            {
+              "x": "2026-02-19",
+              "y": 0.7
+            },
+            {
+              "x": "2026-02-20",
+              "y": 0.76
+            },
+            {
+              "x": "2026-02-21",
+              "y": 0.8
+            },
+            {
+              "x": "2026-02-22",
+              "y": 0.82
+            },
+            {
+              "x": "2026-02-23",
+              "y": 0.81
+            },
+            {
+              "x": "2026-02-24",
+              "y": 0.78
+            },
+            {
+              "x": "2026-02-25",
+              "y": 0.73
+            },
+            {
+              "x": "2026-02-26",
+              "y": 0.68
+            },
+            {
+              "x": "2026-02-27",
+              "y": 0.63
+            },
+            {
+              "x": "2026-02-28",
+              "y": 0.59
+            },
+            {
+              "x": "2026-03-01",
+              "y": 0.58
+            },
+            {
+              "x": "2026-03-02",
+              "y": 0.6
+            },
+            {
+              "x": "2026-03-03",
+              "y": 0.64
+            },
+            {
+              "x": "2026-03-04",
+              "y": 0.69
+            },
+            {
+              "x": "2026-03-05",
+              "y": 0.74
+            },
+            {
+              "x": "2026-03-06",
+              "y": 0.79
+            },
+            {
+              "x": "2026-03-07",
+              "y": 0.82
+            },
+            {
+              "x": "2026-03-08",
+              "y": 0.82
+            },
+            {
+              "x": "2026-03-09",
+              "y": 0.79
+            },
+            {
+              "x": "2026-03-10",
+              "y": 0.74
+            },
+            {
+              "x": "2026-03-11",
+              "y": 0.69
+            },
+            {
+              "x": "2026-03-12",
+              "y": 0.63
+            },
+            {
+              "x": "2026-03-13",
+              "y": 0.6
+            },
+            {
+              "x": "2026-03-14",
+              "y": 0.58
+            },
+            {
+              "x": "2026-03-15",
+              "y": 0.59
+            },
+            {
+              "x": "2026-03-16",
+              "y": 0.63
+            },
+            {
+              "x": "2026-03-17",
+              "y": 0.68
+            },
+            {
+              "x": "2026-03-18",
+              "y": 0.73
+            },
+            {
+              "x": "2026-03-19",
+              "y": 0.78
+            },
+            {
+              "x": "2026-03-20",
+              "y": 0.81
+            },
+            {
+              "x": "2026-03-21",
+              "y": 0.82
+            },
+            {
+              "x": "2026-03-22",
+              "y": 0.8
+            },
+            {
+              "x": "2026-03-23",
+              "y": 0.75
+            },
+            {
+              "x": "2026-03-24",
+              "y": 0.7
+            },
+            {
+              "x": "2026-03-25",
+              "y": 0.64
+            },
+            {
+              "x": "2026-03-26",
+              "y": 0.6
+            },
+            {
+              "x": "2026-03-27",
+              "y": 0.58
+            },
+            {
+              "x": "2026-03-28",
+              "y": 0.59
+            },
+            {
+              "x": "2026-03-29",
+              "y": 0.62
+            },
+            {
+              "x": "2026-03-30",
+              "y": 0.67
+            },
+            {
+              "x": "2026-03-31",
+              "y": 0.72
+            },
+            {
+              "x": "2026-04-01",
+              "y": 0.77
+            },
+            {
+              "x": "2026-04-02",
+              "y": 0.81
+            },
+            {
+              "x": "2026-04-03",
+              "y": 0.82
+            },
+            {
+              "x": "2026-04-04",
+              "y": 0.8
+            },
+            {
+              "x": "2026-04-05",
+              "y": 0.76
+            },
+            {
+              "x": "2026-04-06",
+              "y": 0.71
+            },
+            {
+              "x": "2026-04-07",
+              "y": 0.65
+            },
+            {
+              "x": "2026-04-08",
+              "y": 0.61
+            },
+            {
+              "x": "2026-04-09",
+              "y": 0.58
+            },
+            {
+              "x": "2026-04-10",
+              "y": 0.58
+            },
+            {
+              "x": "2026-04-11",
+              "y": 0.61
+            },
+            {
+              "x": "2026-04-12",
+              "y": 0.66
+            },
+            {
+              "x": "2026-04-13",
+              "y": 0.71
+            },
+            {
+              "x": "2026-04-14",
+              "y": 0.77
+            },
+            {
+              "x": "2026-04-15",
+              "y": 0.8
+            },
+            {
+              "x": "2026-04-16",
+              "y": 0.82
+            },
+            {
+              "x": "2026-04-17",
+              "y": 0.81
+            },
+            {
+              "x": "2026-04-18",
+              "y": 0.77
+            },
+            {
+              "x": "2026-04-19",
+              "y": 0.72
+            },
+            {
+              "x": "2026-04-20",
+              "y": 0.66
+            },
+            {
+              "x": "2026-04-21",
+              "y": 0.62
+            },
+            {
+              "x": "2026-04-22",
+              "y": 0.59
+            },
+            {
+              "x": "2026-04-23",
+              "y": 0.58
+            },
+            {
+              "x": "2026-04-24",
+              "y": 0.6
+            },
+            {
+              "x": "2026-04-25",
+              "y": 0.65
+            },
+            {
+              "x": "2026-04-26",
+              "y": 0.7
+            },
+            {
+              "x": "2026-04-27",
+              "y": 0.76
+            },
+            {
+              "x": "2026-04-28",
+              "y": 0.8
+            },
+            {
+              "x": "2026-04-29",
+              "y": 0.82
+            },
+            {
+              "x": "2026-04-30",
+              "y": 0.81
+            },
+            {
+              "x": "2026-05-01",
+              "y": 0.78
+            },
+            {
+              "x": "2026-05-02",
+              "y": 0.73
+            },
+            {
+              "x": "2026-05-03",
+              "y": 0.68
+            },
+            {
+              "x": "2026-05-04",
+              "y": 0.62
+            },
+            {
+              "x": "2026-05-05",
+              "y": 0.59
+            },
+            {
+              "x": "2026-05-06",
+              "y": 0.58
+            },
+            {
+              "x": "2026-05-07",
+              "y": 0.6
+            },
+            {
+              "x": "2026-05-08",
+              "y": 0.64
+            },
+            {
+              "x": "2026-05-09",
+              "y": 0.69
+            },
+            {
+              "x": "2026-05-10",
+              "y": 0.75
+            },
+            {
+              "x": "2026-05-11",
+              "y": 0.79
+            },
+            {
+              "x": "2026-05-12",
+              "y": 0.82
+            },
+            {
+              "x": "2026-05-13",
+              "y": 0.82
+            },
+            {
+              "x": "2026-05-14",
+              "y": 0.79
+            },
+            {
+              "x": "2026-05-15",
+              "y": 0.74
+            },
+            {
+              "x": "2026-05-16",
+              "y": 0.69
+            },
+            {
+              "x": "2026-05-17",
+              "y": 0.63
+            },
+            {
+              "x": "2026-05-18",
+              "y": 0.6
+            },
+            {
+              "x": "2026-05-19",
+              "y": 0.58
+            }
+          ]
+        }
+      ],
+      "contextRows": [
+        {
+          "id": "e2e",
+          "metric": "End-to-End P95",
+          "calculation": "P95(eligible response_latency_ms)",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "api",
+          "metric": "API Error Rate",
+          "calculation": "errored requests / eligible requests",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "pipeline",
+          "metric": "Pipeline Failure Rate",
+          "calculation": "failed runs / eligible pipeline runs",
+          "coverage": "filter-breakdown"
+        }
+      ],
+      "notes": [
+        "No alert rule or threshold contract is available, so the alert feed reports its state rather than a count",
+        "Direction and provenance only — not a composite health score or an incident conclusion"
+      ]
+    },
+    "requestedOperationsCoverage": {
+      "eyebrow": "MONITORING READINESS",
+      "title": "Requested operations coverage",
+      "description": "What each requirement still needs before it can be reported",
+      "bannerMessage": "ILLUSTRATIVE VALUES — NO INFRASTRUCTURE MEASUREMENT CONTRACT SUPPLIED",
+      "matrix": [
+        {
+          "id": "uptime-sla",
+          "label": "Uptime / SLA",
+          "pendingState": "definition",
+          "missingContract": "Formula, target, and service boundary"
+        },
+        {
+          "id": "cpu-memory",
+          "label": "CPU / Memory",
+          "pendingState": "data",
+          "missingContract": "Telemetry fields"
+        },
+        {
+          "id": "system-load",
+          "label": "System load",
+          "pendingState": "data",
+          "missingContract": "Telemetry fields"
+        },
+        {
+          "id": "alert-feed",
+          "label": "Alert feed",
+          "pendingState": "threshold",
+          "missingContract": "Alert rule, severity, ownership, acknowledgement"
+        }
+      ],
+      "contextRows": [],
+      "notes": [
+        "Pending does not mean zero, healthy, or an unavailable service",
+        "An uptime percentage is never inferred from response status"
+      ]
+    },
+    "servicePathStabilityChart": {
+      "eyebrow": "SERVICE-PATH STABILITY DETAILS",
+      "title": "Service-path stability",
+      "description": "End-to-End P95 · Model Response avg · Retrieval avg · Tool Call avg",
+      "bannerMessage": "ILLUSTRATIVE VALUES — TIME BUCKET, TIMEZONE, AND ATTRIBUTION PENDING VALIDATION",
+      "summary": [
+        {
+          "id": "end-to-end-p95",
+          "label": "End-to-End P95",
+          "value": "1.20 s"
+        },
+        {
+          "id": "model-response-avg",
+          "label": "Model Response avg",
+          "value": "760 ms"
+        },
+        {
+          "id": "retrieval-avg",
+          "label": "Retrieval avg",
+          "value": "210 ms"
+        },
+        {
+          "id": "tool-call-avg",
+          "label": "Tool Call avg",
+          "value": "180 ms"
+        }
+      ],
+      "contextRows": [
+        {
+          "id": "end-to-end-p95",
+          "metric": "End-to-End P95",
+          "calculation": "P95",
+          "latest": "1.20 s",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "model-response-avg",
+          "metric": "Model Response avg",
+          "calculation": "avg",
+          "latest": "760 ms",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "retrieval-avg",
+          "metric": "Retrieval avg",
+          "calculation": "avg",
+          "latest": "210 ms",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "tool-call-avg",
+          "metric": "Tool Call avg",
+          "calculation": "avg",
+          "latest": "180 ms",
+          "coverage": "filter-breakdown"
+        }
+      ],
+      "notes": [
+        "Component times are not additive",
+        "P95 is calculated from eligible individual requests, never from averages"
+      ]
+    },
+    "servicePathRuntimeContext": {
+      "eyebrow": "SERVICE-PATH RUNTIME CONTEXT",
+      "title": "Runtime context",
+      "description": "Four independently calculated operational measures",
+      "bannerMessage": "ILLUSTRATIVE VALUES — POPULATIONS AND ATTRIBUTION PENDING VALIDATION",
+      "summary": [
+        {
+          "id": "request-throughput",
+          "label": "Request Throughput",
+          "value": "42.8 req/s"
+        },
+        {
+          "id": "pipeline-duration",
+          "label": "Pipeline Duration avg",
+          "value": "42 s"
+        },
+        {
+          "id": "indexing-ai-services",
+          "label": "Indexing / AI Services avg",
+          "value": "620 ms"
+        },
+        {
+          "id": "token-throughput",
+          "label": "Token Throughput",
+          "pendingState": "definition"
+        }
+      ],
+      "contextRows": [
+        {
+          "id": "request-throughput",
+          "metric": "Request Throughput",
+          "calculation": "COUNT(DISTINCT request_id) / bucket seconds",
+          "scale": "req/s",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "pipeline-duration",
+          "metric": "Pipeline Duration avg",
+          "calculation": "AVG(final pipeline run duration)",
+          "scale": "seconds",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "indexing-ai-services",
+          "metric": "Indexing / AI Services avg",
+          "calculation": "AVG(service operation latency)",
+          "scale": "milliseconds",
+          "coverage": "filter-breakdown"
+        }
+      ],
+      "notes": [
+        "Units and populations stay separate; these are not a combined health score",
+        "Pipeline and indexing timing is asynchronous and is not added to request-path latency"
+      ]
+    },
+    "failureSurface": {
+      "eyebrow": "FAILURE SURFACE DETAILS",
+      "title": "Failure surface",
+      "description": "Nine workload rates, each with its own eligible unit",
+      "bannerMessage": "ILLUSTRATIVE RATES — FAILURE CLASSIFICATION PENDING VALIDATION",
+      "contextRows": [
+        {
+          "id": "pipeline",
+          "metric": "Pipeline",
+          "calculation": "failed runs / eligible pipeline runs",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "activity",
+          "metric": "Activity",
+          "calculation": "failed activities / eligible activities",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "job",
+          "metric": "Job",
+          "calculation": "failed job runs / eligible job runs",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "api",
+          "metric": "API",
+          "calculation": "errored requests / eligible requests",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "training",
+          "metric": "Training",
+          "calculation": "failed training runs / eligible runs",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "mlflow-span",
+          "metric": "MLflow Span",
+          "calculation": "errored spans / eligible spans",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "indexing",
+          "metric": "Indexing",
+          "calculation": "failed operations / eligible operations",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "transcription",
+          "metric": "Transcription",
+          "calculation": "failed operations / eligible operations",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "translation",
+          "metric": "Translation",
+          "calculation": "failed operations / eligible operations",
+          "coverage": "filter-breakdown"
+        }
+      ],
+      "notes": [
+        "Rates are compared, never summed: each uses its own final record key and eligible denominator",
+        "Rate provenance only — not root-cause analysis"
+      ],
+      "decisions": [
+        {
+          "id": "failure-classification",
+          "label": "Failure classification",
+          "pendingState": "definition"
+        },
+        {
+          "id": "indexing-partial-failure",
+          "label": "Indexing partial-failure rule",
+          "pendingState": "definition"
+        },
+        {
+          "id": "mlflow-span-grain",
+          "label": "MLflow Span grain (span or training run)",
+          "pendingState": "definition"
+        }
+      ]
+    },
+    "operationalControlCoverage": {
+      "eyebrow": "CONTROL COVERAGE DETAILS",
+      "title": "Operational control coverage",
+      "description": "What each control needs before it could be calculated",
+      "bannerMessage": "NO NUMERIC AGGREGATION IS AUTHORIZED FOR THIS SECTION",
+      "controls": [
+        {
+          "id": "training-reproducibility",
+          "label": "Training Reproducibility",
+          "pendingState": "definition",
+          "missingRule": "Reproducible-run definition",
+          "fieldFamily": "Training / lineage"
+        },
+        {
+          "id": "audit-logging",
+          "label": "Audit Logging",
+          "pendingState": "calculation",
+          "missingRule": "Required audit-event set",
+          "fieldFamily": "Audit / application"
+        },
+        {
+          "id": "tool-usage-compliance",
+          "label": "Tool Usage Compliance",
+          "pendingState": "calculation",
+          "missingRule": "Allowed-tool policy",
+          "fieldFamily": "Tool / agent"
+        },
+        {
+          "id": "model-governance",
+          "label": "Model Governance",
+          "pendingState": "calculation",
+          "missingRule": "Eligible-model policy",
+          "fieldFamily": "Model registry / evaluation"
+        },
+        {
+          "id": "environment-compliance",
+          "label": "Environment Compliance",
+          "pendingState": "calculation",
+          "missingRule": "Environment policy",
+          "fieldFamily": "Environment / application"
+        }
+      ],
+      "contextRows": [],
+      "notes": [
+        "No compliance score is derived from these states",
+        "Field families indicate where evidence would come from, not that it is available"
+      ]
+    },
+    "safetyAndSecurityReadiness": {
+      "eyebrow": "SAFETY AND SECURITY READINESS",
+      "title": "Safety and security readiness",
+      "description": "Which evaluator and test outputs are usable",
+      "bannerMessage": "ILLUSTRATIVE VALUES — EVALUATOR COVERAGE PENDING VALIDATION",
+      "readiness": [
+        {
+          "id": "safety-evaluation-score",
+          "label": "Safety Evaluation Score",
+          "pendingState": "calculation"
+        },
+        {
+          "id": "mlflow-safety-score",
+          "label": "MLflow Safety Score",
+          "value": "0.91 / 1"
+        },
+        {
+          "id": "pii-leakage",
+          "label": "PII Leakage (Agent Only)",
+          "pendingState": "data"
+        },
+        {
+          "id": "upia",
+          "label": "UPIA",
+          "pendingState": "test-results"
+        }
+      ],
+      "contextRows": [
+        {
+          "id": "mlflow-safety",
+          "metric": "MLflow Safety Score",
+          "calculation": "AVG(Safety)",
+          "scale": "0–1",
+          "latest": "0.91 / 1",
+          "coverage": "data"
+        }
+      ],
+      "notes": [
+        "The illustrative MLflow value is neutral: not a favorable state and not a threshold result",
+        "Not an incident, breach, attack, or remediation view"
+      ],
+      "decisions": [
+        {
+          "id": "evaluator-coverage",
+          "label": "Evaluator coverage",
+          "pendingState": "evaluator-coverage"
+        }
+      ]
+    }
+  }
 }

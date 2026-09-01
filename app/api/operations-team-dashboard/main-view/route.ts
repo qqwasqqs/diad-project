@@ -25,7 +25,10 @@ import {
   type MockMetricRow,
 } from "@/lib/dashboard/mockSource";
 import type { DashboardFilters, Series } from "@/types/dashboard";
-import type { OperationsDashboardPayload } from "@/types/operationsDashboard";
+import type {
+  OperationsDashboardPayload,
+  OperationsDrawers,
+} from "@/types/operationsDashboard";
 
 const MOCK_PATH = path.join(
   process.cwd(),
@@ -51,6 +54,7 @@ interface MockPayload {
   failureSurface: OperationsDashboardPayload["failureSurface"];
   operationalControlCoverage: MockMetricRow[];
   safetyAndSecurityReadiness: MockMetricRow[];
+  drawers: OperationsDrawers;
 }
 
 /*
@@ -86,6 +90,23 @@ function applyFilters(
     },
     operationalControlCoverage: format(mock.operationalControlCoverage),
     safetyAndSecurityReadiness: format(mock.safetyAndSecurityReadiness),
+
+    /*
+      Drawer content is mostly provenance and readiness text, which passes
+      through unscoped; the pending states it carries stay pending under every
+      selection.
+
+      Its one series is measurement, though, so it is sliced and scoped like any
+      other. Leaving it out showed a 90-day trend inside a drawer whose heading
+      said 30-day.
+    */
+    drawers: {
+      ...mock.drawers,
+      operationalSituation: {
+        ...mock.drawers.operationalSituation,
+        series: sliceSeries(mock.drawers.operationalSituation.series, filters),
+      },
+    },
   };
 }
 
