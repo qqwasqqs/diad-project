@@ -32,6 +32,7 @@ export interface StatusCalloutProps {
   title: string;
   primaryContent: ReactNode;
   className?: string;
+  titleClassName?: string;
   variant?: StatusCalloutVariant;
 }
 
@@ -40,6 +41,7 @@ export const StatusCallout = ({
   title,
   primaryContent,
   className = "",
+  titleClassName = "",
   variant = "warning",
 }: StatusCalloutProps) => {
   const { iconBackground, iconColor } = variantStyles[variant];
@@ -48,6 +50,8 @@ export const StatusCallout = ({
     "flex min-w-0 items-center gap-4",
     className.trim(),
   );
+
+  const titleClasses = cn("block text-slate-700", titleClassName.trim());
 
   return (
     <div className={rootClassName}>
@@ -62,11 +66,11 @@ export const StatusCallout = ({
       </div>
 
       <div className="min-w-0">
-        <Text size={300} weight="medium" className="block text-status-title">
+        <Text size={300} weight="medium" className={titleClasses}>
           {title}
         </Text>
 
-        <div className="mt-1 text-lg font-semibold uppercase tracking-tight">
+        <div className="mt-1 text-lg font-semibold uppercase tracking-tight text-slate-900">
           {primaryContent}
         </div>
       </div>
