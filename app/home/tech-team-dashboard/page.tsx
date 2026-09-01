@@ -19,15 +19,17 @@ import DashboardLineChart from "@/components/shared/dashboard/DashboardLineChart
 import MetricList, {
   type MetricListItem,
 } from "@/components/shared/dashboard/MetricList";
-import DrawerSection from "@/components/shared/dashboard/drawers/DrawerSection";
-import DrawerRowList from "@/components/shared/dashboard/drawers/DrawerRowList";
-import DrawerStatGrid from "@/components/shared/dashboard/drawers/DrawerStatGrid";
 import HorizontalBarList from "@/components/shared/charts/HorizontalBarList";
 import IllustrativeValuesBanner from "@/components/shared/dashboard/IllustrativeValuesBanner";
 import PanelFootnote from "@/components/shared/dashboard/PanelFootnote";
 import PendingStateValue from "@/components/shared/dashboard/PendingStateValue";
 import DashboardSectionAction from "@/components/shared/dashboard/DashboardSectionAction";
-import DetailDrawer from "@/components/shared/dashboard/DetailDrawer";
+import RequestPathLatencyDrawer from "@/components/shared/dashboard/drawers/tech-team/RequestPathLatencyDrawer";
+import RequestPathDiagnosticsDrawer from "@/components/shared/dashboard/drawers/tech-team/RequestPathDiagnosticsDrawer";
+import FailureLocalizationDrawer from "@/components/shared/dashboard/drawers/tech-team/FailureLocalizationDrawer";
+import CapacityAndEfficiencyDrawer from "@/components/shared/dashboard/drawers/tech-team/CapacityAndEfficiencyDrawer";
+import AiModelQualityDrawer from "@/components/shared/dashboard/drawers/tech-team/AiModelQualityDrawer";
+import EvaluatorReadinessDrawer from "@/components/shared/dashboard/drawers/tech-team/EvaluatorReadinessDrawer";
 import { useTechTeamMainView } from "@/hooks/useTechTeamDashboard";
 import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
 import type { MetricRow, Series } from "@/types/dashboard";
@@ -312,103 +314,51 @@ export default function TechTeamDashboard() {
 
       {/* Detail drawers. Each deepens exactly one main-view element. */}
 
-      <DetailDrawer
+      <RequestPathLatencyDrawer
         open={openDrawer === "latencyChart"}
         onClose={closeDrawer}
         content={drawers?.latencyChart}
-        size="wide"
-      >
-        <DrawerStatGrid
-          columns={4}
-          items={(drawers?.latencyChart.contextRows ?? []).map((row) => ({
-            id: row.id,
-            label: row.metric,
-            value: row.latest,
-          }))}
-        />
+        series={latencySeries}
+      />
 
-        <DrawerSection title="Latency trend">
-          <DashboardLineChart
-            series={latencySeries}
-            axes={[{ id: "left", label: "Latency (ms)" }]}
-            height={220}
-          />
-          <PanelFootnote>Component times are not additive</PanelFootnote>
-        </DrawerSection>
-      </DetailDrawer>
-
-      <DetailDrawer
+      <RequestPathDiagnosticsDrawer
         open={openDrawer === "diagnostics"}
         onClose={closeDrawer}
         content={drawers?.diagnostics}
-        size="wide"
-      >
-        {/* The four-series latency chart is deliberately absent: it is a
-            separate clickable element with its own drawer. */}
-        <DrawerStatGrid
-          items={data?.requestPathHealth.diagnostics ?? []}
-          icons={DIAGNOSTIC_ICONS}
-        />
-      </DetailDrawer>
+        diagnostics={data?.requestPathHealth.diagnostics ?? []}
+        icons={DIAGNOSTIC_ICONS}
+      />
 
-      <DetailDrawer
+      <FailureLocalizationDrawer
         open={openDrawer === "failureLocalization"}
         onClose={closeDrawer}
         content={drawers?.failureLocalization}
-        size="wide"
-      >
-        <HorizontalBarList
-          values={data?.failureLocalization.items ?? []}
-          rowsPerColumn={4}
-          max={data?.failureLocalization.scaleMax ?? 2}
-        />
-      </DetailDrawer>
+        items={data?.failureLocalization.items ?? []}
+        scaleMax={data?.failureLocalization.scaleMax ?? 2}
+      />
 
-      <DetailDrawer
+      <CapacityAndEfficiencyDrawer
         open={openDrawer === "capacityAndEfficiency"}
         onClose={closeDrawer}
         content={drawers?.capacityAndEfficiency}
-        size="wide"
-      >
-        <DrawerStatGrid
-          items={(data?.capacityAndEfficiency ?? []).filter(
-            (row) => !row.pendingState,
-          )}
-        />
-      </DetailDrawer>
+        rows={data?.capacityAndEfficiency ?? []}
+      />
 
-      <DetailDrawer
+      <AiModelQualityDrawer
         open={openDrawer === "aiModelQuality"}
         onClose={closeDrawer}
         content={drawers?.aiModelQuality}
-        size="wide"
-      >
-        <DrawerSection title="Quality trend">
-          <DashboardLineChart
-            series={qualitySeries}
-            axes={[{ id: "left", domain: [1, 5] }]}
-            height={200}
-          />
-        </DrawerSection>
+        series={qualitySeries}
+        supporting={data?.aiModelQuality.supporting ?? []}
+      />
 
-        {/* Scales stay visibly separate: the 1-5 and 0-1 measures are shown as
-            distinct cards, never normalized onto one axis. */}
-        <DrawerStatGrid items={data?.aiModelQuality.supporting ?? []} />
-      </DetailDrawer>
-
-      <DetailDrawer
+      <EvaluatorReadinessDrawer
         open={openDrawer === "evaluatorReadiness"}
         onClose={closeDrawer}
         content={drawers?.evaluatorReadiness}
-        size="wide"
-      >
-        <DrawerSection title="Evaluator readiness matrix">
-          <DrawerRowList
-            rows={data?.evaluatorReadiness ?? []}
-            icons={READINESS_ICONS}
-          />
-        </DrawerSection>
-      </DetailDrawer>
+        rows={data?.evaluatorReadiness ?? []}
+        icons={READINESS_ICONS}
+      />
     </DashboardPage>
   );
 }
