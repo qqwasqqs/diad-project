@@ -229,7 +229,7 @@ export default function OperationsTeamDashboard() {
         <DashboardPanel
           template="single"
           title="Operational situation"
-          className="xl:col-span-8"
+          className="xl:col-span-7"
           actions={
             <DashboardSectionAction
               onClick={() => setOpenDrawer("operationalSituation")}
@@ -266,7 +266,7 @@ export default function OperationsTeamDashboard() {
         <DashboardPanel
           template="single"
           title="Requested operations coverage"
-          className="xl:col-span-4"
+          className="xl:col-span-5"
           actions={
             <DashboardSectionAction
               onClick={() => setOpenDrawer("requestedOperationsCoverage")}
@@ -281,6 +281,7 @@ export default function OperationsTeamDashboard() {
                 icon={COVERAGE_ICONS[row.id]}
                 title={row.label}
                 variant="warning"
+                size="compact"
                 primaryContent={
                   row.pendingState ? (
                     <PendingStateValue state={row.pendingState} />
