@@ -234,8 +234,10 @@ export default function ExecutiveDashboard() {
                     </span>
                   ) : undefined
                 }
-                className="rounded-lg border"
+                className="rounded-lg border border-chart-grid"
                 valueClassName="text-3xl font-semibold"
+                headerMinHeight="min-h-[60px]"
+                pinSupporting
               />
             ))}
           </div>
@@ -366,7 +368,7 @@ export default function ExecutiveDashboard() {
               key={row.id}
               title={row.label}
               primaryContent={row.value}
-              className="rounded-lg border"
+              className="rounded-lg border border-chart-grid"
               minHeight="min-h-0"
               titleClassName="text-xs font-medium"
               valueClassName="text-xl font-semibold"
@@ -423,7 +425,7 @@ export default function ExecutiveDashboard() {
               key={row.id}
               title={row.label}
               primaryContent={row.value}
-              className="rounded-lg border"
+              className="rounded-lg border border-chart-grid"
               minHeight="min-h-0"
               titleClassName="text-xs font-medium"
               valueClassName="text-xl font-semibold"
