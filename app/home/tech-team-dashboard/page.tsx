@@ -19,11 +19,13 @@ import DashboardLineChart from "@/components/shared/dashboard/DashboardLineChart
 import MetricList, {
   type MetricListItem,
 } from "@/components/shared/dashboard/MetricList";
+import DrawerSection from "@/components/shared/dashboard/drawers/DrawerSection";
+import DrawerRowList from "@/components/shared/dashboard/drawers/DrawerRowList";
+import DrawerStatGrid from "@/components/shared/dashboard/drawers/DrawerStatGrid";
 import HorizontalBarList from "@/components/shared/charts/HorizontalBarList";
 import IllustrativeValuesBanner from "@/components/shared/dashboard/IllustrativeValuesBanner";
 import PanelFootnote from "@/components/shared/dashboard/PanelFootnote";
 import PendingStateValue from "@/components/shared/dashboard/PendingStateValue";
-import { MetricCard } from "@/components/shared/dashboard/MetricCard";
 import DashboardSectionAction from "@/components/shared/dashboard/DashboardSectionAction";
 import DetailDrawer from "@/components/shared/dashboard/DetailDrawer";
 import { useTechTeamMainView } from "@/hooks/useTechTeamDashboard";
@@ -316,34 +318,23 @@ export default function TechTeamDashboard() {
         content={drawers?.latencyChart}
         size="wide"
       >
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {(drawers?.latencyChart.contextRows ?? []).map((row) => (
-            <MetricCard
-              key={row.id}
-              title={row.metric}
-              primaryContent={row.latest}
-              className="rounded-lg border"
-              minHeight="min-h-0"
-              titleClassName="text-xs font-medium"
-              valueClassName="text-xl font-semibold"
-            />
-          ))}
-        </div>
+        <DrawerStatGrid
+          columns={4}
+          items={(drawers?.latencyChart.contextRows ?? []).map((row) => ({
+            id: row.id,
+            label: row.metric,
+            value: row.latest,
+          }))}
+        />
 
-        <section>
-          <h4
-            className="mb-2 text-sm font-semibold"
-            style={{ color: "var(--color-text-primary)" }}
-          >
-            Latency trend
-          </h4>
+        <DrawerSection title="Latency trend">
           <DashboardLineChart
             series={latencySeries}
             axes={[{ id: "left", label: "Latency (ms)" }]}
             height={220}
           />
           <PanelFootnote>Component times are not additive</PanelFootnote>
-        </section>
+        </DrawerSection>
       </DetailDrawer>
 
       <DetailDrawer
@@ -354,20 +345,10 @@ export default function TechTeamDashboard() {
       >
         {/* The four-series latency chart is deliberately absent: it is a
             separate clickable element with its own drawer. */}
-        <div className="grid grid-cols-2 gap-3">
-          {(data?.requestPathHealth.diagnostics ?? []).map((row) => (
-            <MetricCard
-              key={row.id}
-              icon={DIAGNOSTIC_ICONS[row.id]}
-              title={row.label}
-              primaryContent={row.value}
-              className="rounded-lg border"
-              minHeight="min-h-0"
-              titleClassName="text-xs font-medium"
-              valueClassName="text-xl font-semibold"
-            />
-          ))}
-        </div>
+        <DrawerStatGrid
+          items={data?.requestPathHealth.diagnostics ?? []}
+          icons={DIAGNOSTIC_ICONS}
+        />
       </DetailDrawer>
 
       <DetailDrawer
@@ -389,21 +370,11 @@ export default function TechTeamDashboard() {
         content={drawers?.capacityAndEfficiency}
         size="wide"
       >
-        <div className="grid grid-cols-2 gap-3">
-          {(data?.capacityAndEfficiency ?? [])
-            .filter((row) => !row.pendingState)
-            .map((row) => (
-              <MetricCard
-                key={row.id}
-                title={row.label}
-                primaryContent={row.value}
-                className="rounded-lg border"
-                minHeight="min-h-0"
-                titleClassName="text-xs font-medium"
-                valueClassName="text-xl font-semibold"
-              />
-            ))}
-        </div>
+        <DrawerStatGrid
+          items={(data?.capacityAndEfficiency ?? []).filter(
+            (row) => !row.pendingState,
+          )}
+        />
       </DetailDrawer>
 
       <DetailDrawer
@@ -412,35 +383,17 @@ export default function TechTeamDashboard() {
         content={drawers?.aiModelQuality}
         size="wide"
       >
-        <section>
-          <h4
-            className="mb-2 text-sm font-semibold"
-            style={{ color: "var(--color-text-primary)" }}
-          >
-            Quality trend
-          </h4>
+        <DrawerSection title="Quality trend">
           <DashboardLineChart
             series={qualitySeries}
             axes={[{ id: "left", domain: [1, 5] }]}
             height={200}
           />
-        </section>
+        </DrawerSection>
 
         {/* Scales stay visibly separate: the 1-5 and 0-1 measures are shown as
             distinct cards, never normalized onto one axis. */}
-        <div className="grid grid-cols-2 gap-3">
-          {(data?.aiModelQuality.supporting ?? []).map((stat) => (
-            <MetricCard
-              key={stat.id}
-              title={stat.label}
-              primaryContent={stat.value}
-              className="rounded-lg border"
-              minHeight="min-h-0"
-              titleClassName="text-xs font-medium"
-              valueClassName="text-xl font-semibold"
-            />
-          ))}
-        </div>
+        <DrawerStatGrid items={data?.aiModelQuality.supporting ?? []} />
       </DetailDrawer>
 
       <DetailDrawer
@@ -449,17 +402,12 @@ export default function TechTeamDashboard() {
         content={drawers?.evaluatorReadiness}
         size="wide"
       >
-        <section>
-          <h4
-            className="mb-2 text-sm font-semibold"
-            style={{ color: "var(--color-text-primary)" }}
-          >
-            Evaluator readiness matrix
-          </h4>
-          <MetricList
-            items={toRows(data?.evaluatorReadiness ?? [], READINESS_ICONS)}
+        <DrawerSection title="Evaluator readiness matrix">
+          <DrawerRowList
+            rows={data?.evaluatorReadiness ?? []}
+            icons={READINESS_ICONS}
           />
-        </section>
+        </DrawerSection>
       </DetailDrawer>
     </DashboardPage>
   );

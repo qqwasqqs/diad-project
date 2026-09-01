@@ -25,7 +25,9 @@ import CostByBusinessUnitChart from "@/components/charts/CostByBusinessUnitChart
 import { useExecutiveMainView } from "@/hooks/useExecutiveDashboard";
 import DashboardSectionAction from "@/components/shared/dashboard/DashboardSectionAction";
 import DetailDrawer from "@/components/shared/dashboard/DetailDrawer";
-import MetricList from "@/components/shared/dashboard/MetricList";
+import DrawerSection from "@/components/shared/dashboard/drawers/DrawerSection";
+import DrawerRowList from "@/components/shared/dashboard/drawers/DrawerRowList";
+import DrawerStatGrid from "@/components/shared/dashboard/drawers/DrawerStatGrid";
 import HorizontalBarList from "@/components/shared/charts/HorizontalBarList";
 import MetricContextTable from "@/components/shared/dashboard/MetricContextTable";
 import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
@@ -91,38 +93,6 @@ type DrawerKey =
   | "sessionAndQueryVolume"
   | "costByBusinessUnit"
   | "safetyAndRisk";
-
-// Rows of label and value, used for the smaller blocks inside a drawer.
-const toRows = (rows: MetricRow[]) =>
-  rows.map((row) => ({
-    id: row.id,
-    label: row.label,
-    value: row.pendingState ? (
-      <PendingStateValue state={row.pendingState} />
-    ) : (
-      row.value ?? ""
-    ),
-  }));
-
-function DrawerSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section>
-      <h4
-        className="mb-2 text-sm font-semibold"
-        style={{ color: "var(--color-text-primary)" }}
-      >
-        {title}
-      </h4>
-      {children}
-    </section>
-  );
-}
 
 /*
   A card's primary content: the value with its unit, or the approved pending
@@ -324,7 +294,7 @@ export default function ExecutiveDashboard() {
         size="wide"
       >
         <DrawerSection title="End-to-End Latency">
-          <MetricList items={toRows(drawers?.pulse.latency ?? [])} />
+          <DrawerRowList rows={drawers?.pulse.latency ?? []} />
         </DrawerSection>
 
         <DrawerSection title="API response-status distribution">
@@ -338,7 +308,7 @@ export default function ExecutiveDashboard() {
         </DrawerSection>
 
         <DrawerSection title="User Feedback">
-          <MetricList items={toRows(drawers?.pulse.feedback ?? [])} />
+          <DrawerRowList rows={drawers?.pulse.feedback ?? []} />
         </DrawerSection>
 
         {/*
@@ -346,8 +316,8 @@ export default function ExecutiveDashboard() {
           sections, and no navigation target is approved yet.
         */}
         <DrawerSection title="Detail lives in these sections">
-          <MetricList
-            items={(drawers?.pulse.handoffs ?? []).map((handoff) => ({
+          <DrawerRowList
+            rows={(drawers?.pulse.handoffs ?? []).map((handoff) => ({
               id: handoff.id,
               label: handoff.label,
               value: handoff.destination,
@@ -362,19 +332,10 @@ export default function ExecutiveDashboard() {
         content={drawers?.sessionAndQueryVolume}
         size="wide"
       >
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {(drawers?.sessionAndQueryVolume.summary ?? []).map((row) => (
-            <MetricCard
-              key={row.id}
-              title={row.label}
-              primaryContent={row.value}
-              className="rounded-lg border border-chart-grid"
-              minHeight="min-h-0"
-              titleClassName="text-xs font-medium"
-              valueClassName="text-xl font-semibold"
-            />
-          ))}
-        </div>
+        <DrawerStatGrid
+          items={drawers?.sessionAndQueryVolume.summary ?? []}
+          columns={4}
+        />
 
         <DrawerSection title="Engagement by channel">
           <MetricContextTable
@@ -407,8 +368,8 @@ export default function ExecutiveDashboard() {
         </DrawerSection>
 
         <DrawerSection title="Conversation context">
-          <MetricList
-            items={toRows(drawers?.sessionAndQueryVolume.conversationContext ?? [])}
+          <DrawerRowList
+            rows={drawers?.sessionAndQueryVolume.conversationContext ?? []}
           />
         </DrawerSection>
       </DetailDrawer>
@@ -419,19 +380,7 @@ export default function ExecutiveDashboard() {
         content={drawers?.costByBusinessUnit}
         size="wide"
       >
-        <div className="grid grid-cols-2 gap-3">
-          {(drawers?.costByBusinessUnit.portfolio ?? []).map((row) => (
-            <MetricCard
-              key={row.id}
-              title={row.label}
-              primaryContent={row.value}
-              className="rounded-lg border border-chart-grid"
-              minHeight="min-h-0"
-              titleClassName="text-xs font-medium"
-              valueClassName="text-xl font-semibold"
-            />
-          ))}
-        </div>
+        <DrawerStatGrid items={drawers?.costByBusinessUnit.portfolio ?? []} />
 
         {/* Descending allocation. Each project stays a subset of its parent. */}
         <DrawerSection title="Allocation by business unit">
@@ -458,10 +407,10 @@ export default function ExecutiveDashboard() {
         </DrawerSection>
 
         <DrawerSection title="Separate signal">
-          <MetricList
-            items={toRows([drawers?.costByBusinessUnit.infrastructureCost].filter(
+          <DrawerRowList
+            rows={[drawers?.costByBusinessUnit.infrastructureCost].filter(
               (row): row is MetricRow => Boolean(row),
-            ))}
+            )}
           />
         </DrawerSection>
       </DetailDrawer>
@@ -473,7 +422,7 @@ export default function ExecutiveDashboard() {
         size="wide"
       >
         <DrawerSection title="What each signal reports">
-          <MetricList items={toRows(drawers?.safetyAndRisk.signals ?? [])} />
+          <DrawerRowList rows={drawers?.safetyAndRisk.signals ?? []} />
         </DrawerSection>
       </DetailDrawer>
     </DashboardPage>
