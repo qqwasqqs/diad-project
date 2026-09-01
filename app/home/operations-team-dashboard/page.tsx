@@ -35,11 +35,13 @@ import MetricList, {
 import { MetricCard } from "@/components/shared/dashboard/MetricCard";
 import HorizontalBarList from "@/components/shared/charts/HorizontalBarList";
 import DashboardSectionAction from "@/components/shared/dashboard/DashboardSectionAction";
-import DetailDrawer from "@/components/shared/dashboard/DetailDrawer";
-import DrawerSection from "@/components/shared/dashboard/drawers/DrawerSection";
-import DrawerRowList from "@/components/shared/dashboard/drawers/DrawerRowList";
-import DrawerStatGrid from "@/components/shared/dashboard/drawers/DrawerStatGrid";
-import MetricContextTable from "@/components/shared/dashboard/MetricContextTable";
+import OperationalSituationDrawer from "@/components/shared/dashboard/drawers/operations/OperationalSituationDrawer";
+import RequestedOperationsCoverageDrawer from "@/components/shared/dashboard/drawers/operations/RequestedOperationsCoverageDrawer";
+import ServicePathStabilityDrawer from "@/components/shared/dashboard/drawers/operations/ServicePathStabilityDrawer";
+import ServicePathRuntimeContextDrawer from "@/components/shared/dashboard/drawers/operations/ServicePathRuntimeContextDrawer";
+import FailureSurfaceDrawer from "@/components/shared/dashboard/drawers/operations/FailureSurfaceDrawer";
+import OperationalControlCoverageDrawer from "@/components/shared/dashboard/drawers/operations/OperationalControlCoverageDrawer";
+import SafetyAndSecurityReadinessDrawer from "@/components/shared/dashboard/drawers/operations/SafetyAndSecurityReadinessDrawer";
 import { useOperationsMainView } from "@/hooks/useOperationsDashboard";
 import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
 import type { MetricRow, Series } from "@/types/dashboard";
@@ -411,162 +413,53 @@ export default function OperationsTeamDashboard() {
 
       {/* Detail drawers. One per clickable element; a drawer never merges two. */}
 
-      <DetailDrawer
+      <OperationalSituationDrawer
         open={openDrawer === "operationalSituation"}
         onClose={closeDrawer}
         content={drawers?.operationalSituation}
-        size="wide"
-      >
-        <DrawerStatGrid
-          columns={4}
-          items={drawers?.operationalSituation.summary ?? []}
-        />
+        series={situationSeries}
+      />
 
-        {/*
-          Latency and the two rates keep separate axes: seconds and percentages
-          are different units and never share a scale.
-        */}
-        <DrawerSection title="30-day direction">
-          <DashboardLineChart
-            series={situationSeries}
-            axes={[
-              { id: "left", label: "Latency (ms)" },
-              { id: "right", label: "Rate (%)" },
-            ]}
-            height={220}
-          />
-        </DrawerSection>
-      </DetailDrawer>
-
-      <DetailDrawer
+      <RequestedOperationsCoverageDrawer
         open={openDrawer === "requestedOperationsCoverage"}
         onClose={closeDrawer}
         content={drawers?.requestedOperationsCoverage}
-        size="wide"
-      >
-        <DrawerSection title="Monitoring readiness">
-          <MetricContextTable
-            columns={[
-              { id: "requirement", header: "Requirement" },
-              { id: "missing", header: "Missing contract" },
-              { id: "state", header: "State" },
-            ]}
-            rows={(drawers?.requestedOperationsCoverage.matrix ?? []).map((row) => ({
-              id: row.id,
-              cells: {
-                requirement: row.label,
-                missing: row.missingContract,
-                state: row.pendingState ? (
-                  <PendingStateValue state={row.pendingState} />
-                ) : (
-                  row.value
-                ),
-              },
-            }))}
-            caption="Monitoring readiness by requirement"
-          />
-        </DrawerSection>
-      </DetailDrawer>
+      />
 
-      <DetailDrawer
+      <ServicePathStabilityDrawer
         open={openDrawer === "servicePathStabilityChart"}
         onClose={closeDrawer}
         content={drawers?.servicePathStabilityChart}
-        size="wide"
-      >
-        <DrawerStatGrid
-          columns={4}
-          items={drawers?.servicePathStabilityChart.summary ?? []}
-        />
+        series={latencySeries}
+      />
 
-        <DrawerSection title="Latency trend">
-          <DashboardLineChart
-            series={latencySeries}
-            axes={[{ id: "left", label: "Latency (ms)" }]}
-            height={220}
-          />
-          <PanelFootnote>Component times are not additive</PanelFootnote>
-        </DrawerSection>
-      </DetailDrawer>
-
-      <DetailDrawer
+      <ServicePathRuntimeContextDrawer
         open={openDrawer === "servicePathRuntimeContext"}
         onClose={closeDrawer}
         content={drawers?.servicePathRuntimeContext}
-        size="wide"
-      >
-        {/* The latency chart is deliberately absent: it is a separate element
-            with its own drawer. */}
-        <DrawerStatGrid
-          columns={4}
-          items={drawers?.servicePathRuntimeContext.summary ?? []}
-          icons={DIAGNOSTIC_ICONS}
-        />
-      </DetailDrawer>
+        icons={DIAGNOSTIC_ICONS}
+      />
 
-      <DetailDrawer
+      <FailureSurfaceDrawer
         open={openDrawer === "failureSurface"}
         onClose={closeDrawer}
         content={drawers?.failureSurface}
-        size="wide"
-      >
-        <HorizontalBarList
-          values={data?.failureSurface.items ?? []}
-          rowsPerColumn={3}
-          columns={3}
-          flow="row"
-          max={data?.failureSurface.scaleMax ?? 2}
-        />
-      </DetailDrawer>
+        items={data?.failureSurface.items ?? []}
+        scaleMax={data?.failureSurface.scaleMax ?? 2}
+      />
 
-      <DetailDrawer
+      <OperationalControlCoverageDrawer
         open={openDrawer === "operationalControlCoverage"}
         onClose={closeDrawer}
         content={drawers?.operationalControlCoverage}
-        size="wide"
-      >
-        <DrawerSection title="What each control still needs">
-          <MetricContextTable
-            columns={[
-              { id: "control", header: "Control" },
-              { id: "rule", header: "Missing rule" },
-              { id: "fields", header: "Field family" },
-              { id: "state", header: "State" },
-            ]}
-            rows={(drawers?.operationalControlCoverage.controls ?? []).map(
-              (row) => ({
-                id: row.id,
-                cells: {
-                  control: row.label,
-                  rule: row.missingRule,
-                  fields: row.fieldFamily,
-                  state: row.pendingState ? (
-                    <PendingStateValue state={row.pendingState} />
-                  ) : (
-                    row.value
-                  ),
-                },
-              }),
-            )}
-            caption="Control readiness and missing rules"
-          />
-        </DrawerSection>
-      </DetailDrawer>
+      />
 
-      <DetailDrawer
+      <SafetyAndSecurityReadinessDrawer
         open={openDrawer === "safetyAndSecurityReadiness"}
         onClose={closeDrawer}
         content={drawers?.safetyAndSecurityReadiness}
-        size="wide"
-      >
-        <DrawerSection title="Readiness matrix">
-          <DrawerRowList
-            rows={drawers?.safetyAndSecurityReadiness.readiness ?? []}
-            icons={SAFETY_ICONS}
-            variant="prominent"
-          />
-        </DrawerSection>
-      </DetailDrawer>
+        icons={SAFETY_ICONS}
+      />
     </DashboardPage>
   );
 }
