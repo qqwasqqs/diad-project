@@ -9,7 +9,10 @@ import DashboardDrawer from "@/components/shared/dashboard/DashboardDrawer";
 import { MetricCard } from "@/components/shared/dashboard/MetricCard";
 import { PositiveNegativeBar } from "@/components/shared/charts/PositiveNegativeBar";
 import HorizontalBarList from "@/components/shared/charts/HorizontalBarList";
-import DashboardLineChart from "@/components/shared/dashboard/DashboardLineChart";
+import DashboardLineChart, {
+  type DashboardLineAxisConfig,
+  type DashboardLineSeries,
+} from "@/components/shared/dashboard/DashboardLineChart";
 import DataPendingCard from "@/components/shared/dashboard/DataPendingCard";
 import StatusCallout from "@/components/shared/dashboard/StatusCallout";
 import {
@@ -45,7 +48,7 @@ const productExperiencePulseSections = [
   { id: "workflow-completion" },
 ];
 
-const adoptionAndEngagementSeries = [
+const adoptionAndEngagementSeries: DashboardLineSeries[] = [
   {
     id: "sessions",
     label: "Sessions",
@@ -96,7 +99,7 @@ const adoptionAndEngagementSeries = [
   },
 ];
 
-const adoptionAndEngagementAxes = [
+const adoptionAndEngagementAxes: DashboardLineAxisConfig[] = [
   {
     id: "left",
     tickFormatter: (value: number) => `${Math.round(value / 1000)}K`,
@@ -124,7 +127,7 @@ const adoptionAndEngagementStats = [
   },
 ];
 
-const experienceQualitySeries = [
+const experienceQualitySeries: DashboardLineSeries[] = [
   {
     id: "groundedness",
     label: "Groundedness",
@@ -184,7 +187,7 @@ const experienceQualitySeries = [
   },
 ];
 
-const experienceQualityAxes = [
+const experienceQualityAxes: DashboardLineAxisConfig[] = [
   {
     id: "left",
     domain: [0, 5],
