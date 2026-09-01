@@ -1,0 +1,100 @@
+{
+  "scope": ["Last 30 days", "All business units", "All projects", "All channels"],
+  "engagementSeries": [
+    {
+      "id": "sessions",
+      "label": "Sessions",
+      "color": "#3155c6",
+      "yAxis": "left",
+      "points": [
+        { "x": "Apr 20", "y": 28000 },
+        { "x": "Apr 23", "y": 39000 },
+        { "x": "Apr 26", "y": 35000 },
+        { "x": "Apr 29", "y": 51000 },
+        { "x": "May 2", "y": 44000 },
+        { "x": "May 5", "y": 52000 },
+        { "x": "May 8", "y": 47000 },
+        { "x": "May 11", "y": 49000 },
+        { "x": "May 14", "y": 38000 },
+        { "x": "May 17", "y": 42000 },
+        { "x": "May 20", "y": 62000 }
+      ]
+    },
+    {
+      "id": "queries",
+      "label": "Queries",
+      "color": "#7c3aed",
+      "yAxis": "left",
+      "points": [
+        { "x": "Apr 20", "y": 16000 },
+        { "x": "Apr 23", "y": 24000 },
+        { "x": "Apr 26", "y": 21000 },
+        { "x": "Apr 29", "y": 30000 },
+        { "x": "May 2", "y": 26000 },
+        { "x": "May 5", "y": 31000 },
+        { "x": "May 8", "y": 25000 },
+        { "x": "May 11", "y": 29000 },
+        { "x": "May 14", "y": 19000 },
+        { "x": "May 17", "y": 22000 },
+        { "x": "May 20", "y": 36000 }
+      ]
+    }
+  ],
+  "responsivenessSeries": [
+    {
+      "id": "end-to-end-p95",
+      "label": "End-to-End P95",
+      "color": "#16803c",
+      "yAxis": "left",
+      "points": [
+        { "x": "Apr 20", "y": 1.1 },
+        { "x": "Apr 23", "y": 1.3 },
+        { "x": "Apr 26", "y": 1.45 },
+        { "x": "Apr 29", "y": 1.25 },
+        { "x": "May 2", "y": 1.2 },
+        { "x": "May 5", "y": 1.35 },
+        { "x": "May 8", "y": 1.05 },
+        { "x": "May 11", "y": 0.9 },
+        { "x": "May 14", "y": 0.95 },
+        { "x": "May 17", "y": 1.2 },
+        { "x": "May 20", "y": 1.4 }
+      ]
+    }
+  ],
+  "feedback": {
+    "positive": 84,
+    "negative": 16
+  },
+  "workflowSteps": [
+    { "id": "workflow-key", "label": "Workflow key" },
+    { "id": "terminal-outcome", "label": "Terminal outcome" },
+    { "id": "eligible-denominator", "label": "Eligible denominator" },
+    { "id": "scope-attribution", "label": "Scope attribution" }
+  ],
+  "measurementContext": [
+    {
+      "id": "session-query-volume",
+      "signal": "Session & Query Volume",
+      "calculation": "Distinct queries / sessions",
+      "coverage": "pending"
+    },
+    {
+      "id": "user-satisfaction-rate",
+      "signal": "User Satisfaction Rate",
+      "calculation": "Valid feedback share",
+      "coverage": "pending"
+    },
+    {
+      "id": "end-to-end-latency",
+      "signal": "End-to-End Latency",
+      "calculation": "P95 request latency",
+      "coverage": "pending"
+    },
+    {
+      "id": "workflow-completion",
+      "signal": "Workflow Completion",
+      "calculation": "Event and formula not supplied",
+      "coverage": "data"
+    }
+  ]
+}

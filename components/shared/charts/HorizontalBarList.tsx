@@ -28,6 +28,8 @@ export type HorizontalBarListProps = {
       otherwise every bar renders as an invisible sliver at the same length.
     */
     max?: number;
+    /* Filled bar color. Defaults to the established primary chart series. */
+    barColor?: string;
 };
 
 const COMPONENT_HEIGHT = 180;
@@ -77,7 +79,15 @@ const useStyles = makeStyles({
     },
 });
 
-const ProgressBar = ({ value, max }: { value: number; max: number }) => {
+const ProgressBar = ({
+    value,
+    max,
+    barColor,
+}: {
+    value: number;
+    max: number;
+    barColor: string;
+}) => {
     const safeMax = max > 0 ? max : 100;
     const safeValue = Math.max(0, Math.min(value, safeMax));
 
@@ -107,7 +117,7 @@ const ProgressBar = ({ value, max }: { value: number; max: number }) => {
                 <Bar
                     dataKey="value"
                     stackId="progress"
-                    fill="var(--color-chart-series-1)"
+                    fill={barColor}
                     radius={[999, 0, 0, 999]}
                     barSize={8}
                     isAnimationActive={false}
@@ -131,6 +141,7 @@ export const HorizontalBarList: React.FC<HorizontalBarListProps> = ({
     values,
     rowsPerColumn = DEFAULT_ROWS_PER_COLUMN,
     max = 100,
+    barColor = "var(--color-chart-series-1)",
 }) => {
     const styles = useStyles();
 
@@ -155,7 +166,7 @@ export const HorizontalBarList: React.FC<HorizontalBarListProps> = ({
                     </div>
 
                     <div className={styles.chartWrapper}>
-                        <ProgressBar value={item.value} max={max} />
+                        <ProgressBar value={item.value} max={max} barColor={barColor} />
                     </div>
 
                     <div className={styles.value}>

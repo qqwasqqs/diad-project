@@ -35,6 +35,9 @@ const values = [
 - `values`: ordered array of objects with:
   - `label`: the text shown at the start of the row
   - `value`: the numeric value used to size the bar and show the percent label
+- `rowsPerColumn`: optional number of rows rendered before flowing into a second column
+- `max`: optional upper bound used to size each proportional bar; defaults to `100`
+- `barColor`: optional filled-bar color; defaults to the primary chart-series color
 
 ## Behavior
 
@@ -69,7 +72,12 @@ const channelMixValues = [
 ];
 
 export default function HorizontalBarListExample() {
-  return <HorizontalBarList values={channelMixValues} />;
+  return (
+    <HorizontalBarList
+      values={channelMixValues}
+      barColor="var(--color-chart-series-1)"
+    />
+  );
 }
 ```
 
