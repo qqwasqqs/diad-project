@@ -202,6 +202,8 @@ export default function OperationsTeamDashboard() {
                 minHeight="min-h-0"
                 titleClassName="text-xs font-medium"
                 valueClassName="text-2xl font-semibold"
+                headerMinHeight="min-h-[40px]"
+                pinSupporting
               />
             ))}
           </div>
