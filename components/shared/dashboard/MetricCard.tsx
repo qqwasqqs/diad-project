@@ -11,6 +11,17 @@ export interface MetricCardProps {
   className?: string;
 
   // Layout
+  /*
+    Reserves a fixed height for the icon-and-title row. In a row of cards, a
+    title that wraps to an extra line pushes its value and supporting content
+    out of line with its neighbours; reserving the space keeps them aligned.
+  */
+  headerMinHeight?: string;
+  /*
+    Pins supporting content to the bottom of the card, so a bar or caption sits
+    at the same height across a row regardless of what is above it.
+  */
+  pinSupporting?: boolean;
   minWidth?: string;
   maxWidth?: string;
   minHeight?: string;
@@ -36,6 +47,8 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   supportingContent,
   className,
 
+  headerMinHeight = "",
+  pinSupporting = false,
   minWidth = "min-w-0",
   maxWidth = "",
   minHeight = "min-h-[110px]",
@@ -55,6 +68,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   return (
     <div
       className={`
+        ${pinSupporting ? "flex" : ""}
         flex-1
         basis-0
         flex-col
@@ -67,7 +81,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
       `}
     >
       {/* Header */}
-      <div className={`flex items-center ${gap}`}>
+      <div className={`flex items-center ${gap} ${headerMinHeight}`}>
         {icon && (
           <div
             className={`${iconWrapperClassName} flex items-center justify-center rounded-full shrink-0 icon-bg`}
@@ -95,7 +109,11 @@ export const MetricCard: React.FC<MetricCardProps> = ({
         {primaryContent}
       </div>
 
-      {supportingContent && <div className="mt-2">{supportingContent}</div>}
+      {supportingContent && (
+        <div className={pinSupporting ? "mt-auto pt-2" : "mt-2"}>
+          {supportingContent}
+        </div>
+      )}
     </div>
   );
 };

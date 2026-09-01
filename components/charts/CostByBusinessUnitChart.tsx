@@ -18,7 +18,6 @@ export interface CostByBusinessUnitItem {
   totalCost: number;
   topProjectName: string;
   topProjectCost: number;
-  color: string;
 }
 
 interface CostByBusinessUnitChartProps {
@@ -34,7 +33,17 @@ type CostChartRow = {
   projectName?: string;
 };
 
-const PROJECT_BAR_COLOR = "#d1fae5";
+/*
+  Two series, two colours. Every business unit shares one colour because they
+  are the same measure; varying it per row would imply a distinction that does
+  not exist. The project bar is a lighter tint of the same hue, which reads as a
+  subset of the total above it rather than a separate measure.
+
+  Blue rather than green: cost is a neutral data series, and the design rules
+  reserve green for a confirmed favorable state.
+*/
+const BUSINESS_UNIT_BAR_COLOR = "var(--color-chart-series-1)";
+const PROJECT_BAR_COLOR = "var(--color-chart-series-1-soft)";
 const formatCurrencyK = (value: number) => `$${value.toFixed(2)}K`;
 
 export default function CostByBusinessUnitChart({
@@ -46,7 +55,7 @@ export default function CostByBusinessUnitChart({
         id: `${item.name}-bu`,
         rowLabel: item.name,
         value: item.totalCost,
-        color: item.color,
+        color: BUSINESS_UNIT_BAR_COLOR,
         rowType: "businessUnit",
       },
       {
@@ -77,15 +86,18 @@ export default function CostByBusinessUnitChart({
     0,
   );
 
-  const chartHeight = Math.max(220, chartRows.length * 22);
+  const chartHeight = Math.max(240, chartRows.length * 28);
 
   return (
-    <div className="flex w-full items-stretch gap-5">
+    <div className="flex w-full items-stretch gap-4">
       <div className="min-w-0 flex-1">
         <div className="mb-4 flex items-center justify-end gap-3">
           <div className="flex items-center gap-4 text-xs text-slate-500">
             <div className="flex items-center gap-2">
-              <span className="inline-block h-2.5 w-2.5 rounded-sm bg-emerald-700" />
+              <span
+                className="inline-block h-2.5 w-2.5 rounded-sm"
+                style={{ backgroundColor: BUSINESS_UNIT_BAR_COLOR }}
+              />
               <span>Business Unit</span>
             </div>
             <div className="flex items-center gap-2">
@@ -103,53 +115,70 @@ export default function CostByBusinessUnitChart({
             <BarChart
               data={chartRows}
               layout="vertical"
-              margin={{ top: 8, right: 12, bottom: 8, left: 12 }}
+              /* Right margin holds the value label, which sits outside the bar. */
+              margin={{ top: 8, right: 56, bottom: 8, left: 4 }}
               barCategoryGap="0%"
             >
               <XAxis
                 type="number"
                 hide
-                domain={[0, maxCost * 1.2 || 1]}
+                domain={[0, maxCost * 1.05 || 1]}
               />
               <YAxis
                 type="category"
                 dataKey="rowLabel"
-                width={120}
+                width={118}
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "#334155", fontSize: 12, fontWeight: 500 }}
-                tickFormatter={(_, index) => {
-                  if (typeof index !== "number") {
-                    return "";
+                interval={0}
+                /*
+                  Both rows are named here rather than inside the bars. A
+                  project bar can be too short to hold its own label, and a
+                  clipped name is worse than an indented one.
+                */
+                tick={(props) => {
+                  const row = chartRows[props.index];
+
+                  if (!row || row.rowType === "spacer") {
+                    return <g />;
                   }
 
-                  const row = chartRows[index];
+                  const isBusinessUnit = row.rowType === "businessUnit";
 
-                  return row?.rowType === "businessUnit" ? row.rowLabel : "";
+                  return (
+                    <text
+                      x={props.x}
+                      y={props.y}
+                      dy={4}
+                      textAnchor="end"
+                      fontSize={isBusinessUnit ? 12 : 11}
+                      fontWeight={isBusinessUnit ? 600 : 400}
+                      fill={
+                        isBusinessUnit
+                          ? "var(--color-text-primary)"
+                          : "var(--color-chart-axis)"
+                      }
+                    >
+                      {isBusinessUnit ? row.rowLabel : row.projectName}
+                    </text>
+                  );
                 }}
               />
               <Bar
                 dataKey="value"
                 radius={[0, 8, 8, 0]}
-                barSize={22}
+                barSize={26}
                 isAnimationActive={false}
               >
                 {chartRows.map((entry) => (
                   <Cell key={entry.id} fill={entry.color} />
                 ))}
-                <LabelList
-                  dataKey="projectName"
-                  position="insideLeft"
-                  offset={8}
-                  fill="#0f766e"
-                  fontSize={11}
-                  fontWeight={600}
-                />
+
                 <LabelList
                   dataKey="value"
                   position="right"
                   offset={8}
-                  fill="#334155"
+                  fill="var(--color-text-primary)"
                   fontSize={11}
                   fontWeight={700}
                   formatter={(value: React.ReactNode) => {
