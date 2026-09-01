@@ -86,10 +86,10 @@ export default function CostByBusinessUnitChart({
     0,
   );
 
-  const chartHeight = Math.max(220, chartRows.length * 22);
+  const chartHeight = Math.max(240, chartRows.length * 28);
 
   return (
-    <div className="flex w-full items-stretch gap-5">
+    <div className="flex w-full items-stretch gap-4">
       <div className="min-w-0 flex-1">
         <div className="mb-4 flex items-center justify-end gap-3">
           <div className="flex items-center gap-4 text-xs text-slate-500">
@@ -115,18 +115,19 @@ export default function CostByBusinessUnitChart({
             <BarChart
               data={chartRows}
               layout="vertical"
-              margin={{ top: 8, right: 12, bottom: 8, left: 12 }}
+              /* Right margin holds the value label, which sits outside the bar. */
+              margin={{ top: 8, right: 56, bottom: 8, left: 4 }}
               barCategoryGap="0%"
             >
               <XAxis
                 type="number"
                 hide
-                domain={[0, maxCost * 1.2 || 1]}
+                domain={[0, maxCost * 1.05 || 1]}
               />
               <YAxis
                 type="category"
                 dataKey="rowLabel"
-                width={132}
+                width={118}
                 axisLine={false}
                 tickLine={false}
                 interval={0}
@@ -166,7 +167,7 @@ export default function CostByBusinessUnitChart({
               <Bar
                 dataKey="value"
                 radius={[0, 8, 8, 0]}
-                barSize={22}
+                barSize={26}
                 isAnimationActive={false}
               >
                 {chartRows.map((entry) => (
