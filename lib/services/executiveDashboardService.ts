@@ -31,6 +31,8 @@ import {
   PipelineExecutiveDashboardSchema,
   ExecutiveDashboardHighlights
 } from "@/types/api"; // Import the types for executive dashboard highlights
+import type { DashboardFilters } from "@/types/dashboard";
+import type { ExecutiveDashboardPayload } from "@/types/executiveDashboard";
 
 
 // ----------------------------- CONSTANTS -----------------------------
@@ -63,6 +65,24 @@ export const executiveDashboardService = {
    *       "failedDatasets": 120,
    *     }
    */
+  /*
+    Main-view payload for the AI Observability Executive dashboard.
+
+    Distinct from the highlights calls below, which serve the Data Integrity
+    dashboards. The endpoint owns the data source, so this wrapper stays
+    unchanged when the route moves from local mock data to Splunk.
+  */
+  async getMainView(
+    filters: DashboardFilters = {},
+  ): Promise<ExecutiveDashboardPayload> {
+    const response = await apiClient.get<ExecutiveDashboardPayload>(
+      `${EXECUTIVE_DASHBOARD_BASE_URL}/main-view`,
+      { params: filters },
+    );
+
+    return response.data;
+  },
+
   async getExecutiveDashboardHighlights(): Promise<ExecutiveDashboardHighlights> {
     // Informational log: request is starting (helps trace activity in logs)
     console.info("Fetching executive dashboard highlights data...");
