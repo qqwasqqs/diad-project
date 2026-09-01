@@ -15,12 +15,25 @@ export type HorizontalBarListItem = {
 
 export type HorizontalBarListProps = {
     values: HorizontalBarListItem[];
+    /*
+      Rows per column before wrapping into the next column. Defaults to filling
+      the component height, so eight items split 6 + 2; pass 4 for an even 4 + 4.
+    */
+    rowsPerColumn?: number;
+    /*
+      Upper bound of the bar track. Bar length is `value / max`.
+
+      Defaults to 100 for values that are already percentages of a whole. Sets of
+      small rates that are compared against each other need a smaller bound,
+      otherwise every bar renders as an invisible sliver at the same length.
+    */
+    max?: number;
 };
 
 const COMPONENT_HEIGHT = 180;
 const ROW_HEIGHT = 30;
-const ROWS_PER_COLUMN = Math.floor(COMPONENT_HEIGHT / ROW_HEIGHT);
-const MAX_ITEMS = ROWS_PER_COLUMN * 2;
+const DEFAULT_ROWS_PER_COLUMN = Math.floor(COMPONENT_HEIGHT / ROW_HEIGHT);
+const COLUMN_COUNT = 2;
 
 const useStyles = makeStyles({
     root: {
@@ -64,13 +77,14 @@ const useStyles = makeStyles({
     },
 });
 
-const ProgressBar = ({ value }: { value: number }) => {
-    const safeValue = Math.max(0, Math.min(value, 100));
+const ProgressBar = ({ value, max }: { value: number; max: number }) => {
+    const safeMax = max > 0 ? max : 100;
+    const safeValue = Math.max(0, Math.min(value, safeMax));
 
     const data = [
         {
             value: safeValue,
-            remaining: 100 - safeValue,
+            remaining: safeMax - safeValue,
         },
     ];
 
@@ -86,24 +100,24 @@ const ProgressBar = ({ value }: { value: number }) => {
                     bottom: 0,
                 }}
             >
-                <XAxis type="number" domain={[0, 100]} hide />
+                <XAxis type="number" domain={[0, safeMax]} hide />
                 <YAxis type="category" hide />
 
-                {/* Blue filled portion */}
+                {/* Filled portion */}
                 <Bar
                     dataKey="value"
                     stackId="progress"
-                    fill="#2563eb"
+                    fill="var(--color-chart-series-1)"
                     radius={[999, 0, 0, 999]}
                     barSize={8}
                     isAnimationActive={false}
                 />
 
-                {/* Gray remainder (track) */}
+                {/* Remainder (track) */}
                 <Bar
                     dataKey="remaining"
                     stackId="progress"
-                    fill="#e5e7eb"
+                    fill="var(--color-chart-grid)"
                     radius={[0, 999, 999, 0]}
                     barSize={8}
                     isAnimationActive={false}
@@ -115,16 +129,20 @@ const ProgressBar = ({ value }: { value: number }) => {
 
 export const HorizontalBarList: React.FC<HorizontalBarListProps> = ({
     values,
+    rowsPerColumn = DEFAULT_ROWS_PER_COLUMN,
+    max = 100,
 }) => {
     const styles = useStyles();
 
-    const visibleItems = values.slice(0, MAX_ITEMS);
+    const rows = Math.max(1, rowsPerColumn);
+    const visibleItems = values.slice(0, rows * COLUMN_COUNT);
 
     return (
         <div
             className={styles.root}
             style={{
-                gridTemplateRows: `repeat(${ROWS_PER_COLUMN}, ${ROW_HEIGHT}px)`,
+                gridTemplateRows: `repeat(${rows}, ${ROW_HEIGHT}px)`,
+                height: `${rows * ROW_HEIGHT}px`,
             }}
         >
             {visibleItems.map((item, index) => (
@@ -137,7 +155,7 @@ export const HorizontalBarList: React.FC<HorizontalBarListProps> = ({
                     </div>
 
                     <div className={styles.chartWrapper}>
-                        <ProgressBar value={item.value} />
+                        <ProgressBar value={item.value} max={max} />
                     </div>
 
                     <div className={styles.value}>

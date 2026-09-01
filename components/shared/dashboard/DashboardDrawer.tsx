@@ -16,6 +16,25 @@ const useStyles = makeStyles({
         width: "400px",
         maxWidth: "90vw",
     },
+    // Detail drawers that carry a chart and a table need more width than a
+    // plain list drawer, while still leaving the dimmed main view visible.
+    drawerWide: {
+        width: "720px",
+        maxWidth: "95vw",
+    },
+    eyebrow: {
+        display: "block",
+        fontSize: "12px",
+        letterSpacing: "0.08em",
+        textTransform: "uppercase",
+        color: tokens.colorNeutralForeground2,
+    },
+    description: {
+        display: "block",
+        marginTop: "4px",
+        fontSize: "13px",
+        color: "var(--color-chart-axis)",
+    },
     body: {
         display: "flex",
         flexDirection: "column",
@@ -30,6 +49,11 @@ const useStyles = makeStyles({
 interface DashboardDrawerProps {
     open: boolean;
     title: string;
+    /* Short uppercase label above the title, naming the detail view. */
+    eyebrow?: string;
+    /* One line under the title saying what the drawer covers. */
+    description?: ReactNode;
+    size?: "default" | "wide";
     children?: ReactNode;
     onClose: () => void;
     footer?: ReactNode;
@@ -37,6 +61,9 @@ interface DashboardDrawerProps {
 export default function DashboardDrawer({
     open,
     title,
+    eyebrow,
+    description,
+    size = "default",
     children,
     onClose,
     footer,
@@ -44,7 +71,7 @@ export default function DashboardDrawer({
     const styles = useStyles();
     return (
         <Drawer
-            className={styles.drawer}
+            className={size === "wide" ? styles.drawerWide : styles.drawer}
             position="end"
             open={open}
             onOpenChange={(_, data) => {
@@ -64,7 +91,11 @@ export default function DashboardDrawer({
                         />
                     }
                 >
+                    {eyebrow && <span className={styles.eyebrow}>{eyebrow}</span>}
                     {title}
+                    {description && (
+                        <span className={styles.description}>{description}</span>
+                    )}
                 </DrawerHeaderTitle>
             </DrawerHeader>
             <DrawerBody>

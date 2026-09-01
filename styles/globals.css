@@ -32,6 +32,11 @@
   --color-neutral-foreground-6: #030000; /* Light grey text color */
   --color-neutral-foreground-disabled: #c8c6c4; /* Disabled text color */
 
+  /* Dashboard body text. The neutral foreground scale above is brand green/blue,
+     which the dashboard designs reserve for status and accents. Charcoal is the
+     default reading color for labels, values, and chart text. */
+  --color-text-primary: #242424; /* Primary dashboard text color */
+
   /* Neutral background colors (shades of green/grey for backgrounds) */
   --color-neutral-background-1: #ffffff; /* White background */
   --color-neutral-background-2: #3c7e79; /* Dark greenish background */
@@ -62,6 +67,22 @@
 
   /* violet */
   --color-violet-bg: #EDE9FE;
+
+  /* Chart data series.
+     Neutral series colors only: blue, violet, cyan, teal, indigo. Green and red
+     are reserved for confirmed favorable and confirmed risk states, so they are
+     never used to identify a data series.
+     A metric keeps the same series token across every chart it appears in. */
+  --color-chart-series-1: #2563eb; /* blue    — End-to-End P95, Groundedness */
+  --color-chart-series-2: #7c3aed; /* violet  — Model Response avg, Response Coherence */
+  --color-chart-series-3: #0891b2; /* cyan    — Retrieval avg, Relevance Quality */
+  --color-chart-series-4: #0f766e; /* teal    — Tool Call avg */
+  --color-chart-series-5: #4f46e5; /* indigo  — unassigned */
+  --color-chart-series-6: #8b5cf6; /* violet light — unassigned */
+
+  /* Chart chrome */
+  --color-chart-grid: #e5e7eb; /* Gridlines */
+  --color-chart-axis: #64748b; /* Axis labels and ticks */
 }
 
 /* === Tailwind Theme Layer === */
@@ -94,6 +115,9 @@
 
  
     --color-title: var(--color-neutral-foreground-6);
+
+    /* Dashboard body text: exposes text-text-primary / border-text-primary etc. */
+    --color-text-primary: var(--color-text-primary);
   
     /* Warning */
     --color-status-warning-icon: var(--color-warning-icon);
@@ -111,6 +135,18 @@
     --color-danger-content: var(--color-danger-content);
   
     --color-violet-bg: var(--color-violet-bg);
+
+    /* Chart data series */
+    --color-chart-series-1: var(--color-chart-series-1);
+    --color-chart-series-2: var(--color-chart-series-2);
+    --color-chart-series-3: var(--color-chart-series-3);
+    --color-chart-series-4: var(--color-chart-series-4);
+    --color-chart-series-5: var(--color-chart-series-5);
+    --color-chart-series-6: var(--color-chart-series-6);
+
+    /* Chart chrome */
+    --color-chart-grid: var(--color-chart-grid);
+    --color-chart-axis: var(--color-chart-axis);
 }
 
 /* === Global Base Styles === */

@@ -1,7 +1,9 @@
 import React, { ReactNode } from "react";
 
 export interface MetricCardProps {
-  icon: ReactNode;
+  // Optional: cards in dense contexts (such as drawer summaries) carry no icon,
+  // and the icon slot is omitted entirely rather than left as empty space.
+  icon?: ReactNode;
   title: ReactNode;
   primaryContent: ReactNode;
   supportingContent?: ReactNode;
@@ -66,11 +68,13 @@ export const MetricCard: React.FC<MetricCardProps> = ({
     >
       {/* Header */}
       <div className={`flex items-center ${gap}`}>
-        <div
-          className={`${iconWrapperClassName} flex items-center justify-center rounded-full shrink-0 icon-bg`}
-        >
-          {icon}
-        </div>
+        {icon && (
+          <div
+            className={`${iconWrapperClassName} flex items-center justify-center rounded-full shrink-0 icon-bg`}
+          >
+            {icon}
+          </div>
+        )}
 
         <div className="flex-1 min-w-0">
           <div
