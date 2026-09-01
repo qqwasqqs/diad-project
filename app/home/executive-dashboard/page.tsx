@@ -212,12 +212,7 @@ export default function ExecutiveDashboard() {
           title="Cost by BU and Project"
           className="xl:col-span-5"
         >
-          <CostByBusinessUnitChart
-            data={(data?.costByBusinessUnit.items ?? []).map((item, index) => ({
-              ...item,
-              color: index === 0 ? "#166534" : index === 1 ? "#15803d" : "#16a34a",
-            }))}
-          />
+          <CostByBusinessUnitChart data={data?.costByBusinessUnit.items ?? []} />
         </DashboardPanel>
 
         <DashboardPanel
