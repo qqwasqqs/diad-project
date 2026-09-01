@@ -79,7 +79,7 @@ export default function DetailDrawer({
       description={content.description}
       size={size}
     >
-      <IllustrativeValuesBanner />
+      <IllustrativeValuesBanner message={content.bannerMessage} />
 
       {children}
 

@@ -80,6 +80,12 @@ export interface DrawerContent {
   eyebrow: string;
   title: string;
   description: string;
+  /*
+    Overrides the illustrative-values banner text. A drawer often qualifies
+    something narrower than the page does — session rules, attribution, scale —
+    and saying which is more useful than repeating the page-level notice.
+  */
+  bannerMessage?: string;
   contextRows: ContextRow[];
   // Short qualifying statements rendered as footnotes, in order.
   notes: string[];

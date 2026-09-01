@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   ArrowSync24Regular,
   DataTrending24Regular,
@@ -22,8 +23,13 @@ import { MetricCard } from "@/components/shared/dashboard/MetricCard";
 import { PositiveNegativeBar } from "@/components/shared/charts/PositiveNegativeBar";
 import CostByBusinessUnitChart from "@/components/charts/CostByBusinessUnitChart";
 import { useExecutiveMainView } from "@/hooks/useExecutiveDashboard";
+import DashboardSectionAction from "@/components/shared/dashboard/DashboardSectionAction";
+import DetailDrawer from "@/components/shared/dashboard/DetailDrawer";
+import MetricList from "@/components/shared/dashboard/MetricList";
+import HorizontalBarList from "@/components/shared/charts/HorizontalBarList";
+import MetricContextTable from "@/components/shared/dashboard/MetricContextTable";
 import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
-import type { Series } from "@/types/dashboard";
+import type { MetricRow, Series } from "@/types/dashboard";
 import type { ExecutivePulseCard } from "@/types/executiveDashboard";
 
 /*
@@ -77,6 +83,48 @@ const formatDay = (value: string) =>
 const formatThousands = (value: number) => `${Math.round(value / 1000)}K`;
 
 /*
+  The four clickable sections. Each opens one drawer for the whole section;
+  individual pulse cards and individual cost bars are not separate targets.
+*/
+type DrawerKey =
+  | "pulse"
+  | "sessionAndQueryVolume"
+  | "costByBusinessUnit"
+  | "safetyAndRisk";
+
+// Rows of label and value, used for the smaller blocks inside a drawer.
+const toRows = (rows: MetricRow[]) =>
+  rows.map((row) => ({
+    id: row.id,
+    label: row.label,
+    value: row.pendingState ? (
+      <PendingStateValue state={row.pendingState} />
+    ) : (
+      row.value ?? ""
+    ),
+  }));
+
+function DrawerSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <h4
+        className="mb-2 text-sm font-semibold"
+        style={{ color: "var(--color-text-primary)" }}
+      >
+        {title}
+      </h4>
+      {children}
+    </section>
+  );
+}
+
+/*
   A card's primary content: the value with its unit, or the approved pending
   state. The suffix is typeset smaller so the number stays the focus.
 */
@@ -116,12 +164,17 @@ export default function ExecutiveDashboard() {
   const project = useDashboardFiltersStore((state) => state.project);
   const channel = useDashboardFiltersStore((state) => state.channel);
 
+  const [openDrawer, setOpenDrawer] = useState<DrawerKey | null>(null);
+  const closeDrawer = () => setOpenDrawer(null);
+
   const { mainViewData: data } = useExecutiveMainView({
     period,
     businessUnit,
     project,
     channel,
   });
+
+  const drawers = data?.drawers;
 
   /*
     Sessions and queries are different populations at different magnitudes, so
@@ -152,6 +205,12 @@ export default function ExecutiveDashboard() {
           template="single"
           title="Executive pulse"
           className="xl:col-span-12"
+          actions={
+            <DashboardSectionAction
+              onClick={() => setOpenDrawer("pulse")}
+              label="View executive pulse details"
+            />
+          }
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
             {(data?.pulse ?? []).map((card) => (
@@ -187,6 +246,12 @@ export default function ExecutiveDashboard() {
           template="single"
           title="Session & Query Volume (Session Length / Query per Session)"
           className="xl:col-span-7"
+          actions={
+            <DashboardSectionAction
+              onClick={() => setOpenDrawer("sessionAndQueryVolume")}
+              label="View engagement details"
+            />
+          }
         >
           <DashboardLineChart
             series={volumeSeries}
@@ -211,6 +276,12 @@ export default function ExecutiveDashboard() {
           template="single"
           title="Cost by BU and Project"
           className="xl:col-span-5"
+          actions={
+            <DashboardSectionAction
+              onClick={() => setOpenDrawer("costByBusinessUnit")}
+              label="View cost allocation details"
+            />
+          }
         >
           <CostByBusinessUnitChart data={data?.costByBusinessUnit.items ?? []} />
         </DashboardPanel>
@@ -219,6 +290,12 @@ export default function ExecutiveDashboard() {
           template="single"
           title="Safety &amp; risk posture"
           className="xl:col-span-12"
+          actions={
+            <DashboardSectionAction
+              onClick={() => setOpenDrawer("safetyAndRisk")}
+              label="View safety and risk details"
+            />
+          }
         >
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
             {(data?.safetyAndRisk ?? []).map((card) => (
@@ -235,6 +312,168 @@ export default function ExecutiveDashboard() {
           </div>
         </DashboardPanel>
       </DashboardGrid>
+
+      {/* Detail drawers. One per section; a drawer never merges two sections. */}
+
+      <DetailDrawer
+        open={openDrawer === "pulse"}
+        onClose={closeDrawer}
+        content={drawers?.pulse}
+        size="wide"
+      >
+        <DrawerSection title="End-to-End Latency">
+          <MetricList items={toRows(drawers?.pulse.latency ?? [])} />
+        </DrawerSection>
+
+        <DrawerSection title="API response-status distribution">
+          <HorizontalBarList
+            values={(drawers?.pulse.apiStatus ?? []).map((row) => ({
+              label: row.label,
+              value: row.sharePct,
+            }))}
+            rowsPerColumn={3}
+          />
+        </DrawerSection>
+
+        <DrawerSection title="User Feedback">
+          <MetricList items={toRows(drawers?.pulse.feedback ?? [])} />
+        </DrawerSection>
+
+        {/*
+          Handoffs, not links: these two signals are owned by their own
+          sections, and no navigation target is approved yet.
+        */}
+        <DrawerSection title="Detail lives in these sections">
+          <MetricList
+            items={(drawers?.pulse.handoffs ?? []).map((handoff) => ({
+              id: handoff.id,
+              label: handoff.label,
+              value: handoff.destination,
+            }))}
+          />
+        </DrawerSection>
+      </DetailDrawer>
+
+      <DetailDrawer
+        open={openDrawer === "sessionAndQueryVolume"}
+        onClose={closeDrawer}
+        content={drawers?.sessionAndQueryVolume}
+        size="wide"
+      >
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {(drawers?.sessionAndQueryVolume.summary ?? []).map((row) => (
+            <MetricCard
+              key={row.id}
+              title={row.label}
+              primaryContent={row.value}
+              className="rounded-lg border"
+              minHeight="min-h-0"
+              titleClassName="text-xs font-medium"
+              valueClassName="text-xl font-semibold"
+            />
+          ))}
+        </div>
+
+        <DrawerSection title="Engagement by channel">
+          <MetricContextTable
+            columns={[
+              { id: "channel", header: "Channel" },
+              { id: "queries", header: "Queries" },
+              { id: "sessions", header: "Sessions" },
+              { id: "share", header: "Share of queries" },
+            ]}
+            rows={(drawers?.sessionAndQueryVolume.channels ?? []).map((row) => ({
+              id: row.id,
+              cells: {
+                channel: row.label,
+                queries: row.queries,
+                sessions: row.sessions,
+                share: `${row.sharePct}%`,
+              },
+            }))}
+            caption="Engagement by entry channel"
+          />
+        </DrawerSection>
+
+        <DrawerSection title="Session depth distribution">
+          <HorizontalBarList
+            values={(drawers?.sessionAndQueryVolume.sessionDepth ?? []).map(
+              (row) => ({ label: row.label, value: row.sharePct }),
+            )}
+            rowsPerColumn={4}
+          />
+        </DrawerSection>
+
+        <DrawerSection title="Conversation context">
+          <MetricList
+            items={toRows(drawers?.sessionAndQueryVolume.conversationContext ?? [])}
+          />
+        </DrawerSection>
+      </DetailDrawer>
+
+      <DetailDrawer
+        open={openDrawer === "costByBusinessUnit"}
+        onClose={closeDrawer}
+        content={drawers?.costByBusinessUnit}
+        size="wide"
+      >
+        <div className="grid grid-cols-2 gap-3">
+          {(drawers?.costByBusinessUnit.portfolio ?? []).map((row) => (
+            <MetricCard
+              key={row.id}
+              title={row.label}
+              primaryContent={row.value}
+              className="rounded-lg border"
+              minHeight="min-h-0"
+              titleClassName="text-xs font-medium"
+              valueClassName="text-xl font-semibold"
+            />
+          ))}
+        </div>
+
+        {/* Descending allocation. Each project stays a subset of its parent. */}
+        <DrawerSection title="Allocation by business unit">
+          <MetricContextTable
+            columns={[
+              { id: "unit", header: "Business unit" },
+              { id: "cost", header: "Token cost" },
+              { id: "project", header: "Displayed project" },
+              { id: "projectCost", header: "Project subset" },
+            ]}
+            rows={[...(drawers?.costByBusinessUnit.allocation ?? data?.costByBusinessUnit.items ?? [])]
+              .sort((a, b) => b.totalCost - a.totalCost)
+              .map((item) => ({
+                id: item.name,
+                cells: {
+                  unit: item.name,
+                  cost: `$${item.totalCost.toFixed(2)}K`,
+                  project: item.topProjectName,
+                  projectCost: `$${item.topProjectCost.toFixed(2)}K`,
+                },
+              }))}
+            caption="Attributed token cost by business unit"
+          />
+        </DrawerSection>
+
+        <DrawerSection title="Separate signal">
+          <MetricList
+            items={toRows([drawers?.costByBusinessUnit.infrastructureCost].filter(
+              (row): row is MetricRow => Boolean(row),
+            ))}
+          />
+        </DrawerSection>
+      </DetailDrawer>
+
+      <DetailDrawer
+        open={openDrawer === "safetyAndRisk"}
+        onClose={closeDrawer}
+        content={drawers?.safetyAndRisk}
+        size="wide"
+      >
+        <DrawerSection title="What each signal reports">
+          <MetricList items={toRows(drawers?.safetyAndRisk.signals ?? [])} />
+        </DrawerSection>
+      </DetailDrawer>
     </DashboardPage>
   );
 }

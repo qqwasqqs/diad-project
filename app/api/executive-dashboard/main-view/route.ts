@@ -33,6 +33,7 @@ import type { DashboardFilters, MetricRow, Series } from "@/types/dashboard";
 import type {
   ExecutiveCostItem,
   ExecutiveDashboardPayload,
+  ExecutiveDrawers,
   ExecutivePulseCard,
 } from "@/types/executiveDashboard";
 
@@ -68,6 +69,7 @@ interface MockPayload {
     infrastructureCost: MetricRow;
   };
   safetyAndRisk: MockPulseCard[];
+  drawers: ExecutiveDrawers;
 }
 
 function formatPulseCard(
@@ -149,6 +151,13 @@ function applyFilters(
     safetyAndRisk: mock.safetyAndRisk.map((card) =>
       formatPulseCard(card, factor),
     ),
+
+    /*
+      Drawer content is provenance and readiness text, not measurements, so it
+      passes through unscoped. The pending states it carries stay pending under
+      every selection.
+    */
+    drawers: mock.drawers,
   };
 }
 

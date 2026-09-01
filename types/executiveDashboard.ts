@@ -13,7 +13,7 @@
   `types/dashboard.ts`.
 */
 
-import type { MetricRow, Series } from "./dashboard";
+import type { DrawerContent, MetricRow, Series } from "./dashboard";
 
 /*
   A card in the Executive pulse row.
@@ -78,4 +78,68 @@ export interface ExecutiveDashboardPayload {
   };
 
   safetyAndRisk: ExecutivePulseCard[];
+
+  drawers: ExecutiveDrawers;
+}
+
+/*
+  Detail drawers.
+
+  Each of the four main-view sections is one click target opening one drawer.
+  Individual pulse cards and individual cost bars are not separate targets.
+*/
+
+/*
+  Engagement is neutral evidence of reach and composition. It is not a
+  satisfaction, completion, health, or business-outcome claim, and this drawer
+  deliberately does not repeat the main view's sessions-versus-queries trend.
+*/
+export interface ExecutiveEngagementDrawer extends DrawerContent {
+  summary: MetricRow[];
+  channels: {
+    id: string;
+    label: string;
+    queries: string;
+    sessions: string;
+    sharePct: number;
+  }[];
+  sessionDepth: { id: string; label: string; sessions: string; sharePct: number }[];
+  conversationContext: MetricRow[];
+}
+
+/*
+  Consolidated for the whole pulse section. Session & Query Volume and Cost per
+  Request stay summary-only here and hand off to the sections that own them,
+  rather than growing a competing trend or allocation view.
+*/
+export interface ExecutivePulseDrawer extends DrawerContent {
+  latency: MetricRow[];
+  apiStatus: { id: string; label: string; sharePct: number }[];
+  feedback: MetricRow[];
+  handoffs: { id: string; label: string; destination: string }[];
+}
+
+/*
+  Portfolio AI token cost. Never labelled total cost, and never inclusive of
+  infrastructure cost, which has no approved source.
+*/
+export interface ExecutiveCostDrawer extends DrawerContent {
+  portfolio: MetricRow[];
+  allocation: ExecutiveCostItem[];
+  infrastructureCost: MetricRow;
+}
+
+/*
+  One drawer for the whole section rather than one per card. Reports what each
+  signal can support; it is not an incident, breach, or remediation view.
+*/
+export interface ExecutiveSafetyDrawer extends DrawerContent {
+  signals: MetricRow[];
+}
+
+export interface ExecutiveDrawers {
+  pulse: ExecutivePulseDrawer;
+  sessionAndQueryVolume: ExecutiveEngagementDrawer;
+  costByBusinessUnit: ExecutiveCostDrawer;
+  safetyAndRisk: ExecutiveSafetyDrawer;
 }
