@@ -1,7 +1,7 @@
 import { CSSProperties, ReactNode } from "react";
 import { Text } from "@fluentui/react-components";
 
-export type StatusCalloutVariant = "warning" | "success" | "danger";
+export type StatusCalloutVariant = "warning" | "success" | "danger" | "neutral";
 
 const cn = (...classes: Array<string | false | null | undefined>) =>
   classes.filter(Boolean).join(" ");
@@ -24,6 +24,10 @@ const variantStyles: Record<
   danger: {
     iconBackground: { backgroundColor: "var(--color-danger-bg)" },
     iconColor: { color: "var(--color-danger-icon)" },
+  },
+  neutral: {
+    iconBackground: { backgroundColor: "var(--color-neutral-background-3)" },
+    iconColor: { color: "var(--color-chart-axis)" },
   },
 };
 

@@ -16,6 +16,9 @@ import ProductOwnerChannelMixDrawer, {
 import ProductOwnerExperienceQualityDrawer, {
   type ProductOwnerExperienceQualityData,
 } from "@/components/shared/dashboard/drawers/ProductOwnerExperienceQualityDrawer";
+import ProductOwnerTrustEvidenceDrawer, {
+  type ProductOwnerTrustEvidenceData,
+} from "@/components/shared/dashboard/drawers/ProductOwnerTrustEvidenceDrawer";
 import ProductOwnerProductExperiencePulseDrawer, {
   type ProductExperiencePulseData,
 } from "@/components/shared/dashboard/drawers/ProductOwnerProductExperiencePulseDrawer";
@@ -42,6 +45,7 @@ import adoptionAndEngagementData from "@/public/mocks/new-pages/product-owner-ad
 import productExperiencePulseData from "@/public/mocks/new-pages/product-owner-product-experience-pulse.json";
 import channelMixData from "@/public/mocks/new-pages/product-owner-channel-mix.json";
 import experienceQualityData from "@/public/mocks/new-pages/product-owner-experience-quality.json";
+import trustEvidenceData from "@/public/mocks/new-pages/product-owner-trust-evidence.json";
 
 const channelMixValues = [
   { label: "Web", value: 52 },
@@ -260,6 +264,7 @@ export default function ProductOwnerDashboard() {
   const [channelMixOpen, setChannelMixOpen] = useState(false);
   const [productExperiencePulseOpen, setProductExperiencePulseOpen] = useState(false);
   const [experienceQualityOpen, setExperienceQualityOpen] = useState(false);
+  const [trustEvidenceOpen, setTrustEvidenceOpen] = useState(false);
 
   return (
     <>
@@ -403,6 +408,12 @@ export default function ProductOwnerDashboard() {
           title="Trust and measurement readiness"
           sections={trustReadinessSections}
           className="xl:col-span-2"
+          actions={
+            <DashboardSectionAction
+              onClick={() => setTrustEvidenceOpen(true)}
+              label="View trust evidence decision guide"
+            />
+          }
         >
           {trustReadinessCallouts.map(({ id, icon, title, primaryContent, variant }) => (
             <StatusCallout
@@ -437,6 +448,11 @@ export default function ProductOwnerDashboard() {
       open={experienceQualityOpen}
       onClose={() => setExperienceQualityOpen(false)}
       data={experienceQualityData as ProductOwnerExperienceQualityData}
+    />
+    <ProductOwnerTrustEvidenceDrawer
+      open={trustEvidenceOpen}
+      onClose={() => setTrustEvidenceOpen(false)}
+      data={trustEvidenceData as ProductOwnerTrustEvidenceData}
     />
     </>
   );

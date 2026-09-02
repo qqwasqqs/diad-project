@@ -1,0 +1,41 @@
+{
+  "scope": ["Last 30 days", "All business units", "All projects", "All channels"],
+  "decisionReadiness": {
+    "label": "DECISION READINESS PENDING",
+    "description": "Evidence is not ready to guide a product decision"
+  },
+  "signalInterpretation": [
+    {
+      "id": "safety-evaluators",
+      "signal": "Safety Evaluators",
+      "canInform": "Approved aggregate definition",
+      "cannotEstablish": "Safety verdict or release decision"
+    },
+    {
+      "id": "mlflow-safety-score",
+      "signal": "MLflow Safety Score",
+      "canInform": "Neutral evaluator signal · 0–1",
+      "cannotEstablish": "Satisfaction, quality, or risk status"
+    },
+    {
+      "id": "pii-leakage",
+      "signal": "PII Leakage (Agent Only)",
+      "canInform": "Agent-evaluator availability",
+      "cannotEstablish": "Exposure or no-leakage conclusion"
+    },
+    {
+      "id": "upia",
+      "signal": "UPIA",
+      "canInform": "Security-test measure readiness",
+      "cannotEstablish": "Production attack rate or vulnerability conclusion"
+    }
+  ],
+  "decisionPath": [
+    { "id": "definition-scale", "label": "Definition & scale", "icon": "definition", "status": "PENDING" },
+    { "id": "coverage-attribution", "label": "Coverage & attribution", "icon": "coverage", "status": "PENDING" },
+    { "id": "customer-outcome", "label": "Customer-outcome connection", "icon": "outcome", "status": "PENDING" },
+    { "id": "decision-rule", "label": "Approved decision rule", "icon": "decision", "status": "PENDING" }
+  ],
+  "decisionBoundary": "DO NOT USE THESE SIGNALS TO GATE ADOPTION, ROLLOUT, RELEASE, OR USER-FACING MESSAGING",
+  "footer": "NO SECURITY VERDICT OR PRODUCT DECISION IS DERIVED"
+}
