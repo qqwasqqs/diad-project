@@ -10,7 +10,12 @@ import { MetricCard } from "@/components/shared/dashboard/MetricCard";
 import ProductOwnerAdoptionAndEngagementDrawer, {
   type ProductOwnerAdoptionAndEngagementData,
 } from "@/components/shared/dashboard/drawers/ProductOwnerAdoptionAndEngagementDrawer";
-import ProductOwnerChannelMixDrawer from "@/components/shared/dashboard/drawers/ProductOwnerChannelMixDrawer";
+import ProductOwnerChannelMixDrawer, {
+  type ProductOwnerChannelMixData,
+} from "@/components/shared/dashboard/drawers/ProductOwnerChannelMixDrawer";
+import ProductOwnerExperienceQualityDrawer, {
+  type ProductOwnerExperienceQualityData,
+} from "@/components/shared/dashboard/drawers/ProductOwnerExperienceQualityDrawer";
 import ProductOwnerProductExperiencePulseDrawer, {
   type ProductExperiencePulseData,
 } from "@/components/shared/dashboard/drawers/ProductOwnerProductExperiencePulseDrawer";
@@ -35,19 +40,14 @@ import {
 } from "@fluentui/react-icons";
 import adoptionAndEngagementData from "@/public/mocks/new-pages/product-owner-adoption-and-engagement.json";
 import productExperiencePulseData from "@/public/mocks/new-pages/product-owner-product-experience-pulse.json";
+import channelMixData from "@/public/mocks/new-pages/product-owner-channel-mix.json";
+import experienceQualityData from "@/public/mocks/new-pages/product-owner-experience-quality.json";
 
 const channelMixValues = [
   { label: "Web", value: 52 },
   { label: "Teams", value: 28 },
   { label: "Mobile", value: 14 },
   { label: "API", value: 6 },
-];
-
-const channelMixComparison = [
-  { label: "Web", queriesPerSession: 4.8, avgSession: "8.6 min" },
-  { label: "Teams", queriesPerSession: 4.2, avgSession: "7.9 min" },
-  { label: "Mobile", queriesPerSession: 3.7, avgSession: "6.4 min" },
-  { label: "API", queriesPerSession: 5.1, avgSession: "9.1 min" },
 ];
 
 const productExperiencePulseSections = [
@@ -259,6 +259,7 @@ export default function ProductOwnerDashboard() {
   const [adoptionAndEngagementOpen, setAdoptionAndEngagementOpen] = useState(false);
   const [channelMixOpen, setChannelMixOpen] = useState(false);
   const [productExperiencePulseOpen, setProductExperiencePulseOpen] = useState(false);
+  const [experienceQualityOpen, setExperienceQualityOpen] = useState(false);
 
   return (
     <>
@@ -375,7 +376,14 @@ export default function ProductOwnerDashboard() {
           </div>
         </DashboardPanel>
 
-        <DashboardPanel template="single" title="Experience and response quality">
+        <DashboardPanel template="single" title="Experience and response quality"
+          actions={
+            <DashboardSectionAction
+              onClick={() => setExperienceQualityOpen(true)}
+              label="View experience quality evidence details"
+            />
+          }
+        >
           <DashboardLineChart
             height={300}
             supportingStatsVariant="productOwner"
@@ -413,8 +421,7 @@ export default function ProductOwnerDashboard() {
     <ProductOwnerChannelMixDrawer
       open={channelMixOpen}
       onClose={() => setChannelMixOpen(false)}
-      values={channelMixValues}
-      comparison={channelMixComparison}
+      data={channelMixData as ProductOwnerChannelMixData}
     />
     <ProductOwnerAdoptionAndEngagementDrawer
       open={adoptionAndEngagementOpen}
@@ -425,6 +432,11 @@ export default function ProductOwnerDashboard() {
       open={productExperiencePulseOpen}
       onClose={() => setProductExperiencePulseOpen(false)}
       data={productExperiencePulseData as ProductExperiencePulseData}
+    />
+    <ProductOwnerExperienceQualityDrawer
+      open={experienceQualityOpen}
+      onClose={() => setExperienceQualityOpen(false)}
+      data={experienceQualityData as ProductOwnerExperienceQualityData}
     />
     </>
   );

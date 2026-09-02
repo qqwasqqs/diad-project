@@ -1,113 +1,222 @@
-import DashboardDrawer from "../DashboardDrawer";
+"use client";
 
-type ChannelMixValue = {
-  label: string;
-  value: number;
-};
+import StackedAreaChart, {
+  type StackedAreaPoint,
+  type StackedAreaSeries,
+} from "@/components/shared/charts/StackedAreaChart";
+import DashboardDrawer from "@/components/shared/dashboard/DashboardDrawer";
+import IllustrativeValuesBanner from "@/components/shared/dashboard/IllustrativeValuesBanner";
+import MetricContextTable, {
+  type MetricContextRow,
+} from "@/components/shared/dashboard/MetricContextTable";
+import MetricList, {
+  type MetricListItem,
+} from "@/components/shared/dashboard/MetricList";
+import PanelFootnote from "@/components/shared/dashboard/PanelFootnote";
 
-type ChannelMixComparisonItem = {
-  label: string;
+interface EngagementByChannelItem {
+  id: string;
+  channel: string;
   queriesPerSession: number;
-  avgSession: string;
-};
+  avgSessionDuration: string;
+}
 
-type ProductOwnerChannelMixDrawerProps = {
+interface AttributionReadinessItem {
+  id: string;
+  label: string;
+  status: "PENDING";
+}
+
+interface CalculationContextItem {
+  id: string;
+  signal: string;
+  proposedCalculation: string;
+  coverage: "PENDING";
+}
+
+export interface ProductOwnerChannelMixData {
+  scope: string[];
+  shareEvolutionSeries: StackedAreaSeries[];
+  shareEvolutionPoints: StackedAreaPoint[];
+  engagementByChannel: EngagementByChannelItem[];
+  attributionReadiness: AttributionReadinessItem[];
+  calculationContext: CalculationContextItem[];
+}
+
+interface ProductOwnerChannelMixDrawerProps {
   open: boolean;
   onClose: () => void;
-  values: ChannelMixValue[];
-  comparison: ChannelMixComparisonItem[];
-};
+  data: ProductOwnerChannelMixData;
+}
+
+function StatusLabel({
+  children,
+  variant = "pending",
+}: {
+  children: string;
+  variant?: "pending" | "proposed";
+}) {
+  return (
+    <span
+      className="text-[10px] font-semibold uppercase tracking-[0.02em]"
+      style={{
+        color:
+          variant === "proposed"
+            ? "var(--color-success-content)"
+            : "var(--color-warning-content)",
+      }}
+    >
+      {children}
+    </span>
+  );
+}
 
 export default function ProductOwnerChannelMixDrawer({
   open,
   onClose,
-  values,
-  comparison,
+  data,
 }: ProductOwnerChannelMixDrawerProps) {
+  const engagementColumns = [
+    { id: "channel", header: "Channel" },
+    { id: "queriesPerSession", header: "Queries / session" },
+    { id: "avgSessionDuration", header: "Avg session duration" },
+  ];
+
+  const engagementRows: MetricContextRow[] = data.engagementByChannel.map(
+    (item) => ({
+      id: item.id,
+      cells: {
+        channel: item.channel,
+        queriesPerSession: item.queriesPerSession,
+        avgSessionDuration: item.avgSessionDuration,
+      },
+    })
+  );
+
+  const attributionItems: MetricListItem[] = data.attributionReadiness.map(
+    (item) => ({
+      id: item.id,
+      label: item.label,
+      value: <StatusLabel>{item.status}</StatusLabel>,
+    })
+  );
+
+  const calculationRows: MetricContextRow[] = data.calculationContext.map(
+    (item) => ({
+      id: item.id,
+      cells: {
+        signal: item.signal,
+        calculation: item.proposedCalculation,
+        coverage: <StatusLabel>{item.coverage}</StatusLabel>,
+      },
+    })
+  );
+
   return (
     <DashboardDrawer
       open={open}
-      title="Channel engagement patterns"
       onClose={onClose}
+      size="wide"
+      eyebrow="CHANNEL ENGAGEMENT PATTERNS DETAILS"
+      title="Channel engagement patterns"
+      description="Entry-channel change and observed session context"
     >
-      <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-800">
-        Illustrative values
-      </div>
-
-      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-        <div className="mb-3 text-xs font-semibold text-slate-700">
-          Channel share evolution
+      <div className="space-y-3 pb-1">
+        <div className="text-xs font-medium text-slate-600">
+          {data.scope.join(" · ")}
         </div>
 
-        <div className="space-y-2.5 text-xs text-slate-600">
-          {values.map((item) => (
-            <div
-              key={item.label}
-              className="grid grid-cols-[34px_minmax(0,1fr)_32px] items-center gap-2"
-            >
-              <span className="font-medium text-slate-700">{item.label}</span>
-              <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-                <div
-                  className="h-full rounded-full bg-blue-600"
-                  style={{ width: `${item.value}%` }}
-                />
-              </div>
-              <span className="text-right font-medium text-slate-700">
-                {item.value}%
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
+        <IllustrativeValuesBanner className="px-3 py-2" />
 
-      <div className="rounded-xl border border-slate-200 bg-white p-3">
-        <div className="text-xs font-semibold text-slate-700">
-          Engagement by entry channel
-        </div>
+        <section
+          aria-labelledby="channel-share-evolution-title"
+          className="rounded-lg border border-slate-200 bg-white p-3"
+        >
+          <h3
+            id="channel-share-evolution-title"
+            className="text-xs font-semibold text-slate-800"
+          >
+            Channel share evolution
+          </h3>
+          <p className="text-[10px] text-slate-600">
+            Illustrative daily classified-query share
+          </p>
 
-        <div className="mt-3 rounded-lg border border-slate-200">
-          <div className="grid grid-cols-[1.2fr_1fr_1fr] border-b border-slate-200 bg-slate-50 px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
-            <span>Channel</span>
-            <span>Queries / session</span>
-            <span>Avg session</span>
+          <div className="mt-2">
+            <StackedAreaChart
+              series={data.shareEvolutionSeries}
+              points={data.shareEvolutionPoints}
+              axisLabel="Share of classified queries"
+              height={200}
+            />
           </div>
+        </section>
 
-          {comparison.map((item) => (
-            <div
-              key={item.label}
-              className="grid grid-cols-[1.2fr_1fr_1fr] items-center border-b border-slate-200 px-2 py-2 text-xs text-slate-700 last:border-b-0"
+        <div className="grid gap-3 md:grid-cols-2">
+          <section
+            aria-labelledby="engagement-by-channel-title"
+            className="rounded-lg border border-slate-200 bg-white p-3"
+          >
+            <h3
+              id="engagement-by-channel-title"
+              className="text-xs font-semibold text-slate-800"
             >
-              <span>{item.label}</span>
-              <span>{item.queriesPerSession}</span>
-              <span>{item.avgSession}</span>
+              Engagement by entry channel
+            </h3>
+            <MetricContextTable
+              className="mt-2"
+              columns={engagementColumns}
+              rows={engagementRows}
+              caption="Engagement by entry channel"
+            />
+            <div className="mt-2 text-center">
+              <StatusLabel>PROPOSED AGGREGATION</StatusLabel>
             </div>
-          ))}
-        </div>
-      </div>
+          </section>
 
-      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-        <div className="text-xs font-semibold text-slate-700">
-          Calculation context
+          <section
+            aria-labelledby="channel-attribution-readiness-title"
+            className="rounded-lg border border-slate-200 bg-white p-3"
+          >
+            <h3
+              id="channel-attribution-readiness-title"
+              className="text-xs font-semibold text-slate-800"
+            >
+              Channel attribution readiness
+            </h3>
+            <MetricList items={attributionItems} className="mt-2" />
+            <p className="mt-1 text-[10px] text-slate-600">
+              Multi-channel session rule not supplied
+            </p>
+          </section>
         </div>
 
-        <ul className="mt-2 space-y-2 text-xs text-slate-600">
-          <li>
-            <span className="font-medium text-slate-700">Share evolution:</span>{" "}
-            classified queries by entry channel and day.
-          </li>
-          <li>
-            <span className="font-medium text-slate-700">Queries / session:</span>{" "}
-            distinct query key per assigned channel session.
-          </li>
-          <li>
-            <span className="font-medium text-slate-700">Session duration:</span>{" "}
-            max minus min timestamp per approved session rule.
-          </li>
-          <li>
-            <span className="font-medium text-slate-700">Channel assignment:</span>{" "}
-            pending validation for entry-channel mapping.
-          </li>
-        </ul>
+        <section
+          aria-labelledby="channel-calculation-context-title"
+          className="rounded-lg border border-slate-200 bg-white p-3"
+        >
+          <h3
+            id="channel-calculation-context-title"
+            className="text-xs font-semibold text-slate-800"
+          >
+            Calculation context
+          </h3>
+          <MetricContextTable
+            className="mt-2"
+            columns={[
+              { id: "signal", header: "Signal" },
+              { id: "calculation", header: "Proposed calculation" },
+              { id: "coverage", header: "Coverage" },
+            ]}
+            rows={calculationRows}
+            caption="Channel mix calculation context"
+          />
+        </section>
+
+        <PanelFootnote className="pt-0">
+          Channel patterns do not establish feature adoption, satisfaction, or
+          causation
+        </PanelFootnote>
       </div>
     </DashboardDrawer>
   );

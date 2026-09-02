@@ -1,0 +1,68 @@
+{
+  "scope": ["Last 30 days", "All business units", "All projects", "All channels"],
+  "evaluatorCoverage": [
+    { "id": "groundedness", "label": "Groundedness", "status": "COVERAGE PENDING" },
+    { "id": "relevance-quality", "label": "Relevance Quality", "status": "COVERAGE PENDING" },
+    { "id": "intent-resolution", "label": "Intent Resolution", "status": "COVERAGE PENDING" },
+    { "id": "retrieval-quality", "label": "Retrieval Quality", "status": "COVERAGE PENDING" },
+    { "id": "task-adherence", "label": "Task Adherence", "status": "COVERAGE PENDING" }
+  ],
+  "scoreDefinitionMap": [
+    {
+      "id": "groundedness",
+      "signal": "Groundedness",
+      "calculation": "AVG score",
+      "scale": "1–5",
+      "recordGrain": "PENDING"
+    },
+    {
+      "id": "relevance-quality",
+      "signal": "Relevance Quality",
+      "calculation": "AVG score",
+      "scale": "1–5",
+      "recordGrain": "PENDING"
+    },
+    {
+      "id": "intent-resolution",
+      "signal": "Intent Resolution",
+      "calculation": "AVG score",
+      "scale": "SCALE PENDING",
+      "recordGrain": "PENDING"
+    },
+    {
+      "id": "retrieval-quality",
+      "signal": "Retrieval Quality",
+      "calculation": "AVG score",
+      "scale": "1–5",
+      "recordGrain": "PENDING"
+    },
+    {
+      "id": "task-adherence",
+      "signal": "Task Adherence",
+      "calculation": "AVG score",
+      "scale": "1–5",
+      "recordGrain": "PENDING"
+    }
+  ],
+  "comparabilityGuardrails": [
+    { "id": "confirmed-signals-separate", "text": "Confirmed 1–5 signals stay separate" },
+    { "id": "intent-resolution-scale", "text": "Intent Resolution scale requires approval" },
+    { "id": "composite-score-not-authorized", "text": "Composite quality score not authorized" }
+  ],
+  "experienceLinkEvidence": [
+    {
+      "id": "feedback-quality-correlation",
+      "label": "Feedback ↔ quality correlation",
+      "status": "PENDING",
+      "note": "Requires approved request correlation and feedback timestamp"
+    },
+    {
+      "id": "latency-quality-correlation",
+      "label": "Latency ↔ quality correlation",
+      "status": "PENDING",
+      "note": "Requires a shared request population and time alignment"
+    }
+  ],
+  "contextOnly": "CONTEXT ONLY — 84% positive · P95 1.20 s · NO CAUSAL CLAIM",
+  "bottomNote": "EVALUATOR COVERAGE AND COMPARABILITY PENDING"
+}
