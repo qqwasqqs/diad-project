@@ -70,7 +70,7 @@ const useStyles = makeStyles({
     value: {
         fontSize: "12px",
         lineHeight: "16px",
-        color: "#6b7280",
+        color: "var(--color-chart-axis)",
         textAlign: "right",
         fontWeight: 500,
         whiteSpace: "nowrap",
