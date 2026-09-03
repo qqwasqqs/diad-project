@@ -254,14 +254,15 @@ Path: `/home/executive-dashboard`
 
 Purpose:
 
-- Shows executive summary metrics for data quality, KPIs, and pipelines
+- Shows the AI Observability executive view: performance, adoption, cost, and
+  safety and risk posture
 
 Main files:
 
 - `app/home/executive-dashboard/page.tsx`
 - `hooks/useExecutiveDashboard.ts`
 - `lib/services/executiveDashboardService.ts`
-- `app/api/executive-dashboard/*`
+- `app/api/executive-dashboard/main-view/route.ts`
 
 ### Data Quality Dashboard
 
@@ -661,7 +662,6 @@ Core files:
 
 - `lib/services/splunkReportService.ts`
 - `app/api/pipelines-dashboard/*`
-- `app/api/executive-dashboard/pipeline-highlights/route.ts`
 
 This means the pipeline dashboard depends on:
 
