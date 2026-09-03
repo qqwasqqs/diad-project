@@ -3,9 +3,11 @@
 import { useState } from "react";
 import {
   ArrowSync24Regular,
+  Clock24Regular,
   DataTrending24Regular,
   LockClosed24Regular,
   Money24Regular,
+  Person24Regular,
   Scales24Regular,
   ShieldCheckmark24Regular,
   ThumbLike24Regular,
@@ -49,6 +51,25 @@ const SERIES_COLORS = [
   "var(--color-chart-series-1)",
   "var(--color-chart-series-2)",
 ];
+
+/*
+  The icon and colour carried by each supporting value below the volume chart.
+  A value the payload adds later falls through to plain body text rather than
+  borrowing another metric's colour.
+*/
+const VOLUME_STAT_PRESENTATION: Record<
+  string,
+  { icon: React.ReactNode; color: string }
+> = {
+  "queries-per-session": {
+    icon: <Person24Regular aria-hidden="true" />,
+    color: SERIES_COLORS[0],
+  },
+  "avg-session-minutes": {
+    icon: <Clock24Regular aria-hidden="true" />,
+    color: SERIES_COLORS[1],
+  },
+};
 
 const PULSE_ICONS: Record<string, React.ReactNode> = {
   "end-to-end-latency": (
@@ -237,6 +258,10 @@ export default function ExecutiveDashboard() {
                 id: stat.id,
                 value: stat.value,
                 text: stat.label,
+                icon: VOLUME_STAT_PRESENTATION[stat.id]?.icon,
+                iconColor: VOLUME_STAT_PRESENTATION[stat.id]?.color,
+                valueColor: VOLUME_STAT_PRESENTATION[stat.id]?.color,
+                textColor: VOLUME_STAT_PRESENTATION[stat.id]?.color,
               }),
             )}
           />
@@ -248,6 +273,7 @@ export default function ExecutiveDashboard() {
           template="single"
           title="Cost by BU and Project"
           className="xl:col-span-5"
+          fillHeight
           actions={
             <DashboardSectionAction
               onClick={() => setOpenDrawer("costByBusinessUnit")}
