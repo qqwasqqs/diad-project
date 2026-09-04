@@ -10,10 +10,6 @@
   be developed without external systems. Outside local design mode the real
   source is required: the route fails loudly rather than serving illustrative
   numbers that would be indistinguishable from measured ones.
-
-  Note: the sibling `highlights` and `pipeline-highlights` routes serve the Data
-  Integrity dashboards. This route is the AI Observability Executive view; they
-  share a path segment but not a data source.
 */
 
 import { promises as fs } from "fs";
