@@ -1,5 +1,4 @@
 {
-  "scope": ["Last 30 days", "All business units", "All projects", "All channels"],
   "decisionReadiness": {
     "label": "DECISION READINESS PENDING",
     "description": "Evidence is not ready to guide a product decision"

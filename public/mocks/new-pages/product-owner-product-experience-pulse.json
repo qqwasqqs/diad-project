@@ -1,5 +1,4 @@
 {
-  "scope": ["Last 30 days", "All business units", "All projects", "All channels"],
   "engagementSeries": [
     {
       "id": "sessions",

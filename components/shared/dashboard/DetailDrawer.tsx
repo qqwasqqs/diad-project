@@ -11,6 +11,7 @@ import MetricContextTable, {
 import PanelFootnote from "./PanelFootnote";
 import PendingStateValue from "./PendingStateValue";
 import type { DrawerContent } from "@/types/dashboard";
+import type { DashboardFilterState } from "./DashboardFilters";
 
 /*
   Shell for a persona dashboard's detail drawer.
@@ -30,6 +31,7 @@ interface DetailDrawerProps {
   content?: DrawerContent;
   size?: "default" | "wide";
   children?: ReactNode;
+  headerFilters?: DashboardFilterState;
 }
 
 export default function DetailDrawer({
@@ -38,6 +40,7 @@ export default function DetailDrawer({
   content,
   size = "default",
   children,
+  headerFilters,
 }: DetailDrawerProps) {
   if (!content) {
     return null;
@@ -78,6 +81,7 @@ export default function DetailDrawer({
       title={content.title}
       description={content.description}
       size={size}
+      headerFilters={headerFilters}
     >
       <IllustrativeValuesBanner />
 

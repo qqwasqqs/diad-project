@@ -16,6 +16,7 @@ import MetricContextTable, {
 } from "@/components/shared/dashboard/MetricContextTable";
 import PanelFootnote from "@/components/shared/dashboard/PanelFootnote";
 import StatusCallout from "@/components/shared/dashboard/StatusCallout";
+import useDrawerFilters from "@/components/shared/dashboard/useDrawerFilters";
 
 interface SignalInterpretationItem {
   id: string;
@@ -34,7 +35,6 @@ interface DecisionPathItem {
 }
 
 export interface ProductOwnerTrustEvidenceData {
-  scope: string[];
   decisionReadiness: {
     label: "DECISION READINESS PENDING";
     description: string;
@@ -74,6 +74,7 @@ export default function ProductOwnerTrustEvidenceDrawer({
   onClose,
   data,
 }: ProductOwnerTrustEvidenceDrawerProps) {
+  const headerFilters = useDrawerFilters();
   const interpretationRows: MetricContextRow[] = data.signalInterpretation.map(
     (item) => ({
       id: item.id,
@@ -93,12 +94,9 @@ export default function ProductOwnerTrustEvidenceDrawer({
       eyebrow="TRUST EVIDENCE DECISION DETAILS"
       title="Trust evidence decision guide"
       description="When trust signals can responsibly inform product decisions"
+      headerFilters={headerFilters}
     >
       <div className="space-y-3 pb-1">
-        <div className="text-xs font-medium text-slate-600">
-          {data.scope.join(" · ")}
-        </div>
-
         <IllustrativeValuesBanner className="px-3 py-2" />
 
         <section className="rounded-lg border border-slate-200 bg-white p-4">

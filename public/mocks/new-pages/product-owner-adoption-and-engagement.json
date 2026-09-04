@@ -1,5 +1,4 @@
 {
-  "scope": ["Last 30 days", "All business units", "All projects", "All channels"],
   "sessionDepthDistribution": [
     { "label": "1 query", "value": 31 },
     { "label": "2–3 queries", "value": 36 },

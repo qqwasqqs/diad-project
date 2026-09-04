@@ -1,5 +1,4 @@
 {
-  "scope": ["Last 30 days", "All business units", "All projects", "All channels"],
   "evaluatorCoverage": [
     { "id": "groundedness", "label": "Groundedness", "status": "COVERAGE PENDING" },
     { "id": "relevance-quality", "label": "Relevance Quality", "status": "COVERAGE PENDING" },

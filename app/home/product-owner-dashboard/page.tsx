@@ -6,6 +6,9 @@ import DashboardPage from "@/components/shared/dashboard/DashboardPage";
 import DashboardGrid from "@/components/shared/dashboard/DashboardGrid";
 import DashboardPanel from "@/components/shared/dashboard/DashboardPanel";
 import DashboardSectionAction from "@/components/shared/dashboard/DashboardSectionAction";
+import DashboardSectionInfo, {
+  type DashboardSectionInfoContent,
+} from "@/components/shared/dashboard/DashboardSectionInfo";
 import { MetricCard } from "@/components/shared/dashboard/MetricCard";
 import ProductOwnerAdoptionAndEngagementDrawer, {
   type ProductOwnerAdoptionAndEngagementData,
@@ -46,6 +49,12 @@ import productExperiencePulseData from "@/public/mocks/new-pages/product-owner-p
 import channelMixData from "@/public/mocks/new-pages/product-owner-channel-mix.json";
 import experienceQualityData from "@/public/mocks/new-pages/product-owner-experience-quality.json";
 import trustEvidenceData from "@/public/mocks/new-pages/product-owner-trust-evidence.json";
+import productOwnerSections from "@/content/dashboards/product-owner-sections.json";
+
+const sectionInfo = productOwnerSections as Record<
+  string,
+  DashboardSectionInfoContent
+>;
 
 const channelMixValues = [
   { label: "Web", value: 52 },
@@ -275,6 +284,12 @@ export default function ProductOwnerDashboard() {
         <DashboardGrid>
         <DashboardPanel
           template="segmented"
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Product experience pulse"
+              content={sectionInfo["product-experience-pulse"]}
+            />
+          }
           title="Product experience pulse"
           sections={productExperiencePulseSections}
           className="xl:col-span-2"
@@ -346,6 +361,12 @@ export default function ProductOwnerDashboard() {
 
 
         <DashboardPanel
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Adoption and engagement"
+              content={sectionInfo["adoption-and-engagement"]}
+            />
+          }
           template="single"
           title="Adoption and engagement"
           actions={
@@ -366,6 +387,12 @@ export default function ProductOwnerDashboard() {
         </DashboardPanel>
 
         <DashboardPanel
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Channel mix"
+              content={sectionInfo["channel-mix"]}
+            />
+          }
           template="single"
           title="Channel mix"
           actions={
@@ -381,7 +408,15 @@ export default function ProductOwnerDashboard() {
           </div>
         </DashboardPanel>
 
-        <DashboardPanel template="single" title="Experience and response quality"
+        <DashboardPanel
+          template="single"
+          title="Experience and response quality"
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Experience and response quality"
+              content={sectionInfo["experience-and-response-quality"]}
+            />
+          }
           actions={
             <DashboardSectionAction
               onClick={() => setExperienceQualityOpen(true)}
@@ -399,7 +434,16 @@ export default function ProductOwnerDashboard() {
           />
         </DashboardPanel>
 
-        <DashboardPanel title="Feature usage evidence" template="single">
+        <DashboardPanel
+          title="Feature usage evidence"
+          template="single"
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Feature usage evidence"
+              content={sectionInfo["feature-usage-evidence"]}
+            />
+          }
+        >
           <DataPendingCard description="No feature identifier or usage formula supplied" />
         </DashboardPanel>
 
@@ -407,6 +451,12 @@ export default function ProductOwnerDashboard() {
           template="segmented"
           title="Trust and measurement readiness"
           sections={trustReadinessSections}
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Trust and measurement readiness"
+              content={sectionInfo["trust-and-measurement-readiness"]}
+            />
+          }
           className="xl:col-span-2"
           actions={
             <DashboardSectionAction

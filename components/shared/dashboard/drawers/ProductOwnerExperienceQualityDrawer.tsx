@@ -11,6 +11,7 @@ import MetricList, {
   type MetricListItem,
 } from "@/components/shared/dashboard/MetricList";
 import PanelFootnote from "@/components/shared/dashboard/PanelFootnote";
+import useDrawerFilters from "@/components/shared/dashboard/useDrawerFilters";
 
 interface EvaluatorCoverageItem {
   id: string;
@@ -39,7 +40,6 @@ interface ExperienceLinkEvidenceItem {
 }
 
 export interface ProductOwnerExperienceQualityData {
-  scope: string[];
   evaluatorCoverage: EvaluatorCoverageItem[];
   scoreDefinitionMap: ScoreDefinitionItem[];
   comparabilityGuardrails: ComparabilityGuardrailItem[];
@@ -70,6 +70,7 @@ export default function ProductOwnerExperienceQualityDrawer({
   onClose,
   data,
 }: ProductOwnerExperienceQualityDrawerProps) {
+  const headerFilters = useDrawerFilters();
   const coverageItems: MetricListItem[] = data.evaluatorCoverage.map((item) => ({
     id: item.id,
     label: item.label,
@@ -96,12 +97,9 @@ export default function ProductOwnerExperienceQualityDrawer({
       eyebrow="EXPERIENCE QUALITY EVIDENCE DETAILS"
       title="Experience quality evidence"
       description="Coverage, comparability, and experience-link readiness"
+      headerFilters={headerFilters}
     >
       <div className="space-y-3 pb-1">
-        <div className="text-xs font-medium text-slate-600">
-          {data.scope.join(" · ")}
-        </div>
-
         <IllustrativeValuesBanner className="px-3 py-2" />
 
         <section

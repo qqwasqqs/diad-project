@@ -12,6 +12,7 @@ import MetricList, {
   type MetricListItem,
 } from "@/components/shared/dashboard/MetricList";
 import PanelFootnote from "@/components/shared/dashboard/PanelFootnote";
+import useDrawerFilters from "@/components/shared/dashboard/useDrawerFilters";
 
 interface CoverageItem {
   id: string;
@@ -27,7 +28,6 @@ interface CalculationContextItem {
 }
 
 export interface ProductOwnerAdoptionAndEngagementData {
-  scope: string[];
   sessionDepthDistribution: HorizontalBarListItem[];
   conversationPattern: {
     label: string;
@@ -106,6 +106,7 @@ export default function ProductOwnerAdoptionAndEngagementDrawer({
   onClose,
   data,
 }: ProductOwnerAdoptionAndEngagementDrawerProps) {
+  const headerFilters = useDrawerFilters();
   const coverageItems: MetricListItem[] = data.coverageItems.map((item) => ({
     id: item.id,
     label: item.label,
@@ -131,12 +132,9 @@ export default function ProductOwnerAdoptionAndEngagementDrawer({
       eyebrow="ENGAGEMENT PATTERNS DETAILS"
       title="Engagement patterns"
       description="Observed behavior within sessions"
+      headerFilters={headerFilters}
     >
       <div className="space-y-3 pb-1">
-        <div className="text-xs font-medium text-slate-600">
-          {data.scope.join(" · ")}
-        </div>
-
         <IllustrativeValuesBanner className="px-3 py-2" />
 
         <div className="grid gap-3 md:grid-cols-2">

@@ -1,5 +1,4 @@
 {
-  "scope": ["Last 30 days", "All business units", "All projects", "All channels"],
   "shareEvolutionSeries": [
     { "id": "web", "label": "Web", "color": "#0f5132" },
     { "id": "teams", "label": "Teams", "color": "#2e8b57" },

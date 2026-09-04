@@ -13,6 +13,7 @@ import MetricList, {
   type MetricListItem,
 } from "@/components/shared/dashboard/MetricList";
 import PanelFootnote from "@/components/shared/dashboard/PanelFootnote";
+import useDrawerFilters from "@/components/shared/dashboard/useDrawerFilters";
 
 interface EngagementByChannelItem {
   id: string;
@@ -35,7 +36,6 @@ interface CalculationContextItem {
 }
 
 export interface ProductOwnerChannelMixData {
-  scope: string[];
   shareEvolutionSeries: StackedAreaSeries[];
   shareEvolutionPoints: StackedAreaPoint[];
   engagementByChannel: EngagementByChannelItem[];
@@ -76,6 +76,7 @@ export default function ProductOwnerChannelMixDrawer({
   onClose,
   data,
 }: ProductOwnerChannelMixDrawerProps) {
+  const headerFilters = useDrawerFilters();
   const engagementColumns = [
     { id: "channel", header: "Channel" },
     { id: "queriesPerSession", header: "Queries / session" },
@@ -120,12 +121,9 @@ export default function ProductOwnerChannelMixDrawer({
       eyebrow="CHANNEL ENGAGEMENT PATTERNS DETAILS"
       title="Channel engagement patterns"
       description="Entry-channel change and observed session context"
+      headerFilters={headerFilters}
     >
       <div className="space-y-3 pb-1">
-        <div className="text-xs font-medium text-slate-600">
-          {data.scope.join(" · ")}
-        </div>
-
         <IllustrativeValuesBanner className="px-3 py-2" />
 
         <section

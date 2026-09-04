@@ -18,6 +18,7 @@ import MetricContextTable, {
 } from "@/components/shared/dashboard/MetricContextTable";
 import PanelFootnote from "@/components/shared/dashboard/PanelFootnote";
 import PendingStateValue from "@/components/shared/dashboard/PendingStateValue";
+import useDrawerFilters from "@/components/shared/dashboard/useDrawerFilters";
 
 interface ProductExperiencePulseSeries {
   id: string;
@@ -28,7 +29,6 @@ interface ProductExperiencePulseSeries {
 }
 
 export interface ProductExperiencePulseData {
-  scope: string[];
   engagementSeries: ProductExperiencePulseSeries[];
   responsivenessSeries: ProductExperiencePulseSeries[];
   feedback: {
@@ -101,6 +101,7 @@ export default function ProductOwnerProductExperiencePulseDrawer({
   onClose,
   data,
 }: ProductOwnerProductExperiencePulseDrawerProps) {
+  const headerFilters = useDrawerFilters();
   const contextRows: MetricContextRow[] = data.measurementContext.map((row) => ({
     id: row.id,
     cells: {
@@ -123,12 +124,9 @@ export default function ProductOwnerProductExperiencePulseDrawer({
       eyebrow="PRODUCT EXPERIENCE PULSE DETAILS"
       title="Product experience pulse"
       description="Experience signals over time and measurement readiness"
+      headerFilters={headerFilters}
     >
       <div className="space-y-3 pb-1">
-        <div className="text-xs font-medium text-slate-600">
-          {data.scope.join(" · ")}
-        </div>
-
         <IllustrativeValuesBanner />
 
         <section
