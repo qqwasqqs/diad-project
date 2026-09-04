@@ -89,7 +89,7 @@ export default function CostByBusinessUnitChart({
   const chartHeight = Math.max(240, chartRows.length * 28);
 
   return (
-    <div className="flex w-full items-stretch gap-4">
+    <div className="flex min-h-0 w-full flex-1 items-stretch gap-4">
       <div className="min-w-0 flex-1">
         <div className="mb-4 flex items-center justify-end gap-3">
           <div className="flex items-center gap-4 text-xs text-slate-500">
@@ -195,7 +195,7 @@ export default function CostByBusinessUnitChart({
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center">
+      <div className="flex shrink-0 items-end">
         <InfrastructureDataPendingCard
           title="Infrastructure Cost"
           statusLabel="DATA PENDING"

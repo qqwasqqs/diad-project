@@ -10,6 +10,13 @@ export interface DashboardSupportingStatItem {
   value: string;
   text: string;
   iconColor?: string;
+  /*
+    Colours the value and its label to the series they belong to, where the
+    design calls for it. Left unset, both stay on the default body colour: a
+    series colour is only meaningful when the stat maps to a plotted series.
+  */
+  valueColor?: string;
+  textColor?: string;
 }
 
 interface DashboardSupportingStatsProps {
@@ -33,7 +40,7 @@ const useStyles = makeStyles({
     gap: "8px",
     minWidth: 0,
     flex: "1 1 220px",
-    color: tokens.colorNeutralForeground1,
+    color: "var(--color-text-primary)",
   },
   icon: {
     display: "inline-flex",
@@ -41,19 +48,19 @@ const useStyles = makeStyles({
     justifyContent: "center",
     width: "28px",
     height: "28px",
-    color: tokens.colorNeutralForeground1,
+    color: "var(--color-text-primary)",
     flexShrink: 0,
   },
   value: {
     fontSize: "2.1rem",
     lineHeight: 1.1,
     fontWeight: 700,
-    color: tokens.colorNeutralForeground1,
+    color: "var(--color-text-primary)",
   },
   text: {
     fontSize: "1.1rem",
     lineHeight: 1.2,
-    color: tokens.colorNeutralForeground1,
+    color: "var(--color-text-primary)",
   },
   productOwnerRoot: {
     display: "flex",
@@ -71,7 +78,7 @@ const useStyles = makeStyles({
     gap: "10px",
     minWidth: 0,
     flex: "0 1 auto",
-    color: tokens.colorNeutralForeground1,
+    color: "var(--color-text-primary)",
   },
   productOwnerIcon: {
     display: "inline-flex",
@@ -90,12 +97,12 @@ const useStyles = makeStyles({
     lineHeight: 1.1,
     fontWeight: 600,
     letterSpacing: "-0.04em",
-    color: tokens.colorNeutralForeground1,
+    color: "var(--color-text-primary)",
   },
   productOwnerText: {
     fontSize: "1.1rem",
     lineHeight: 1.25,
-    color: tokens.colorNeutralForeground2,
+    color: "var(--color-chart-axis)",
     fontWeight: 500,
   },
   rightRoot: {
@@ -119,7 +126,7 @@ const useStyles = makeStyles({
     alignItems: "center",
     width: "100%",
     minWidth: 0,
-    color: tokens.colorNeutralForeground1,
+    color: "var(--color-text-primary)",
     paddingTop: "14px",
     marginTop: "12px",
   },
@@ -137,7 +144,7 @@ const useStyles = makeStyles({
     justifyContent: "center",
     width: "22px",
     height: "22px",
-    color: tokens.colorNeutralForeground1,
+    color: "var(--color-text-primary)",
     flexShrink: 0,
   },
   rightValue: {
@@ -145,12 +152,12 @@ const useStyles = makeStyles({
     lineHeight: 1.1,
     fontWeight: 600,
     letterSpacing: "-0.04em",
-    color: tokens.colorNeutralForeground1,
+    color: "var(--color-text-primary)",
   },
   rightText: {
     fontSize: "0.9rem",
     lineHeight: 1.25,
-    color: tokens.colorNeutralForeground2,
+    color: "var(--color-chart-axis)",
     fontWeight: 500,
     marginBottom: "4px",
     textAlign: "center",
@@ -216,10 +223,18 @@ export default function DashboardSupportingStats({
         >
           {isRight ? (
             <>
-              <Text as="span" className={textClass}>
+              <Text
+                as="span"
+                className={textClass}
+                style={item.textColor ? { color: item.textColor } : undefined}
+              >
                 {item.text}
               </Text>
-              <Text as="span" className={valueClass}>
+              <Text
+                as="span"
+                className={valueClass}
+                style={item.valueColor ? { color: item.valueColor } : undefined}
+              >
                 {item.value}
               </Text>
             </>
@@ -233,10 +248,18 @@ export default function DashboardSupportingStats({
                   {item.icon}
                 </span>
               )}
-              <Text as="span" className={valueClass}>
+              <Text
+                as="span"
+                className={valueClass}
+                style={item.valueColor ? { color: item.valueColor } : undefined}
+              >
                 {item.value}
               </Text>
-              <Text as="span" className={textClass}>
+              <Text
+                as="span"
+                className={textClass}
+                style={item.textColor ? { color: item.textColor } : undefined}
+              >
                 {item.text}
               </Text>
             </>
