@@ -1,0 +1,55 @@
+{
+  "shareEvolutionSeries": [
+    { "id": "web", "label": "Web", "color": "#0f5132" },
+    { "id": "teams", "label": "Teams", "color": "#2e8b57" },
+    { "id": "mobile", "label": "Mobile", "color": "#8fd19e" },
+    { "id": "api", "label": "API", "color": "#d9e8dd" }
+  ],
+  "shareEvolutionPoints": [
+    { "x": "Apr 20", "values": { "web": 52, "teams": 28, "mobile": 14, "api": 6 } },
+    { "x": "Apr 25", "values": { "web": 50, "teams": 29, "mobile": 15, "api": 6 } },
+    { "x": "Apr 30", "values": { "web": 49, "teams": 30, "mobile": 15, "api": 6 } },
+    { "x": "May 5", "values": { "web": 51, "teams": 28, "mobile": 15, "api": 6 } },
+    { "x": "May 10", "values": { "web": 48, "teams": 30, "mobile": 16, "api": 6 } },
+    { "x": "May 15", "values": { "web": 47, "teams": 31, "mobile": 16, "api": 6 } },
+    { "x": "May 20", "values": { "web": 52, "teams": 28, "mobile": 14, "api": 6 } }
+  ],
+  "engagementByChannel": [
+    { "id": "web", "channel": "Web", "queriesPerSession": 4.8, "avgSessionDuration": "8.6 min" },
+    { "id": "teams", "channel": "Teams", "queriesPerSession": 4.2, "avgSessionDuration": "7.9 min" },
+    { "id": "mobile", "channel": "Mobile", "queriesPerSession": 3.7, "avgSessionDuration": "6.4 min" },
+    { "id": "api", "channel": "API", "queriesPerSession": 5.1, "avgSessionDuration": "9.1 min" }
+  ],
+  "attributionReadiness": [
+    { "id": "channel-vocabulary", "label": "Channel vocabulary", "status": "PENDING" },
+    { "id": "session-to-entry-channel", "label": "Session to entry channel", "status": "PENDING" },
+    { "id": "timestamp", "label": "Timestamp", "status": "PENDING" },
+    { "id": "bu-project-attribution", "label": "Business unit and project attribution", "status": "PENDING" }
+  ],
+  "calculationContext": [
+    {
+      "id": "share-evolution",
+      "signal": "Share evolution",
+      "proposedCalculation": "Classified queries by day",
+      "coverage": "PENDING"
+    },
+    {
+      "id": "queries-per-session",
+      "signal": "Queries / session",
+      "proposedCalculation": "Distinct query key per assigned channel session",
+      "coverage": "PENDING"
+    },
+    {
+      "id": "session-duration",
+      "signal": "Session duration",
+      "proposedCalculation": "Max minus min timestamp",
+      "coverage": "PENDING"
+    },
+    {
+      "id": "channel-assignment",
+      "signal": "Channel assignment",
+      "proposedCalculation": "Approved entry channel rule",
+      "coverage": "PENDING"
+    }
+  ]
+}

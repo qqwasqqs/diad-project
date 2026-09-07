@@ -1,0 +1,50 @@
+{
+  "product-experience-pulse": {
+    "description": "Summarizes adoption, feedback, response speed, and the current workflow-completion availability state.",
+    "kpiCategories": [
+      "Adoption and engagement",
+      "User feedback",
+      "Performance and latency",
+      "Workflow completion (pending)"
+    ]
+  },
+  "adoption-and-engagement": {
+    "description": "Shows how much the product is used and how observed session activity changes over time.",
+    "kpiCategories": [
+      "Adoption",
+      "User engagement"
+    ]
+  },
+  "channel-mix": {
+    "description": "Shows the observed distribution of eligible user queries by entry channel.",
+    "kpiCategories": [
+      "Adoption",
+      "User engagement"
+    ]
+  },
+  "experience-and-response-quality": {
+    "description": "Brings together response-quality signals and adjacent feedback and latency context without implying causation.",
+    "kpiCategories": [
+      "AI response quality",
+      "RAG quality",
+      "Agent quality",
+      "User feedback",
+      "Performance and latency"
+    ]
+  },
+  "feature-usage-evidence": {
+    "description": "Shows whether evidence exists to define and measure feature usage. The measurement definition is still pending.",
+    "kpiCategories": [
+      "Feature usage (pending)"
+    ]
+  },
+  "trust-and-measurement-readiness": {
+    "description": "Shows the availability and decision-readiness of safety, security, evaluation, and prompt-injection evidence.",
+    "kpiCategories": [
+      "Content safety",
+      "Security",
+      "ML evaluation",
+      "Prompt-injection testing (pending)"
+    ]
+  }
+}

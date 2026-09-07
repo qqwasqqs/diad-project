@@ -23,6 +23,8 @@ interface DashboardPanelProps {
   title?: string;
   /* Action for the panel as a whole, rendered beside its title. */
   actions?: ReactNode;
+  /* Supplemental panel control, rendered below the content. */
+  footer?: ReactNode;
   sections?: DashboardPanelSection[];
   children: ReactNode;
   className?: string;
@@ -39,6 +41,7 @@ export default function DashboardPanel({
   template,
   title,
   actions,
+  footer,
   sections,
   children,
   className = "",
@@ -69,6 +72,9 @@ export default function DashboardPanel({
         >
           {children}
         </div>
+        {footer && (
+          <div className="flex justify-end px-3 pb-2">{footer}</div>
+        )}
       </div>
     );
   }
@@ -157,6 +163,7 @@ export default function DashboardPanel({
           );
         })}
       </div>
+      {footer && <div className="flex justify-end px-3 pb-2">{footer}</div>}
     </div>
   );
 }

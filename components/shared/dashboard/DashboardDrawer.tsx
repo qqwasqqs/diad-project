@@ -11,6 +11,8 @@ import {
 } from "@fluentui/react-components";
 import { Dismiss24Regular } from "@fluentui/react-icons";
 import { ReactNode } from "react";
+import DashboardHeader from "./DashboardHeader";
+import type { DashboardFilterState } from "./DashboardFilters";
 const useStyles = makeStyles({
     drawer: {
         width: "400px",
@@ -57,6 +59,8 @@ interface DashboardDrawerProps {
     children?: ReactNode;
     onClose: () => void;
     footer?: ReactNode;
+    /* Enables the compact, locally controlled filter row under the drawer title. */
+    headerFilters?: DashboardFilterState;
 }
 export default function DashboardDrawer({
     open,
@@ -67,6 +71,7 @@ export default function DashboardDrawer({
     children,
     onClose,
     footer,
+    headerFilters,
 }: DashboardDrawerProps) {
     const styles = useStyles();
     return (
@@ -91,10 +96,23 @@ export default function DashboardDrawer({
                         />
                     }
                 >
-                    {eyebrow && <span className={styles.eyebrow}>{eyebrow}</span>}
-                    {title}
-                    {description && (
-                        <span className={styles.description}>{description}</span>
+                    {headerFilters ? (
+                        <DashboardHeader
+                            template="drawer"
+                            title={title}
+                            eyebrow={eyebrow}
+                            description={description}
+                            showExport={false}
+                            filterState={headerFilters}
+                        />
+                    ) : (
+                        <>
+                            {eyebrow && <span className={styles.eyebrow}>{eyebrow}</span>}
+                            {title}
+                            {description && (
+                                <span className={styles.description}>{description}</span>
+                            )}
+                        </>
                     )}
                 </DrawerHeaderTitle>
             </DrawerHeader>

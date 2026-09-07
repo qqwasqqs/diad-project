@@ -5,8 +5,26 @@ import { useState } from "react";
 import DashboardPage from "@/components/shared/dashboard/DashboardPage";
 import DashboardGrid from "@/components/shared/dashboard/DashboardGrid";
 import DashboardPanel from "@/components/shared/dashboard/DashboardPanel";
-import DashboardDrawer from "@/components/shared/dashboard/DashboardDrawer";
+import DashboardSectionAction from "@/components/shared/dashboard/DashboardSectionAction";
+import DashboardSectionInfo, {
+  type DashboardSectionInfoContent,
+} from "@/components/shared/dashboard/DashboardSectionInfo";
 import { MetricCard } from "@/components/shared/dashboard/MetricCard";
+import ProductOwnerAdoptionAndEngagementDrawer, {
+  type ProductOwnerAdoptionAndEngagementData,
+} from "@/components/shared/dashboard/drawers/ProductOwnerAdoptionAndEngagementDrawer";
+import ProductOwnerChannelMixDrawer, {
+  type ProductOwnerChannelMixData,
+} from "@/components/shared/dashboard/drawers/ProductOwnerChannelMixDrawer";
+import ProductOwnerExperienceQualityDrawer, {
+  type ProductOwnerExperienceQualityData,
+} from "@/components/shared/dashboard/drawers/ProductOwnerExperienceQualityDrawer";
+import ProductOwnerTrustEvidenceDrawer, {
+  type ProductOwnerTrustEvidenceData,
+} from "@/components/shared/dashboard/drawers/ProductOwnerTrustEvidenceDrawer";
+import ProductOwnerProductExperiencePulseDrawer, {
+  type ProductExperiencePulseData,
+} from "@/components/shared/dashboard/drawers/ProductOwnerProductExperiencePulseDrawer";
 import { PositiveNegativeBar } from "@/components/shared/charts/PositiveNegativeBar";
 import HorizontalBarList from "@/components/shared/charts/HorizontalBarList";
 import DashboardLineChart, {
@@ -26,19 +44,23 @@ import {
   ShieldCheckmark24Regular,
   ThumbLike24Regular,
 } from "@fluentui/react-icons";
+import adoptionAndEngagementData from "@/public/mocks/new-pages/product-owner-adoption-and-engagement.json";
+import productExperiencePulseData from "@/public/mocks/new-pages/product-owner-product-experience-pulse.json";
+import channelMixData from "@/public/mocks/new-pages/product-owner-channel-mix.json";
+import experienceQualityData from "@/public/mocks/new-pages/product-owner-experience-quality.json";
+import trustEvidenceData from "@/public/mocks/new-pages/product-owner-trust-evidence.json";
+import productOwnerSections from "@/content/dashboards/product-owner-sections.json";
+
+const sectionInfo = productOwnerSections as Record<
+  string,
+  DashboardSectionInfoContent
+>;
 
 const channelMixValues = [
   { label: "Web", value: 52 },
   { label: "Teams", value: 28 },
   { label: "Mobile", value: 14 },
   { label: "API", value: 6 },
-];
-
-const channelMixComparison = [
-  { label: "Web", queriesPerSession: 4.8, avgSession: "8.6 min" },
-  { label: "Teams", queriesPerSession: 4.2, avgSession: "7.9 min" },
-  { label: "Mobile", queriesPerSession: 3.7, avgSession: "6.4 min" },
-  { label: "API", queriesPerSession: 5.1, avgSession: "9.1 min" },
 ];
 
 const productExperiencePulseSections = [
@@ -247,7 +269,11 @@ const trustReadinessCallouts = [
 ];
 
 export default function ProductOwnerDashboard() {
+  const [adoptionAndEngagementOpen, setAdoptionAndEngagementOpen] = useState(false);
   const [channelMixOpen, setChannelMixOpen] = useState(false);
+  const [productExperiencePulseOpen, setProductExperiencePulseOpen] = useState(false);
+  const [experienceQualityOpen, setExperienceQualityOpen] = useState(false);
+  const [trustEvidenceOpen, setTrustEvidenceOpen] = useState(false);
 
   return (
     <>
@@ -258,9 +284,21 @@ export default function ProductOwnerDashboard() {
         <DashboardGrid>
         <DashboardPanel
           template="segmented"
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Product experience pulse"
+              content={sectionInfo["product-experience-pulse"]}
+            />
+          }
           title="Product experience pulse"
           sections={productExperiencePulseSections}
           className="xl:col-span-2"
+          actions={
+            <DashboardSectionAction
+              onClick={() => setProductExperiencePulseOpen(true)}
+              label="View product experience pulse details"
+            />
+          }
         >
           <MetricCard
             icon={<DataTrending24Regular className="text-blue-600" />}
@@ -322,7 +360,22 @@ export default function ProductOwnerDashboard() {
 
 
 
-        <DashboardPanel template="single" title="Adoption and engagement">
+        <DashboardPanel
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Adoption and engagement"
+              content={sectionInfo["adoption-and-engagement"]}
+            />
+          }
+          template="single"
+          title="Adoption and engagement"
+          actions={
+            <DashboardSectionAction
+              onClick={() => setAdoptionAndEngagementOpen(true)}
+              label="View engagement patterns details"
+            />
+          }
+        >
           <DashboardLineChart
             description=""
             height={320}
@@ -333,27 +386,44 @@ export default function ProductOwnerDashboard() {
           />
         </DashboardPanel>
 
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={() => setChannelMixOpen(true)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" || event.key === " ") {
-              event.preventDefault();
-              setChannelMixOpen(true);
-            }
-          }}
-          className="cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+        <DashboardPanel
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Channel mix"
+              content={sectionInfo["channel-mix"]}
+            />
+          }
+          template="single"
+          title="Channel mix"
+          actions={
+            <DashboardSectionAction
+              onClick={() => setChannelMixOpen(true)}
+              label="View channel mix details"
+            />
+          }
         >
-          <DashboardPanel template="single" title="Channel mix">
-            <HorizontalBarList values={channelMixValues} />
-            <div className="mt-2 text-[11px] font-medium text-neutral-500">
-              Illustrative channel breakdown
-            </div>
-          </DashboardPanel>
-        </div>
+          <HorizontalBarList values={channelMixValues} />
+          <div className="mt-2 text-[11px] font-medium text-neutral-500">
+            Illustrative channel breakdown
+          </div>
+        </DashboardPanel>
 
-        <DashboardPanel template="single" title="Experience and response quality">
+        <DashboardPanel
+          template="single"
+          title="Experience and response quality"
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Experience and response quality"
+              content={sectionInfo["experience-and-response-quality"]}
+            />
+          }
+          actions={
+            <DashboardSectionAction
+              onClick={() => setExperienceQualityOpen(true)}
+              label="View experience quality evidence details"
+            />
+          }
+        >
           <DashboardLineChart
             height={300}
             supportingStatsVariant="productOwner"
@@ -364,7 +434,16 @@ export default function ProductOwnerDashboard() {
           />
         </DashboardPanel>
 
-        <DashboardPanel title="Feature usage evidence" template="single">
+        <DashboardPanel
+          title="Feature usage evidence"
+          template="single"
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Feature usage evidence"
+              content={sectionInfo["feature-usage-evidence"]}
+            />
+          }
+        >
           <DataPendingCard description="No feature identifier or usage formula supplied" />
         </DashboardPanel>
 
@@ -372,7 +451,19 @@ export default function ProductOwnerDashboard() {
           template="segmented"
           title="Trust and measurement readiness"
           sections={trustReadinessSections}
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Trust and measurement readiness"
+              content={sectionInfo["trust-and-measurement-readiness"]}
+            />
+          }
           className="xl:col-span-2"
+          actions={
+            <DashboardSectionAction
+              onClick={() => setTrustEvidenceOpen(true)}
+              label="View trust evidence decision guide"
+            />
+          }
         >
           {trustReadinessCallouts.map(({ id, icon, title, primaryContent, variant }) => (
             <StatusCallout
@@ -388,82 +479,31 @@ export default function ProductOwnerDashboard() {
       </DashboardGrid>
     </DashboardPage>
 
-    <DashboardDrawer
+    <ProductOwnerChannelMixDrawer
       open={channelMixOpen}
-      title="Channel engagement patterns"
       onClose={() => setChannelMixOpen(false)}
-    >
-      <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-800">
-        Illustrative values
-      </div>
-
-      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-        <div className="mb-3 text-xs font-semibold text-slate-700">
-          Channel share evolution
-        </div>
-
-        <div className="space-y-2.5 text-xs text-slate-600">
-          {channelMixValues.map((item) => (
-            <div key={item.label} className="grid grid-cols-[34px_minmax(0,1fr)_32px] items-center gap-2">
-              <span className="font-medium text-slate-700">{item.label}</span>
-              <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-                <div
-                  className="h-full rounded-full bg-blue-600"
-                  style={{ width: `${item.value}%` }}
-                />
-              </div>
-              <span className="text-right font-medium text-slate-700">{item.value}%</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-slate-200 bg-white p-3">
-        <div className="text-xs font-semibold text-slate-700">
-          Engagement by entry channel
-        </div>
-
-        <div className="mt-3 rounded-lg border border-slate-200">
-          <div className="grid grid-cols-[1.2fr_1fr_1fr] border-b border-slate-200 bg-slate-50 px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
-            <span>Channel</span>
-            <span>Queries / session</span>
-            <span>Avg session</span>
-          </div>
-
-          {channelMixComparison.map((item) => (
-            <div
-              key={item.label}
-              className="grid grid-cols-[1.2fr_1fr_1fr] items-center border-b border-slate-200 px-2 py-2 text-xs text-slate-700 last:border-b-0"
-            >
-              <span>{item.label}</span>
-              <span>{item.queriesPerSession}</span>
-              <span>{item.avgSession}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-        <div className="text-xs font-semibold text-slate-700">
-          Calculation context
-        </div>
-
-        <ul className="mt-2 space-y-2 text-xs text-slate-600">
-          <li>
-            <span className="font-medium text-slate-700">Share evolution:</span> classified queries by entry channel and day.
-          </li>
-          <li>
-            <span className="font-medium text-slate-700">Queries / session:</span> distinct query key per assigned channel session.
-          </li>
-          <li>
-            <span className="font-medium text-slate-700">Session duration:</span> max minus min timestamp per approved session rule.
-          </li>
-          <li>
-            <span className="font-medium text-slate-700">Channel assignment:</span> pending validation for entry-channel mapping.
-          </li>
-        </ul>
-      </div>
-    </DashboardDrawer>
+      data={channelMixData as ProductOwnerChannelMixData}
+    />
+    <ProductOwnerAdoptionAndEngagementDrawer
+      open={adoptionAndEngagementOpen}
+      onClose={() => setAdoptionAndEngagementOpen(false)}
+      data={adoptionAndEngagementData as ProductOwnerAdoptionAndEngagementData}
+    />
+    <ProductOwnerProductExperiencePulseDrawer
+      open={productExperiencePulseOpen}
+      onClose={() => setProductExperiencePulseOpen(false)}
+      data={productExperiencePulseData as ProductExperiencePulseData}
+    />
+    <ProductOwnerExperienceQualityDrawer
+      open={experienceQualityOpen}
+      onClose={() => setExperienceQualityOpen(false)}
+      data={experienceQualityData as ProductOwnerExperienceQualityData}
+    />
+    <ProductOwnerTrustEvidenceDrawer
+      open={trustEvidenceOpen}
+      onClose={() => setTrustEvidenceOpen(false)}
+      data={trustEvidenceData as ProductOwnerTrustEvidenceData}
+    />
     </>
   );
 }

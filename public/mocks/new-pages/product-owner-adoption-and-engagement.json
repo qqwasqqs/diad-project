@@ -1,0 +1,52 @@
+{
+  "sessionDepthDistribution": [
+    { "label": "1 query", "value": 31 },
+    { "label": "2–3 queries", "value": 36 },
+    { "label": "4–6 queries", "value": 21 },
+    { "label": "7+ queries", "value": 12 }
+  ],
+  "conversationPattern": {
+    "label": "Conversations per session",
+    "value": 1.6,
+    "state": "PROPOSED AGGREGATION",
+    "note": "Requires validated session and conversation relationship"
+  },
+  "sessionDurationDistribution": [
+    { "label": "0–2 min", "value": 29 },
+    { "label": "3–7 min", "value": 34 },
+    { "label": "8–15 min", "value": 23 },
+    { "label": "16+ min", "value": 14 }
+  ],
+  "coverageItems": [
+    { "id": "session-id", "label": "Session ID", "status": "PENDING" },
+    { "id": "conversation-id", "label": "Conversation ID", "status": "PENDING" },
+    { "id": "timestamp", "label": "Timestamp", "status": "PENDING" },
+    { "id": "channel", "label": "Channel", "status": "PENDING" }
+  ],
+  "calculationContext": [
+    {
+      "id": "session-depth",
+      "signal": "Session depth",
+      "proposedCalculation": "Distinct approved query key per session",
+      "coverage": "PENDING"
+    },
+    {
+      "id": "conversation-pattern",
+      "signal": "Conversation pattern",
+      "proposedCalculation": "Distinct conversations / sessions",
+      "coverage": "PENDING"
+    },
+    {
+      "id": "session-duration",
+      "signal": "Session duration",
+      "proposedCalculation": "Max minus min timestamp",
+      "coverage": "PENDING"
+    },
+    {
+      "id": "channel",
+      "signal": "Channel",
+      "proposedCalculation": "Classified entry channel",
+      "coverage": "PENDING"
+    }
+  ]
+}
