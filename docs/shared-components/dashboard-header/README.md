@@ -24,12 +24,29 @@ rather than repeated per dashboard.
 />
 ```
 
+Drawer headers use the compact template through `DashboardDrawer`:
+
+```tsx
+<DashboardDrawer
+  open={open}
+  onClose={onClose}
+  title="Executive pulse details"
+  headerFilters={{ values, onChange: setValues }}
+>
+  {/* detail content */}
+</DashboardDrawer>
+```
+
 ### Props
 
 - `title`: the dashboard name.
 - `description`: optional subtitle.
 - `showFilters`: render the global filter bar. Defaults to true.
 - `showExport`: render the export action. Defaults to true.
+- `template`: `main` (default) preserves the page header. `drawer` renders a
+  compact title block and filters below it.
+- `filterState`: optional controlled values and `onChange` handler. This keeps
+  selections local to the drawer instead of writing to the global store.
 
 ## Behavior
 
@@ -52,12 +69,18 @@ rather than repeated per dashboard.
 - The header does not own filter state. It shows the selection and writes
   changes to the shared store, which lets a page read the same scope its header
   displays without prop-threading through the layout.
+- Drawer filters use compact controls and content-aware widths, wrapping within
+  the drawer rather than using the page header's wide layout breakpoint.
 
 ## Selection state
 
 Holding a selection is not the same as applying it. A dashboard page opts in by
 reading the store and passing the scope to its data hook; a page that does not
 read the store is unaffected by the filter bar.
+
+When a caller passes `filterState`, that controlled state takes precedence over
+the store. Executive drawer prototypes use this mode with static options and an
+illustrative-data notice; they do not call a data source.
 
 ## Implementation example
 
