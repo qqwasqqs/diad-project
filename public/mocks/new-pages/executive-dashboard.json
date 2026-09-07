@@ -1,0 +1,1200 @@
+{
+  "generatedAt": "2026-09-01T00:00:00.000Z",
+  "note": "Illustrative values. Not production telemetry. Targets and thresholds pending validation.",
+  "pulse": [
+    {
+      "id": "end-to-end-latency",
+      "label": "End-to-End Latency",
+      "amount": 1.2,
+      "prefix": "P95 ",
+      "unit": " s",
+      "decimals": 2
+    },
+    {
+      "id": "api-error-rate",
+      "label": "API Error Rate (Inference Errors)",
+      "amount": 1.14,
+      "unit": "%",
+      "decimals": 2
+    },
+    {
+      "id": "session-query-volume",
+      "label": "Session & Query Volume",
+      "amount": 316,
+      "unit": "K",
+      "decimals": 0,
+      "suffix": "queries",
+      "supportingParts": [
+        {
+          "amount": 4.6,
+          "decimals": 1,
+          "unit": " queries/session"
+        },
+        {
+          "amount": 8.2,
+          "decimals": 1,
+          "unit": " min avg session"
+        }
+      ]
+    },
+    {
+      "id": "user-feedback",
+      "label": "User Feedback (Thumbs Up/Down)",
+      "amount": 84,
+      "unit": "%",
+      "decimals": 0,
+      "suffix": "positive",
+      "max": 100,
+      "split": {
+        "positive": 84,
+        "negative": 16
+      }
+    },
+    {
+      "id": "cost-per-request",
+      "label": "Cost per Request",
+      "amount": 0.12,
+      "prefix": "$",
+      "decimals": 2
+    }
+  ],
+  "sessionAndQueryVolume": {
+    "series": [
+      {
+        "id": "sessions",
+        "label": "Sessions",
+        "points": [
+          {
+            "x": "2026-02-19",
+            "y": 18000
+          },
+          {
+            "x": "2026-02-20",
+            "y": 21216
+          },
+          {
+            "x": "2026-02-21",
+            "y": 23698
+          },
+          {
+            "x": "2026-02-22",
+            "y": 24904
+          },
+          {
+            "x": "2026-02-23",
+            "y": 24625
+          },
+          {
+            "x": "2026-02-24",
+            "y": 23039
+          },
+          {
+            "x": "2026-02-25",
+            "y": 20652
+          },
+          {
+            "x": "2026-02-26",
+            "y": 18165
+          },
+          {
+            "x": "2026-02-27",
+            "y": 16277
+          },
+          {
+            "x": "2026-02-28",
+            "y": 15494
+          },
+          {
+            "x": "2026-03-01",
+            "y": 15997
+          },
+          {
+            "x": "2026-03-02",
+            "y": 17590
+          },
+          {
+            "x": "2026-03-03",
+            "y": 19757
+          },
+          {
+            "x": "2026-03-04",
+            "y": 21807
+          },
+          {
+            "x": "2026-03-05",
+            "y": 23063
+          },
+          {
+            "x": "2026-03-06",
+            "y": 23053
+          },
+          {
+            "x": "2026-03-07",
+            "y": 21643
+          },
+          {
+            "x": "2026-03-08",
+            "y": 19080
+          },
+          {
+            "x": "2026-03-09",
+            "y": 15929
+          },
+          {
+            "x": "2026-03-10",
+            "y": 12929
+          },
+          {
+            "x": "2026-03-11",
+            "y": 10796
+          },
+          {
+            "x": "2026-03-12",
+            "y": 10033
+          },
+          {
+            "x": "2026-03-13",
+            "y": 10801
+          },
+          {
+            "x": "2026-03-14",
+            "y": 12873
+          },
+          {
+            "x": "2026-03-15",
+            "y": 15698
+          },
+          {
+            "x": "2026-03-16",
+            "y": 18550
+          },
+          {
+            "x": "2026-03-17",
+            "y": 20723
+          },
+          {
+            "x": "2026-03-18",
+            "y": 21719
+          },
+          {
+            "x": "2026-03-19",
+            "y": 21377
+          },
+          {
+            "x": "2026-03-20",
+            "y": 19915
+          },
+          {
+            "x": "2026-03-21",
+            "y": 17862
+          },
+          {
+            "x": "2026-03-22",
+            "y": 15910
+          },
+          {
+            "x": "2026-03-23",
+            "y": 14722
+          },
+          {
+            "x": "2026-03-24",
+            "y": 14745
+          },
+          {
+            "x": "2026-03-25",
+            "y": 16084
+          },
+          {
+            "x": "2026-03-26",
+            "y": 18466
+          },
+          {
+            "x": "2026-03-27",
+            "y": 21314
+          },
+          {
+            "x": "2026-03-28",
+            "y": 23898
+          },
+          {
+            "x": "2026-03-29",
+            "y": 25531
+          },
+          {
+            "x": "2026-03-30",
+            "y": 25754
+          },
+          {
+            "x": "2026-03-31",
+            "y": 24460
+          },
+          {
+            "x": "2026-04-01",
+            "y": 21929
+          },
+          {
+            "x": "2026-04-02",
+            "y": 18750
+          },
+          {
+            "x": "2026-04-03",
+            "y": 15672
+          },
+          {
+            "x": "2026-04-04",
+            "y": 13399
+          },
+          {
+            "x": "2026-04-05",
+            "y": 12412
+          },
+          {
+            "x": "2026-04-06",
+            "y": 12842
+          },
+          {
+            "x": "2026-04-07",
+            "y": 14439
+          },
+          {
+            "x": "2026-04-08",
+            "y": 16649
+          },
+          {
+            "x": "2026-04-09",
+            "y": 18767
+          },
+          {
+            "x": "2026-04-10",
+            "y": 20135
+          },
+          {
+            "x": "2026-04-11",
+            "y": 20320
+          },
+          {
+            "x": "2026-04-12",
+            "y": 19239
+          },
+          {
+            "x": "2026-04-13",
+            "y": 17179
+          },
+          {
+            "x": "2026-04-14",
+            "y": 14721
+          },
+          {
+            "x": "2026-04-15",
+            "y": 12583
+          },
+          {
+            "x": "2026-04-16",
+            "y": 11420
+          },
+          {
+            "x": "2026-04-17",
+            "y": 11647
+          },
+          {
+            "x": "2026-04-18",
+            "y": 13320
+          },
+          {
+            "x": "2026-04-19",
+            "y": 16114
+          },
+          {
+            "x": "2026-04-20",
+            "y": 19411
+          },
+          {
+            "x": "2026-04-21",
+            "y": 22454
+          },
+          {
+            "x": "2026-04-22",
+            "y": 24549
+          },
+          {
+            "x": "2026-04-23",
+            "y": 25250
+          },
+          {
+            "x": "2026-04-24",
+            "y": 24467
+          },
+          {
+            "x": "2026-04-25",
+            "y": 22494
+          },
+          {
+            "x": "2026-04-26",
+            "y": 19920
+          },
+          {
+            "x": "2026-04-27",
+            "y": 17468
+          },
+          {
+            "x": "2026-04-28",
+            "y": 15800
+          },
+          {
+            "x": "2026-04-29",
+            "y": 15339
+          },
+          {
+            "x": "2026-04-30",
+            "y": 16149
+          },
+          {
+            "x": "2026-05-01",
+            "y": 17930
+          },
+          {
+            "x": "2026-05-02",
+            "y": 20095
+          },
+          {
+            "x": "2026-05-03",
+            "y": 21937
+          },
+          {
+            "x": "2026-05-04",
+            "y": 22827
+          },
+          {
+            "x": "2026-05-05",
+            "y": 22386
+          },
+          {
+            "x": "2026-05-06",
+            "y": 20599
+          },
+          {
+            "x": "2026-05-07",
+            "y": 17821
+          },
+          {
+            "x": "2026-05-08",
+            "y": 14688
+          },
+          {
+            "x": "2026-05-09",
+            "y": 11951
+          },
+          {
+            "x": "2026-05-10",
+            "y": 10276
+          },
+          {
+            "x": "2026-05-11",
+            "y": 10068
+          },
+          {
+            "x": "2026-05-12",
+            "y": 11363
+          },
+          {
+            "x": "2026-05-13",
+            "y": 13871
+          },
+          {
+            "x": "2026-05-14",
+            "y": 16955
+          },
+          {
+            "x": "2026-05-15",
+            "y": 19857
+          },
+          {
+            "x": "2026-05-16",
+            "y": 21908
+          },
+          {
+            "x": "2026-05-17",
+            "y": 22696
+          },
+          {
+            "x": "2026-05-18",
+            "y": 22178
+          },
+          {
+            "x": "2026-05-19",
+            "y": 20674
+          }
+        ]
+      },
+      {
+        "id": "queries",
+        "label": "Queries",
+        "points": [
+          {
+            "x": "2026-02-19",
+            "y": 41000
+          },
+          {
+            "x": "2026-02-20",
+            "y": 46566
+          },
+          {
+            "x": "2026-02-21",
+            "y": 50862
+          },
+          {
+            "x": "2026-02-22",
+            "y": 52949
+          },
+          {
+            "x": "2026-02-23",
+            "y": 52467
+          },
+          {
+            "x": "2026-02-24",
+            "y": 49721
+          },
+          {
+            "x": "2026-02-25",
+            "y": 45591
+          },
+          {
+            "x": "2026-02-26",
+            "y": 41286
+          },
+          {
+            "x": "2026-02-27",
+            "y": 38017
+          },
+          {
+            "x": "2026-02-28",
+            "y": 36663
+          },
+          {
+            "x": "2026-03-01",
+            "y": 37533
+          },
+          {
+            "x": "2026-03-02",
+            "y": 40290
+          },
+          {
+            "x": "2026-03-03",
+            "y": 44041
+          },
+          {
+            "x": "2026-03-04",
+            "y": 47588
+          },
+          {
+            "x": "2026-03-05",
+            "y": 49762
+          },
+          {
+            "x": "2026-03-06",
+            "y": 49746
+          },
+          {
+            "x": "2026-03-07",
+            "y": 47306
+          },
+          {
+            "x": "2026-03-08",
+            "y": 42870
+          },
+          {
+            "x": "2026-03-09",
+            "y": 37416
+          },
+          {
+            "x": "2026-03-10",
+            "y": 32223
+          },
+          {
+            "x": "2026-03-11",
+            "y": 28531
+          },
+          {
+            "x": "2026-03-12",
+            "y": 27212
+          },
+          {
+            "x": "2026-03-13",
+            "y": 28541
+          },
+          {
+            "x": "2026-03-14",
+            "y": 32127
+          },
+          {
+            "x": "2026-03-15",
+            "y": 37016
+          },
+          {
+            "x": "2026-03-16",
+            "y": 41952
+          },
+          {
+            "x": "2026-03-17",
+            "y": 45714
+          },
+          {
+            "x": "2026-03-18",
+            "y": 47437
+          },
+          {
+            "x": "2026-03-19",
+            "y": 46846
+          },
+          {
+            "x": "2026-03-20",
+            "y": 44315
+          },
+          {
+            "x": "2026-03-21",
+            "y": 40760
+          },
+          {
+            "x": "2026-03-22",
+            "y": 37382
+          },
+          {
+            "x": "2026-03-23",
+            "y": 35327
+          },
+          {
+            "x": "2026-03-24",
+            "y": 35367
+          },
+          {
+            "x": "2026-03-25",
+            "y": 37683
+          },
+          {
+            "x": "2026-03-26",
+            "y": 41806
+          },
+          {
+            "x": "2026-03-27",
+            "y": 46736
+          },
+          {
+            "x": "2026-03-28",
+            "y": 51209
+          },
+          {
+            "x": "2026-03-29",
+            "y": 54035
+          },
+          {
+            "x": "2026-03-30",
+            "y": 54420
+          },
+          {
+            "x": "2026-03-31",
+            "y": 52181
+          },
+          {
+            "x": "2026-04-01",
+            "y": 47800
+          },
+          {
+            "x": "2026-04-02",
+            "y": 42299
+          },
+          {
+            "x": "2026-04-03",
+            "y": 36970
+          },
+          {
+            "x": "2026-04-04",
+            "y": 33037
+          },
+          {
+            "x": "2026-04-05",
+            "y": 31329
+          },
+          {
+            "x": "2026-04-06",
+            "y": 32072
+          },
+          {
+            "x": "2026-04-07",
+            "y": 34836
+          },
+          {
+            "x": "2026-04-08",
+            "y": 38661
+          },
+          {
+            "x": "2026-04-09",
+            "y": 42327
+          },
+          {
+            "x": "2026-04-10",
+            "y": 44694
+          },
+          {
+            "x": "2026-04-11",
+            "y": 45015
+          },
+          {
+            "x": "2026-04-12",
+            "y": 43144
+          },
+          {
+            "x": "2026-04-13",
+            "y": 39579
+          },
+          {
+            "x": "2026-04-14",
+            "y": 35326
+          },
+          {
+            "x": "2026-04-15",
+            "y": 31625
+          },
+          {
+            "x": "2026-04-16",
+            "y": 29612
+          },
+          {
+            "x": "2026-04-17",
+            "y": 30005
+          },
+          {
+            "x": "2026-04-18",
+            "y": 32900
+          },
+          {
+            "x": "2026-04-19",
+            "y": 37737
+          },
+          {
+            "x": "2026-04-20",
+            "y": 43442
+          },
+          {
+            "x": "2026-04-21",
+            "y": 48708
+          },
+          {
+            "x": "2026-04-22",
+            "y": 52335
+          },
+          {
+            "x": "2026-04-23",
+            "y": 53547
+          },
+          {
+            "x": "2026-04-24",
+            "y": 52193
+          },
+          {
+            "x": "2026-04-25",
+            "y": 48779
+          },
+          {
+            "x": "2026-04-26",
+            "y": 44323
+          },
+          {
+            "x": "2026-04-27",
+            "y": 40079
+          },
+          {
+            "x": "2026-04-28",
+            "y": 37193
+          },
+          {
+            "x": "2026-04-29",
+            "y": 36394
+          },
+          {
+            "x": "2026-04-30",
+            "y": 37797
+          },
+          {
+            "x": "2026-05-01",
+            "y": 40879
+          },
+          {
+            "x": "2026-05-02",
+            "y": 44626
+          },
+          {
+            "x": "2026-05-03",
+            "y": 47815
+          },
+          {
+            "x": "2026-05-04",
+            "y": 49354
+          },
+          {
+            "x": "2026-05-05",
+            "y": 48592
+          },
+          {
+            "x": "2026-05-06",
+            "y": 45499
+          },
+          {
+            "x": "2026-05-07",
+            "y": 40690
+          },
+          {
+            "x": "2026-05-08",
+            "y": 35267
+          },
+          {
+            "x": "2026-05-09",
+            "y": 30530
+          },
+          {
+            "x": "2026-05-10",
+            "y": 27632
+          },
+          {
+            "x": "2026-05-11",
+            "y": 27272
+          },
+          {
+            "x": "2026-05-12",
+            "y": 29512
+          },
+          {
+            "x": "2026-05-13",
+            "y": 33882
+          },
+          {
+            "x": "2026-05-14",
+            "y": 39274
+          },
+          {
+            "x": "2026-05-15",
+            "y": 44365
+          },
+          {
+            "x": "2026-05-16",
+            "y": 47995
+          },
+          {
+            "x": "2026-05-17",
+            "y": 49452
+          },
+          {
+            "x": "2026-05-18",
+            "y": 48656
+          },
+          {
+            "x": "2026-05-19",
+            "y": 46164
+          }
+        ]
+      }
+    ],
+    "supporting": [
+      {
+        "id": "queries-per-session",
+        "label": "queries/session",
+        "amount": 4.6,
+        "decimals": 1
+      },
+      {
+        "id": "avg-session-minutes",
+        "label": "min avg session",
+        "amount": 8.2,
+        "decimals": 1
+      }
+    ]
+  },
+  "costByBusinessUnit": {
+    "items": [
+      {
+        "name": "Business Unit A",
+        "totalCost": 7.68,
+        "topProjectName": "Project A1",
+        "topProjectCost": 4.21
+      },
+      {
+        "name": "Business Unit B",
+        "totalCost": 5.42,
+        "topProjectName": "Project B1",
+        "topProjectCost": 2.93
+      },
+      {
+        "name": "Business Unit C",
+        "totalCost": 3.76,
+        "topProjectName": "Project C1",
+        "topProjectCost": 1.94
+      }
+    ],
+    "infrastructureCost": {
+      "id": "infrastructure-cost",
+      "label": "Infrastructure Cost",
+      "pendingState": "data"
+    }
+  },
+  "safetyAndRisk": [
+    {
+      "id": "safety-evaluation-score",
+      "label": "Safety Evaluation Score",
+      "amount": 0.8,
+      "unit": "%",
+      "decimals": 1,
+      "suffix": "impacted requests"
+    },
+    {
+      "id": "mlflow-safety-score",
+      "label": "MLflow Safety Score",
+      "pendingState": "scale"
+    },
+    {
+      "id": "pii-leakage",
+      "label": "PII Leakage (Agent Only)",
+      "amount": 0.02,
+      "unit": "%",
+      "decimals": 2,
+      "suffix": "flagged"
+    }
+  ],
+  "drawers": {
+    "pulse": {
+      "eyebrow": "EXECUTIVE PULSE DETAILS",
+      "title": "Executive pulse",
+      "description": "Portfolio view • Latency, API errors, and feedback",
+      "bannerMessage": "ILLUSTRATIVE VALUES — ATTRIBUTION AND COMPARISON PERIODS PENDING VALIDATION",
+      "latency": [
+        {
+          "id": "p95",
+          "label": "End-to-End Latency P95",
+          "value": "1.20 s"
+        },
+        {
+          "id": "avg",
+          "label": "End-to-End Latency average",
+          "value": "0.74 s"
+        },
+        {
+          "id": "previous",
+          "label": "Previous period P95",
+          "value": "1.31 s"
+        }
+      ],
+      "apiStatus": [
+        {
+          "id": "success",
+          "label": "Success",
+          "sharePct": 98.86
+        },
+        {
+          "id": "client-error",
+          "label": "Client error",
+          "sharePct": 0.62
+        },
+        {
+          "id": "server-error",
+          "label": "Server error",
+          "sharePct": 0.52
+        }
+      ],
+      "feedback": [
+        {
+          "id": "positive",
+          "label": "Positive",
+          "value": "84%"
+        },
+        {
+          "id": "negative",
+          "label": "Negative",
+          "value": "16%"
+        },
+        {
+          "id": "participation",
+          "label": "Anonymous participation",
+          "value": "12.4K responses"
+        },
+        {
+          "id": "attribution",
+          "label": "Business unit / project attribution",
+          "pendingState": "filter-breakdown"
+        }
+      ],
+      "handoffs": [
+        {
+          "id": "engagement",
+          "label": "Session & Query Volume",
+          "destination": "Engagement details"
+        },
+        {
+          "id": "cost",
+          "label": "Cost per Request",
+          "destination": "Cost allocation"
+        }
+      ],
+      "contextRows": [
+        {
+          "id": "latency-calc",
+          "metric": "End-to-End Latency",
+          "calculation": "P95 and AVG of eligible request duration",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "api-calc",
+          "metric": "API Error Rate",
+          "calculation": "Aggregate response-status distribution",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "feedback-calc",
+          "metric": "User Feedback",
+          "calculation": "Share of positive and negative responses",
+          "coverage": "filter-breakdown"
+        }
+      ],
+      "notes": [
+        "Session & Query Volume and Cost per Request are summary signals here; their own sections own the detail",
+        "No previous-period comparison is shown for API errors or feedback, which have no approved comparison basis"
+      ]
+    },
+    "sessionAndQueryVolume": {
+      "eyebrow": "EXECUTIVE ENGAGEMENT DETAILS",
+      "title": "Session & Query Volume",
+      "description": "Portfolio view • Reach and composition",
+      "bannerMessage": "ILLUSTRATIVE VALUES — SESSION RULES AND ATTRIBUTION PENDING VALIDATION",
+      "summary": [
+        {
+          "id": "active-users",
+          "label": "Distinct active users",
+          "value": "42.6K"
+        },
+        {
+          "id": "total-sessions",
+          "label": "Total sessions",
+          "value": "68.7K"
+        },
+        {
+          "id": "total-conversations",
+          "label": "Total conversations",
+          "value": "91.4K"
+        },
+        {
+          "id": "queries-per-user",
+          "label": "Average queries per user",
+          "value": "7.4"
+        }
+      ],
+      "channels": [
+        {
+          "id": "web",
+          "label": "Web",
+          "queries": "154K",
+          "sessions": "34.1K",
+          "sharePct": 48.7
+        },
+        {
+          "id": "teams",
+          "label": "Teams",
+          "queries": "96K",
+          "sessions": "20.2K",
+          "sharePct": 30.4
+        },
+        {
+          "id": "mobile",
+          "label": "Mobile",
+          "queries": "42K",
+          "sessions": "9.1K",
+          "sharePct": 13.3
+        },
+        {
+          "id": "api",
+          "label": "API",
+          "queries": "24K",
+          "sessions": "5.3K",
+          "sharePct": 7.6
+        }
+      ],
+      "sessionDepth": [
+        {
+          "id": "1",
+          "label": "1 query",
+          "sessions": "19.9K sessions",
+          "sharePct": 29
+        },
+        {
+          "id": "2-5",
+          "label": "2–5 queries",
+          "sessions": "29.5K sessions",
+          "sharePct": 43
+        },
+        {
+          "id": "6-10",
+          "label": "6–10 queries",
+          "sessions": "13.7K sessions",
+          "sharePct": 20
+        },
+        {
+          "id": "11plus",
+          "label": "11+ queries",
+          "sessions": "5.6K sessions",
+          "sharePct": 8
+        }
+      ],
+      "conversationContext": [
+        {
+          "id": "conv-per-session",
+          "label": "Average conversations per session",
+          "value": "1.3"
+        },
+        {
+          "id": "queries-per-conv",
+          "label": "Average queries per conversation",
+          "value": "3.5"
+        },
+        {
+          "id": "duration-distribution",
+          "label": "Session-duration distribution",
+          "pendingState": "data"
+        }
+      ],
+      "contextRows": [
+        {
+          "id": "active-users-calc",
+          "metric": "Active users",
+          "calculation": "COUNT(DISTINCT user_id)",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "sessions-calc",
+          "metric": "Sessions",
+          "calculation": "COUNT(DISTINCT session_id)",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "conversations-calc",
+          "metric": "Conversations",
+          "calculation": "COUNT(DISTINCT session_id + conversation_id)",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "queries-per-user-calc",
+          "metric": "Queries per user",
+          "calculation": "distinct request count / distinct user count",
+          "coverage": "filter-breakdown"
+        }
+      ],
+      "notes": [
+        "Depth bands are illustrative and require client approval",
+        "Engagement is neutral evidence of reach, not a satisfaction, completion, or business-outcome claim",
+        "Executive-only aggregates — no user, session, conversation, request, prompt, or response content"
+      ]
+    },
+    "costByBusinessUnit": {
+      "eyebrow": "EXECUTIVE COST ALLOCATION",
+      "title": "Cost by BU and Project",
+      "description": "Portfolio view • Attributed AI token cost",
+      "bannerMessage": "ILLUSTRATIVE VALUES — OWNERSHIP AND ALLOCATION RULES PENDING VALIDATION",
+      "portfolio": [
+        {
+          "id": "token-cost",
+          "label": "Attributed AI token cost",
+          "value": "$16.86K"
+        },
+        {
+          "id": "cost-per-request",
+          "label": "Portfolio average Cost per Request",
+          "value": "$0.12"
+        }
+      ],
+      "infrastructureCost": {
+        "id": "infrastructure-cost",
+        "label": "Infrastructure Cost",
+        "pendingState": "data"
+      },
+      "contextRows": [
+        {
+          "id": "bu-calc",
+          "metric": "Business unit cost",
+          "calculation": "SUM(request_cost) GROUP BY business_unit",
+          "coverage": "filter-breakdown"
+        },
+        {
+          "id": "project-calc",
+          "metric": "Project cost",
+          "calculation": "SUM(request_cost) GROUP BY business_unit, project",
+          "coverage": "filter-breakdown"
+        }
+      ],
+      "notes": [
+        "A project cost is a subset of its business unit, never added to it",
+        "Attributed token cost only — this is not a total cost, and it excludes Infrastructure Cost"
+      ],
+      "decisions": [
+        {
+          "id": "shared-ownership",
+          "label": "Shared and cross-project ownership rule",
+          "pendingState": "definition"
+        },
+        {
+          "id": "unattributed",
+          "label": "Missing or conflicting ownership treatment",
+          "pendingState": "definition"
+        }
+      ]
+    },
+    "safetyAndRisk": {
+      "eyebrow": "SAFETY & RISK DETAILS",
+      "title": "Safety & risk posture",
+      "description": "Portfolio view • What each signal can support",
+      "bannerMessage": "ILLUSTRATIVE VALUES — COVERAGE AND ATTRIBUTION PENDING VALIDATION",
+      "signals": [
+        {
+          "id": "safety-evaluation",
+          "label": "Safety Evaluation — impacted-request rate from approved category pass/fail results",
+          "value": "0.8%"
+        },
+        {
+          "id": "mlflow-safety",
+          "label": "MLflow Safety Score — no approved scale",
+          "pendingState": "scale"
+        },
+        {
+          "id": "pii-leakage",
+          "label": "PII Leakage — flagged-evaluation rate, agent workloads only",
+          "value": "0.02%"
+        }
+      ],
+      "contextRows": [
+        {
+          "id": "safety-calc",
+          "metric": "Safety Evaluation",
+          "calculation": "Impacted requests / evaluated requests",
+          "coverage": "data"
+        },
+        {
+          "id": "pii-calc",
+          "metric": "PII Leakage (Agent Only)",
+          "calculation": "Flagged evaluations / agent evaluations",
+          "coverage": "data"
+        }
+      ],
+      "notes": [
+        "A PII flag is an evaluation result, not a confirmed breach",
+        "No safety score is derived from category severity values",
+        "Not an incident, remediation, or threshold view"
+      ],
+      "decisions": [
+        {
+          "id": "coverage",
+          "label": "Evaluation coverage",
+          "pendingState": "data"
+        },
+        {
+          "id": "attribution",
+          "label": "Business unit / project / channel attribution",
+          "pendingState": "data"
+        }
+      ]
+    }
+  }
+}

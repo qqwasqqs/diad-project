@@ -31,6 +31,8 @@ const variantStyles: Record<
   },
 };
 
+export type StatusCalloutSize = "default" | "compact";
+
 export interface StatusCalloutProps {
   icon: ReactNode;
   title: string;
@@ -38,6 +40,12 @@ export interface StatusCalloutProps {
   className?: string;
   titleClassName?: string;
   variant?: StatusCalloutVariant;
+  /*
+    "compact" shrinks the icon badge and type for callouts placed several across
+    a narrow panel, where a full-size badge leaves too little room for the text
+    beside it.
+  */
+  size?: StatusCalloutSize;
 }
 
 export const StatusCallout = ({
@@ -47,11 +55,14 @@ export const StatusCallout = ({
   className = "",
   titleClassName = "",
   variant = "warning",
+  size = "default",
 }: StatusCalloutProps) => {
   const { iconBackground, iconColor } = variantStyles[variant];
+  const isCompact = size === "compact";
 
   const rootClassName = cn(
-    "flex min-w-0 items-center gap-4",
+    "flex min-w-0 items-center",
+    isCompact ? "gap-3" : "gap-4",
     className.trim(),
   );
 
@@ -60,21 +71,39 @@ export const StatusCallout = ({
   return (
     <div className={rootClassName}>
       <div
-        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full"
+        className={cn(
+          "flex shrink-0 items-center justify-center rounded-full",
+          isCompact ? "h-10 w-10" : "h-14 w-14",
+        )}
         style={iconBackground}
         aria-hidden="true"
       >
-        <span className="flex items-center justify-center text-2xl" style={iconColor}>
+        <span
+          className={cn(
+            "flex items-center justify-center",
+            isCompact ? "text-lg" : "text-2xl",
+          )}
+          style={iconColor}
+        >
           {icon}
         </span>
       </div>
 
       <div className="min-w-0">
-        <Text size={300} weight="medium" className={titleClasses}>
+        <Text
+          size={isCompact ? 200 : 300}
+          weight="medium"
+          className={titleClasses}
+        >
           {title}
         </Text>
 
-        <div className="mt-1 text-lg font-semibold uppercase tracking-tight text-slate-900">
+        <div
+          className={cn(
+            "mt-1 font-semibold uppercase tracking-tight text-slate-900",
+            isCompact ? "text-sm" : "text-lg",
+          )}
+        >
           {primaryContent}
         </div>
       </div>

@@ -28,6 +28,13 @@ interface DashboardPanelProps {
   sections?: DashboardPanelSection[];
   children: ReactNode;
   className?: string;
+  /*
+    Lets the body fill a panel that the grid has stretched to match a taller
+    neighbour, so content can align to the panel's bottom edge rather than to
+    the bottom of its own natural height. Opt-in: a panel that does not ask for
+    it keeps the block flow its children were laid out against.
+  */
+  fillHeight?: boolean;
 }
 
 export default function DashboardPanel({
@@ -38,12 +45,14 @@ export default function DashboardPanel({
   sections,
   children,
   className = "",
+  fillHeight = false,
 }: DashboardPanelProps) {
   if (template === "single") {
     return (
       <div
         className={[
           "w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm",
+          fillHeight ? "flex h-full flex-col" : "",
           className,
         ].join(" ")}
       >
@@ -55,7 +64,14 @@ export default function DashboardPanel({
             {actions && <div className="shrink-0">{actions}</div>}
           </div>
         )}
-        <div className="px-5 pb-4 pt-2">{children}</div>
+        <div
+          className={[
+            "px-5 pb-4 pt-2",
+            fillHeight ? "flex min-h-0 flex-1 flex-col" : "",
+          ].join(" ")}
+        >
+          {children}
+        </div>
         {footer && (
           <div className="flex justify-end px-3 pb-2">{footer}</div>
         )}

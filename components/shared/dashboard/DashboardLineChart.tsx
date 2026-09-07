@@ -211,7 +211,7 @@ export default function DashboardLineChart({
         <LineChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 8 }}>
           {showGrid && (
             <CartesianGrid
-              stroke="#e2e8f0"
+              stroke="var(--color-chart-grid)"
               strokeDasharray="3 3"
               vertical={false}
             />
@@ -219,10 +219,10 @@ export default function DashboardLineChart({
 
           <XAxis
             dataKey="x"
-            axisLine={{ stroke: "#cbd5e1" }}
+            axisLine={{ stroke: "var(--color-chart-axis-line)" }}
             tickLine={false}
             tickMargin={10}
-            tick={{ fill: "#64748b", fontSize: 12 }}
+            tick={{ fill: "var(--color-chart-axis)", fontSize: 12 }}
             minTickGap={18}
           />
 
@@ -231,13 +231,13 @@ export default function DashboardLineChart({
               key={axis.id}
               yAxisId={axis.id}
               orientation={axis.id === "right" ? "right" : "left"}
-              axisLine={{ stroke: "#cbd5e1" }}
+              axisLine={{ stroke: "var(--color-chart-axis-line)" }}
               tickLine={false}
               tickMargin={10}
               width={axis.width ?? (axis.label ? 72 : 50)}
               domain={axis.domain}
               tickFormatter={axis.tickFormatter}
-              tick={{ fill: "#64748b", fontSize: 12 }}
+              tick={{ fill: "var(--color-chart-axis)", fontSize: 12 }}
               label={
                 axis.label
                   ? {
@@ -245,7 +245,7 @@ export default function DashboardLineChart({
                       angle: -90,
                       position: "insideLeft",
                       style: {
-                        fill: "#64748b",
+                        fill: "var(--color-chart-axis)",
                         fontSize: 12,
                         textAnchor: "middle",
                       },
@@ -256,12 +256,12 @@ export default function DashboardLineChart({
           ))}
 
           <Tooltip
-            cursor={{ stroke: "#94a3b8", strokeDasharray: "4 4" }}
+            cursor={{ stroke: "var(--color-chart-cursor)", strokeDasharray: "4 4" }}
             formatter={(value: number | string) => [value, ""]}
             labelFormatter={(label) => `${label}`}
             contentStyle={{
               borderRadius: 12,
-              border: "1px solid #e2e8f0",
+              border: "1px solid var(--color-chart-grid)",
               boxShadow: "0 10px 15px -3px rgba(15, 23, 42, 0.08)",
             }}
           />

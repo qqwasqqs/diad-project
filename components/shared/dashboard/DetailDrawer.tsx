@@ -83,7 +83,7 @@ export default function DetailDrawer({
       size={size}
       headerFilters={headerFilters}
     >
-      <IllustrativeValuesBanner />
+      <IllustrativeValuesBanner message={content.bannerMessage} />
 
       {children}
 

@@ -12,27 +12,50 @@ export default function InfrastructureDataPendingCard({
   statusLabel = "DATA PENDING",
   value = "",
   icon = (
-    <span className="inline-flex h-7 w-7 items-center justify-center text-lg text-slate-600">
+    <span
+      className="inline-flex h-5 w-5 items-center justify-center text-base"
+      style={{ color: "var(--color-chart-axis)" }}
+    >
       ⏳
     </span>
   ),
 }: InfrastructureDataPendingCardProps) {
   return (
-    <div className="flex h-full min-h-[240px] w-[200px] min-w-[200px] flex-col rounded-2xl border border-slate-200 bg-white px-6 py-7 shadow-sm">
-      <div className="text-xl font-medium leading-tight text-slate-800">{title}</div>
-
-      <div className="mt-8 flex flex-1 items-center justify-center">
-        <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-600">
-          {icon}
-        </div>
+    /*
+      Deliberately compact. This is a placeholder for a metric with no approved
+      source, sitting beside the chart that carries the panel's actual content;
+      at panel widths it must not take room the bars need.
+    */
+    <div
+      className="flex w-[124px] shrink-0 flex-col items-center justify-center gap-2 rounded-xl border px-3 py-4 text-center"
+      style={{ borderColor: "var(--color-chart-grid)" }}
+    >
+      <div
+        className="text-xs font-medium leading-tight"
+        style={{ color: "var(--color-text-primary)" }}
+      >
+        {title}
       </div>
 
-      <div className="mt-6 text-center text-sm font-semibold uppercase tracking-[0.03em] text-slate-500">
+      <div
+        className="inline-flex h-9 w-9 items-center justify-center rounded-full"
+        style={{ backgroundColor: "var(--color-neutral-background-3)" }}
+      >
+        {icon}
+      </div>
+
+      <div
+        className="text-[11px] font-semibold uppercase tracking-[0.03em]"
+        style={{ color: "var(--color-warning-content)" }}
+      >
         {statusLabel}
       </div>
 
       {value ? (
-        <div className="mt-3 text-center text-xl font-semibold leading-none text-slate-700">
+        <div
+          className="text-sm font-semibold leading-none"
+          style={{ color: "var(--color-text-primary)" }}
+        >
           {value}
         </div>
       ) : null}

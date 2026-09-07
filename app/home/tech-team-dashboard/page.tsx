@@ -23,9 +23,13 @@ import HorizontalBarList from "@/components/shared/charts/HorizontalBarList";
 import IllustrativeValuesBanner from "@/components/shared/dashboard/IllustrativeValuesBanner";
 import PanelFootnote from "@/components/shared/dashboard/PanelFootnote";
 import PendingStateValue from "@/components/shared/dashboard/PendingStateValue";
-import { MetricCard } from "@/components/shared/dashboard/MetricCard";
 import DashboardSectionAction from "@/components/shared/dashboard/DashboardSectionAction";
-import DetailDrawer from "@/components/shared/dashboard/DetailDrawer";
+import RequestPathLatencyDrawer from "@/components/shared/dashboard/drawers/tech-team/RequestPathLatencyDrawer";
+import RequestPathDiagnosticsDrawer from "@/components/shared/dashboard/drawers/tech-team/RequestPathDiagnosticsDrawer";
+import FailureLocalizationDrawer from "@/components/shared/dashboard/drawers/tech-team/FailureLocalizationDrawer";
+import CapacityAndEfficiencyDrawer from "@/components/shared/dashboard/drawers/tech-team/CapacityAndEfficiencyDrawer";
+import AiModelQualityDrawer from "@/components/shared/dashboard/drawers/tech-team/AiModelQualityDrawer";
+import EvaluatorReadinessDrawer from "@/components/shared/dashboard/drawers/tech-team/EvaluatorReadinessDrawer";
 import { useTechTeamMainView } from "@/hooks/useTechTeamDashboard";
 import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
 import type { MetricRow, Series } from "@/types/dashboard";
@@ -310,157 +314,51 @@ export default function TechTeamDashboard() {
 
       {/* Detail drawers. Each deepens exactly one main-view element. */}
 
-      <DetailDrawer
+      <RequestPathLatencyDrawer
         open={openDrawer === "latencyChart"}
         onClose={closeDrawer}
         content={drawers?.latencyChart}
-        size="wide"
-      >
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {(drawers?.latencyChart.contextRows ?? []).map((row) => (
-            <MetricCard
-              key={row.id}
-              title={row.metric}
-              primaryContent={row.latest}
-              className="rounded-lg border"
-              minHeight="min-h-0"
-              titleClassName="text-xs font-medium"
-              valueClassName="text-xl font-semibold"
-            />
-          ))}
-        </div>
+        series={latencySeries}
+      />
 
-        <section>
-          <h4
-            className="mb-2 text-sm font-semibold"
-            style={{ color: "var(--color-text-primary)" }}
-          >
-            Latency trend
-          </h4>
-          <DashboardLineChart
-            series={latencySeries}
-            axes={[{ id: "left", label: "Latency (ms)" }]}
-            height={220}
-          />
-          <PanelFootnote>Component times are not additive</PanelFootnote>
-        </section>
-      </DetailDrawer>
-
-      <DetailDrawer
+      <RequestPathDiagnosticsDrawer
         open={openDrawer === "diagnostics"}
         onClose={closeDrawer}
         content={drawers?.diagnostics}
-        size="wide"
-      >
-        {/* The four-series latency chart is deliberately absent: it is a
-            separate clickable element with its own drawer. */}
-        <div className="grid grid-cols-2 gap-3">
-          {(data?.requestPathHealth.diagnostics ?? []).map((row) => (
-            <MetricCard
-              key={row.id}
-              icon={DIAGNOSTIC_ICONS[row.id]}
-              title={row.label}
-              primaryContent={row.value}
-              className="rounded-lg border"
-              minHeight="min-h-0"
-              titleClassName="text-xs font-medium"
-              valueClassName="text-xl font-semibold"
-            />
-          ))}
-        </div>
-      </DetailDrawer>
+        diagnostics={data?.requestPathHealth.diagnostics ?? []}
+        icons={DIAGNOSTIC_ICONS}
+      />
 
-      <DetailDrawer
+      <FailureLocalizationDrawer
         open={openDrawer === "failureLocalization"}
         onClose={closeDrawer}
         content={drawers?.failureLocalization}
-        size="wide"
-      >
-        <HorizontalBarList
-          values={data?.failureLocalization.items ?? []}
-          rowsPerColumn={4}
-          max={data?.failureLocalization.scaleMax ?? 2}
-        />
-      </DetailDrawer>
+        items={data?.failureLocalization.items ?? []}
+        scaleMax={data?.failureLocalization.scaleMax ?? 2}
+      />
 
-      <DetailDrawer
+      <CapacityAndEfficiencyDrawer
         open={openDrawer === "capacityAndEfficiency"}
         onClose={closeDrawer}
         content={drawers?.capacityAndEfficiency}
-        size="wide"
-      >
-        <div className="grid grid-cols-2 gap-3">
-          {(data?.capacityAndEfficiency ?? [])
-            .filter((row) => !row.pendingState)
-            .map((row) => (
-              <MetricCard
-                key={row.id}
-                title={row.label}
-                primaryContent={row.value}
-                className="rounded-lg border"
-                minHeight="min-h-0"
-                titleClassName="text-xs font-medium"
-                valueClassName="text-xl font-semibold"
-              />
-            ))}
-        </div>
-      </DetailDrawer>
+        rows={data?.capacityAndEfficiency ?? []}
+      />
 
-      <DetailDrawer
+      <AiModelQualityDrawer
         open={openDrawer === "aiModelQuality"}
         onClose={closeDrawer}
         content={drawers?.aiModelQuality}
-        size="wide"
-      >
-        <section>
-          <h4
-            className="mb-2 text-sm font-semibold"
-            style={{ color: "var(--color-text-primary)" }}
-          >
-            Quality trend
-          </h4>
-          <DashboardLineChart
-            series={qualitySeries}
-            axes={[{ id: "left", domain: [1, 5] }]}
-            height={200}
-          />
-        </section>
+        series={qualitySeries}
+        supporting={data?.aiModelQuality.supporting ?? []}
+      />
 
-        {/* Scales stay visibly separate: the 1-5 and 0-1 measures are shown as
-            distinct cards, never normalized onto one axis. */}
-        <div className="grid grid-cols-2 gap-3">
-          {(data?.aiModelQuality.supporting ?? []).map((stat) => (
-            <MetricCard
-              key={stat.id}
-              title={stat.label}
-              primaryContent={stat.value}
-              className="rounded-lg border"
-              minHeight="min-h-0"
-              titleClassName="text-xs font-medium"
-              valueClassName="text-xl font-semibold"
-            />
-          ))}
-        </div>
-      </DetailDrawer>
-
-      <DetailDrawer
+      <EvaluatorReadinessDrawer
         open={openDrawer === "evaluatorReadiness"}
         onClose={closeDrawer}
         content={drawers?.evaluatorReadiness}
-        size="wide"
-      >
-        <section>
-          <h4
-            className="mb-2 text-sm font-semibold"
-            style={{ color: "var(--color-text-primary)" }}
-          >
-            Evaluator readiness matrix
-          </h4>
-          <MetricList
-            items={toRows(data?.evaluatorReadiness ?? [], READINESS_ICONS)}
-          />
-        </section>
-      </DetailDrawer>
+        rows={data?.evaluatorReadiness ?? []}
+        icons={READINESS_ICONS}
+      />
     </DashboardPage>
   );
 }

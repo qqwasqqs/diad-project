@@ -21,6 +21,17 @@ export type HorizontalBarListProps = {
     */
     rowsPerColumn?: number;
     /*
+      Number of columns the rows flow into. Defaults to two.
+    */
+    columns?: number;
+    /*
+      Fill direction. "column" (default) fills each column top to bottom, so the
+      supplied order reads down the first column. "row" fills left to right, so
+      the order reads across. Which one is correct comes from the design being
+      implemented, not from the data.
+    */
+    flow?: "column" | "row";
+    /*
       Upper bound of the bar track. Bar length is `value / max`.
 
       Defaults to 100 for values that are already percentages of a whole. Sets of
@@ -35,16 +46,13 @@ export type HorizontalBarListProps = {
 const COMPONENT_HEIGHT = 180;
 const ROW_HEIGHT = 30;
 const DEFAULT_ROWS_PER_COLUMN = Math.floor(COMPONENT_HEIGHT / ROW_HEIGHT);
-const COLUMN_COUNT = 2;
+const DEFAULT_COLUMN_COUNT = 2;
 
 const useStyles = makeStyles({
     root: {
         display: "grid",
-        gridAutoFlow: "column",
-        gridAutoColumns: "minmax(0, 1fr)",
         columnGap: "24px",
         overflow: "hidden",
-        height: `${COMPONENT_HEIGHT}px`,
     },
 
     row: {
@@ -72,7 +80,7 @@ const useStyles = makeStyles({
     value: {
         fontSize: "12px",
         lineHeight: "16px",
-        color: "#6b7280",
+        color: "var(--color-chart-axis)",
         textAlign: "right",
         fontWeight: 500,
         whiteSpace: "nowrap",
@@ -140,21 +148,35 @@ const ProgressBar = ({
 export const HorizontalBarList: React.FC<HorizontalBarListProps> = ({
     values,
     rowsPerColumn = DEFAULT_ROWS_PER_COLUMN,
+    columns = DEFAULT_COLUMN_COUNT,
+    flow = "column",
     max = 100,
     barColor = "var(--color-chart-series-1)",
 }) => {
     const styles = useStyles();
 
     const rows = Math.max(1, rowsPerColumn);
-    const visibleItems = values.slice(0, rows * COLUMN_COUNT);
+    const columnCount = Math.max(1, columns);
+    const visibleItems = values.slice(0, rows * columnCount);
 
     return (
         <div
             className={styles.root}
-            style={{
-                gridTemplateRows: `repeat(${rows}, ${ROW_HEIGHT}px)`,
-                height: `${rows * ROW_HEIGHT}px`,
-            }}
+            style={
+                flow === "row"
+                    ? {
+                          gridAutoFlow: "row",
+                          gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
+                          gridAutoRows: `${ROW_HEIGHT}px`,
+                          height: `${rows * ROW_HEIGHT}px`,
+                      }
+                    : {
+                          gridAutoFlow: "column",
+                          gridAutoColumns: "minmax(0, 1fr)",
+                          gridTemplateRows: `repeat(${rows}, ${ROW_HEIGHT}px)`,
+                          height: `${rows * ROW_HEIGHT}px`,
+                      }
+            }
         >
             {visibleItems.map((item, index) => (
                 <div
