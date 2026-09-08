@@ -37,7 +37,7 @@ export const MetricList = ({
     return (
         <ul
             role="list"
-            className={`w-full divide-y ${className}`}
+            className={`w-full divide-y divide-gray-200 ${className}`}
             style={{ borderColor: "var(--color-chart-grid)" }}
         >
             {items.map((item) => (

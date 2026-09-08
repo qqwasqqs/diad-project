@@ -1,0 +1,50 @@
+{
+  "operational-situation": {
+    "description": "Shows compact mapped latency and reliability signals, including the alert-feed readiness state. Values are illustrative and do not form a composite health status.",
+    "kpiCategories": [
+      "Performance and latency",
+      "Reliability",
+      "Alert monitoring (pending)"
+    ]
+  },
+  "requested-operations-coverage": {
+    "description": "Lists required operations monitoring signals that do not yet have approved reporting contracts. Pending states do not make a live monitoring claim.",
+    "kpiCategories": [
+      "Uptime and SLA (pending)",
+      "Infrastructure utilization (pending)",
+      "System load (pending)"
+    ]
+  },
+  "service-path-stability": {
+    "description": "Shows how latency moves through the service path alongside diagnostic context. Component times are not additive.",
+    "kpiCategories": [
+      "Performance and latency",
+      "Request throughput",
+      "Pipeline and service runtime"
+    ]
+  },
+  "failure-surface": {
+    "description": "Compares illustrative failure-rate signals across operational workloads. It identifies where follow-up may be needed without implying an approved threshold or breach.",
+    "kpiCategories": [
+      "Reliability",
+      "Pipeline and workload failures"
+    ]
+  },
+  "operational-control-coverage": {
+    "description": "Shows the readiness of reproducibility, audit, tool-use, governance, and environment controls. Pending states reflect missing approved calculation or policy rules.",
+    "kpiCategories": [
+      "Training reproducibility",
+      "Audit and governance",
+      "Tool and environment compliance"
+    ]
+  },
+  "safety-and-security-readiness": {
+    "description": "Shows which safety and security evidence is available for follow-up. The illustrative MLflow score does not imply a favorable result or approved attention threshold.",
+    "kpiCategories": [
+      "Content safety",
+      "Security",
+      "ML evaluation",
+      "Prompt-injection testing (pending)"
+    ]
+  }
+}

@@ -23,16 +23,15 @@ interface DashboardPanelProps {
   title?: string;
   /* Action for the panel as a whole, rendered beside its title. */
   actions?: ReactNode;
-  /* Supplemental panel control, rendered below the content. */
+  /* Supplemental panel control, anchored at the panel's bottom edge. */
   footer?: ReactNode;
   sections?: DashboardPanelSection[];
   children: ReactNode;
   className?: string;
   /*
     Lets the body fill a panel that the grid has stretched to match a taller
-    neighbour, so content can align to the panel's bottom edge rather than to
-    the bottom of its own natural height. Opt-in: a panel that does not ask for
-    it keeps the block flow its children were laid out against.
+    neighbour. Panels with a footer do this automatically so the footer remains
+    at the bottom; otherwise this stays opt-in.
   */
   fillHeight?: boolean;
 }
@@ -47,12 +46,17 @@ export default function DashboardPanel({
   className = "",
   fillHeight = false,
 }: DashboardPanelProps) {
+  const hasFooter = Boolean(footer);
+  // A footer is a panel-level control, so it is anchored to the bottom of a
+  // grid-stretched panel instead of following the content's natural height.
+  const shouldFillPanel = fillHeight || hasFooter;
+
   if (template === "single") {
     return (
       <div
         className={[
           "w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm",
-          fillHeight ? "flex h-full flex-col" : "",
+          shouldFillPanel ? "flex h-full flex-col" : "",
           className,
         ].join(" ")}
       >
@@ -67,7 +71,7 @@ export default function DashboardPanel({
         <div
           className={[
             "px-5 pb-4 pt-2",
-            fillHeight ? "flex min-h-0 flex-1 flex-col" : "",
+            shouldFillPanel ? "flex min-h-0 flex-1 flex-col" : "",
           ].join(" ")}
         >
           {children}
@@ -100,6 +104,7 @@ export default function DashboardPanel({
     <div
       className={[
         "w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm",
+        shouldFillPanel ? "flex h-full flex-col" : "",
         className,
       ].join(" ")}
     >
@@ -118,7 +123,10 @@ export default function DashboardPanel({
         content into an unreadable column.
       */}
       <div
-        className="grid w-full grid-cols-1 xl:[grid-template-columns:var(--panel-cols)]"
+        className={[
+          "grid w-full grid-cols-1 xl:[grid-template-columns:var(--panel-cols)]",
+          shouldFillPanel ? "min-h-0 flex-1" : "",
+        ].join(" ")}
         style={
           {
             "--panel-cols": sectionList

@@ -12,19 +12,19 @@ import DashboardSectionInfo, {
 import { MetricCard } from "@/components/shared/dashboard/MetricCard";
 import ProductOwnerAdoptionAndEngagementDrawer, {
   type ProductOwnerAdoptionAndEngagementData,
-} from "@/components/shared/dashboard/drawers/ProductOwnerAdoptionAndEngagementDrawer";
+} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerAdoptionAndEngagementDrawer";
 import ProductOwnerChannelMixDrawer, {
   type ProductOwnerChannelMixData,
-} from "@/components/shared/dashboard/drawers/ProductOwnerChannelMixDrawer";
+} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerChannelMixDrawer";
 import ProductOwnerExperienceQualityDrawer, {
   type ProductOwnerExperienceQualityData,
-} from "@/components/shared/dashboard/drawers/ProductOwnerExperienceQualityDrawer";
+} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerExperienceQualityDrawer";
 import ProductOwnerTrustEvidenceDrawer, {
   type ProductOwnerTrustEvidenceData,
-} from "@/components/shared/dashboard/drawers/ProductOwnerTrustEvidenceDrawer";
+} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerTrustEvidenceDrawer";
 import ProductOwnerProductExperiencePulseDrawer, {
   type ProductExperiencePulseData,
-} from "@/components/shared/dashboard/drawers/ProductOwnerProductExperiencePulseDrawer";
+} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerProductExperiencePulseDrawer";
 import { PositiveNegativeBar } from "@/components/shared/charts/PositiveNegativeBar";
 import HorizontalBarList from "@/components/shared/charts/HorizontalBarList";
 import DashboardLineChart, {

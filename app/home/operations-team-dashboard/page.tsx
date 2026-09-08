@@ -25,6 +25,9 @@ import DashboardPage from "@/components/shared/dashboard/DashboardPage";
 import DashboardGrid from "@/components/shared/dashboard/DashboardGrid";
 import DashboardPanel from "@/components/shared/dashboard/DashboardPanel";
 import DashboardLineChart from "@/components/shared/dashboard/DashboardLineChart";
+import DashboardSectionInfo, {
+  type DashboardSectionInfoContent,
+} from "@/components/shared/dashboard/DashboardSectionInfo";
 import IllustrativeValuesBanner from "@/components/shared/dashboard/IllustrativeValuesBanner";
 import PanelFootnote from "@/components/shared/dashboard/PanelFootnote";
 import PendingStateValue from "@/components/shared/dashboard/PendingStateValue";
@@ -45,6 +48,12 @@ import SafetyAndSecurityReadinessDrawer from "@/components/shared/dashboard/draw
 import { useOperationsMainView } from "@/hooks/useOperationsDashboard";
 import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
 import type { MetricRow, Series } from "@/types/dashboard";
+import operationsTeamSections from "@/content/dashboards/operations-team-sections.json";
+
+const sectionInfo = operationsTeamSections as Record<
+  string,
+  DashboardSectionInfoContent
+>;
 
 /*
   Operations Team main view.
@@ -227,38 +236,47 @@ export default function OperationsTeamDashboard() {
         {/* Measured stability signals. The alert feed has no approved threshold,
             so it reports that rather than a count. */}
         <DashboardPanel
-          template="single"
+          template="segmented"
           title="Operational situation"
           className="xl:col-span-7"
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Operational situation"
+              content={sectionInfo["operational-situation"]}
+            />
+          }
           actions={
             <DashboardSectionAction
               onClick={() => setOpenDrawer("operationalSituation")}
               label="View operational situation details"
             />
           }
+          sections={(data?.operationalSituation ?? []).map((row) => ({
+            id: row.id,
+          }))}
         >
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {(data?.operationalSituation ?? []).map((row) => (
-              <MetricCard
-                key={row.id}
-                icon={SITUATION_ICONS[row.id]}
-                title={row.label}
-                primaryContent={
-                  row.pendingState ? (
-                    <PendingStateValue state={row.pendingState} />
-                  ) : (
-                    row.value
-                  )
-                }
-                className="rounded-lg border border-chart-grid"
-                minHeight="min-h-0"
-                titleClassName="text-xs font-medium"
-                valueClassName="text-2xl font-semibold"
-                headerMinHeight="min-h-[40px]"
-                pinSupporting
-              />
-            ))}
-          </div>
+          {(data?.operationalSituation ?? []).map((row) => (
+            <MetricCard
+              key={row.id}
+              icon={SITUATION_ICONS[row.id]}
+              title={row.label}
+              primaryContent={
+                row.pendingState ? (
+                  <PendingStateValue
+                    state={row.pendingState}
+                    className="!whitespace-nowrap !text-xs !tracking-normal"
+                  />
+                ) : (
+                  row.value
+                )
+              }
+              minHeight="min-h-0"
+              titleClassName="text-xs font-medium"
+              valueClassName="whitespace-nowrap text-[22px] font-semibold leading-7"
+              headerMinHeight="min-h-[40px]"
+              pinSupporting
+            />
+          ))}
         </DashboardPanel>
 
         {/* Requirements with no reporting contract. Not zero values, and not
@@ -267,6 +285,12 @@ export default function OperationsTeamDashboard() {
           template="single"
           title="Requested operations coverage"
           className="xl:col-span-5"
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Requested operations coverage"
+              content={sectionInfo["requested-operations-coverage"]}
+            />
+          }
           actions={
             <DashboardSectionAction
               onClick={() => setOpenDrawer("requestedOperationsCoverage")}
@@ -299,6 +323,12 @@ export default function OperationsTeamDashboard() {
           template="segmented"
           title="Service-path stability"
           className="xl:col-span-12"
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Service-path stability"
+              content={sectionInfo["service-path-stability"]}
+            />
+          }
           sections={[
             {
               id: "latency-trend",
@@ -347,6 +377,12 @@ export default function OperationsTeamDashboard() {
           template="single"
           title="Failure surface"
           className="xl:col-span-7"
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Failure surface"
+              content={sectionInfo["failure-surface"]}
+            />
+          }
           actions={
             <DashboardSectionAction
               onClick={() => setOpenDrawer("failureSurface")}
@@ -369,6 +405,12 @@ export default function OperationsTeamDashboard() {
           template="single"
           title="Operational control coverage"
           className="xl:col-span-5"
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Operational control coverage"
+              content={sectionInfo["operational-control-coverage"]}
+            />
+          }
           actions={
             <DashboardSectionAction
               onClick={() => setOpenDrawer("operationalControlCoverage")}
@@ -385,6 +427,12 @@ export default function OperationsTeamDashboard() {
           template="single"
           title="Safety and security readiness"
           className="xl:col-span-12"
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Safety and security readiness"
+              content={sectionInfo["safety-and-security-readiness"]}
+            />
+          }
           actions={
             <DashboardSectionAction
               onClick={() => setOpenDrawer("safetyAndSecurityReadiness")}
