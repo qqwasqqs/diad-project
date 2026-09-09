@@ -13,6 +13,13 @@ We use two shared endpoints:
 
 This separates lightweight single-value metrics from heavier chart datasets.
 
+## Persona Contracts
+
+- [Product Owner Dashboard](product-owner-dashboard-splunk-data-contract.md)
+- [Executive Dashboard](executive-dashboard-splunk-data-contract.md)
+- [Operations Team Dashboard](operations-team-dashboard-splunk-data-contract.md)
+- [Tech Team Dashboard](tech-team-dashboard-splunk-data-contract.md)
+
 ## Why We Chose This
 
 1. Efficiency for main-page cards

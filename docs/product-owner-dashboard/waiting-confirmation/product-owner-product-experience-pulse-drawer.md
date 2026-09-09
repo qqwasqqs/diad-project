@@ -254,3 +254,4 @@ an approved metric/display contract.
 | User Satisfaction Rate | Feedback scale and denominator; feedback timestamp; correlation-ID target and privacy rules. |
 | End-to-End Latency | Eligible-request definition; correlation-ID event pairing and deduplication; time and selected-scope attribution. |
 | Workflow Completion | Workflow definition/key; terminal outcomes and denominator; lifecycle coverage and API pending-state contract. |
+
