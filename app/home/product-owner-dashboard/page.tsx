@@ -31,7 +31,6 @@ import DashboardLineChart, {
   type DashboardLineAxisConfig,
   type DashboardLineSeries,
 } from "@/components/shared/dashboard/DashboardLineChart";
-import DataPendingCard from "@/components/shared/dashboard/DataPendingCard";
 import StatusCallout from "@/components/shared/dashboard/StatusCallout";
 import {
   ArrowSync24Regular,
@@ -432,19 +431,6 @@ export default function ProductOwnerDashboard() {
             axes={experienceQualityAxes}
             supportingStats={experienceQualityStats}
           />
-        </DashboardPanel>
-
-        <DashboardPanel
-          title="Feature usage evidence"
-          template="single"
-          footer={
-            <DashboardSectionInfo
-              sectionTitle="Feature usage evidence"
-              content={sectionInfo["feature-usage-evidence"]}
-            />
-          }
-        >
-          <DataPendingCard description="No feature identifier or usage formula supplied" />
         </DashboardPanel>
 
         <DashboardPanel

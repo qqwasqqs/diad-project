@@ -108,24 +108,9 @@ a composite quality score.
 
 ## Explicit pending measures
 
-Feature Usage has no feature identifier, event taxonomy, exposure/eligibility
-definition, event key, or approved formula. Return DATA_PENDING, never a
-session/query-volume proxy. Workflow Completion, Safety Evaluators, PII Leakage,
-and UPIA use the status treatment in the metrics table. Static pending states
-do not need unrelated telemetry queries.
-
-## Decisions required before OK
-
-1. Submitted-query key plus eligibility/retry rules.
-2. Session end, idle-gap, cross-day, and conversation-to-session rules.
-3. Feedback encoding, timestamp, changed-feedback rule, and privacy-preserving
-   request/response correlation.
-4. Eligible request population and P95 convention.
-5. Channel vocabulary and non-all channel-filter behaviour.
-6. Per-metric business-unit/project/channel attribution and approved joins.
-7. Evaluation grain, evaluator version/population, and Intent Resolution scale/direction.
-8. MLflow rating direction/coverage, plus future definitions for feature usage,
-   workflow completion, Safety Evaluator aggregation, PII Leakage, and UPIA.
+Workflow Completion, Safety Evaluators, PII Leakage, and UPIA use the status
+treatment in the metrics table. Static pending states do not need unrelated
+telemetry queries.
 
 ## Handoff checklist
 

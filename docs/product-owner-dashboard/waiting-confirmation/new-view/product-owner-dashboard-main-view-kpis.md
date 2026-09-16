@@ -51,85 +51,69 @@ data chain. They do not mean that every raw field must be returned to React.
 Identifiers and event-level fields can remain inside Splunk when Splunk returns
 a ready-to-display aggregate.
 
-Business unit, project, and channel filters are treated as canonical inputs
-that Splunk applies before returning the result. React does not join KPI records
-to those fields itself.
+Business unit and project filters are treated as canonical inputs that Splunk
+applies before returning the result. React does not join KPI records to those
+fields itself.
 
-## 1. Session & Query Volume - Validated. No questions remaining unanswered.
+## 1. Session & Query Volume — hierarchy validated
 
-_Status: The KPI is mapped, but the query identity, session definition, and
-session-duration calculation need confirmation._
+_Status: The conversation/session relationship is confirmed. A conversation is
+the complete thread and can contain multiple sessions. A session is one period
+of interaction within that conversation._
 
 ### 1. Business Meaning
 
 Shows how much the product is used: the number of user queries, the number of
 sessions, the average number of queries in a session, and the observed length
-of sessions. It is an adoption and engagement signal, not proof of
-satisfaction, feature adoption, workflow completion, or business value.
+of sessions. Sessions are counted as separate periods of interaction even when
+they belong to the same continuing conversation. It is an adoption and
+engagement signal, not proof of satisfaction, feature adoption, workflow
+completion, or business value.
 
-### 2. In Simple Terms
+### 2. Practical Interpretation
 
-This tells us how often people use the product, how many questions they ask
-during a visit, and how long that visit appears to last. We first need to agree
-what one question and one session mean.
+The conversation is the full thread. Each time a user enters that thread and
+interacts with it, that activity belongs to a session. If the user leaves and
+returns to the same thread later, the conversation stays the same but a new
+session begins.
 
 ### 3. Required Fields
 
 | Required field                               | Do we currently have it?                      | Description                                                                                                                               |
 | -------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `session_id`                                 | **Yes — documented**                          | Identifies a user session and groups activity that belongs to it.                                                                         |
-| `conversation_id`                            | **Yes — documented**                          | Identifies a multi-turn conversation within a session. Its relationship to `session_id` still needs confirmation.                         |
+| `session_id`                                 | **Yes — documented and validated**            | Identifies one period of interaction. Multiple sessions can belong to the same conversation.                                              |
+| `conversation_id`                            | **Yes — documented and validated**            | Identifies the complete conversation thread and is the parent of `session_id`.                                                            |
 | `user_id`                                    | **Yes — documented**                          | A SHA-256-hashed user identifier. It may support private aggregate counting but must not be displayed.                                    |
-| `channel`                                    | **Yes — documented**                          | The entry channel, with Web, Teams, Mobile, and API given as examples.                                                                    |
 | `timestamp_start`                            | **Yes — documented**                          | The time at which the user submits a request. The first and last values in a session are currently proposed as the observed session span. |
 | Canonical `query_key`                        | **No — not documented**                       | A stable identifier that says which logged records represent one user-submitted query.                                                    |
 | `request_id` as the query key                | **Available elsewhere — confirmation needed** | Documented as a unique request identifier for Request Throughput, but not approved as the query identifier for this KPI.                  |
 | `timestamp_end`                              | **Available elsewhere — confirmation needed** | Documented as the end of one rendered response for End-to-End Latency. It is not defined as the end of a session.                         |
 | Session end timestamp or session-close event | **No — not documented**                       | An explicit event or time that says a session has ended.                                                                                  |
 | `correlation_id`                             | **Available elsewhere — confirmation needed** | Available across component logs for joining related events. It does not by itself define a query, conversation, or session.               |
-| `business_unit`, `project_name`              | **Available elsewhere — confirmation needed** | Documented for Business Ownership, but not yet confirmed for filtering this KPI.                                                          |
+| `business_unit`, `project_name`              | **Yes — canonical Splunk filters**            | Splunk applies these filters before returning the KPI result; React does not join them.                                                    |
 
 ### 4. Client Questions
 
-- Is the session ID the same as the conversation ID?
-- If they are not the same, what does a session mean and what does a
-  conversation mean?
-- Which is the larger group: does a session contain conversations, or does a
-  conversation contain sessions?
-- Can one conversation continue across more than one session?
-- What tells us that a session has started?
-- What tells us that a session has ended?
-- We have a start time for each request but no session end time. Should the last
-  request start time in a session be treated as the session end?
-- Could the response `timestamp_end` be used as the session end, or does it only
-  mark the end of one answer?
-- When a new `timestamp_start` arrives, how do we know whether it continues the
-  current session or starts a new one?
-- Should a session end after a period with no activity? If yes, after how many
-  minutes?
-- What should the duration be for a session that contains only one query?
-- What counts as one query? Can `request_id` be used for it?
-- If the system retries the same query, should that still count as one query?
-- Should failed or abandoned queries be included?
-- If a session continues after midnight, should it remain one session or be
-  split across two days?
+_No client questions remain for this KPI._
 
 ## 2. User Satisfaction Rate
 
-_Status: The KPI is mapped, but the feedback scale and the population behind
-the percentage are not consistently defined._
+_Status: The KPI remains in scope, but it is available only for applications
+that collect user feedback. The response must distinguish unsupported
+applications from applications that support feedback but received none._
 
 ### 1. Business Meaning
 
 Shows the percentage of valid feedback that is positive for the selected
-period and scope. It describes the feedback received; it does not represent all
-users or all responses, and it does not prove that another KPI caused the
-result.
+period and scope, but only for applications that track user feedback. It
+describes the feedback received; it does not represent all users or all
+responses, and it does not prove that another KPI caused the result.
 
-### 2. In Simple Terms
+### 2. Practical Interpretation
 
-This tells us what share of the feedback people submitted was positive. It does
-not tell us how everyone felt, because many people may not leave feedback.
+This indicates what share of submitted feedback was positive for applications
+that provide feedback data. An application that does not support feedback must
+be shown as unavailable or not applicable, not as having zero satisfaction.
 
 ### 3. Required Fields
 
@@ -138,11 +122,12 @@ not tell us how everyone felt, because many people may not leave feedback.
 | `user_feedback_score`                      | **Yes — documented, meaning needs confirmation** | Described as `1 = thumbs up` and `0 = thumbs down`, but another source uses a score of 3 or more as positive.               |
 | `user_id`                                  | **Yes — documented**                             | A hashed user identifier that can support private aggregate handling. It must not be displayed.                             |
 | `application_name`                         | **Yes — documented**                             | The application to which the feedback belongs.                                                                              |
+| Feedback availability or support indicator | **No — not documented**                          | Tells React whether the selected application tracks feedback or whether the KPI does not apply.                              |
 | Feedback timestamp                         | **No — not documented for this KPI**             | The time at which the feedback was submitted; required for the selected period and a trend.                                 |
 | Feedback key                               | **No — not documented**                          | Identifies one feedback record so duplicates or later changes can be handled.                                               |
 | Response or request key                    | **Available elsewhere — confirmation needed**    | Needed to say which answer or request received the feedback. `request_id` is documented elsewhere but is not approved here. |
 | `correlation_id`                           | **Available elsewhere — confirmation needed**    | Can connect feedback with related logs, but the valid feedback target is not yet defined.                                   |
-| `business_unit`, `project_name`, `channel` | **Yes — canonical Splunk filters**               | Splunk applies these filters before returning the satisfaction result; React does not join them.                            |
+| `business_unit`, `project_name`            | **Yes — canonical Splunk filters**               | Splunk applies these filters before returning the satisfaction result; React does not join them.                            |
 
 ### 4. Client Questions
 
@@ -150,11 +135,8 @@ not tell us how everyone felt, because many people may not leave feedback.
   `user_feedback_score` contain?
 - If individual records are returned, will each record contain a feedback key,
   a timestamp, and the ID of the answer or request it belongs to?
-- How will neutral, invalid, or missing feedback appear in the response?
 - Will the response include coverage counts so React can show how much feedback
   the percentage represents?
-- Which status will Splunk return when there is no feedback: `NO_DATA`,
-  `DATA_PENDING`, or another value?
 
 ## 3. End-to-End Latency
 
@@ -168,7 +150,7 @@ response is rendered. The proposed P95 view shows the time within which 95% of
 eligible requests completed, making slower user experiences more visible than
 a simple average would.
 
-### 2. In Simple Terms
+### 2. Practical Interpretation
 
 This tells us how long users wait for a complete answer. P95 focuses on the
 slower experiences: if P95 is 1.20 seconds, 95 out of 100 included requests
@@ -184,127 +166,52 @@ finished in 1.20 seconds or less.
 | Canonical request key                      | **Available elsewhere — confirmation needed** | `request_id` exists for Request Throughput, but it is not approved as the unique request key for latency.                                                  |
 | `correlation_id`                           | **Available elsewhere — confirmation needed** | Can join the start and end events across components, but retry and multiple-response behaviour is not defined.                                             |
 | Request outcome                            | **Available elsewhere — confirmation needed** | Other mappings contain status fields, but no approved latency outcome says how failures, cancellations, timeouts, or filtered responses should be handled. |
-| `business_unit`, `project_name`, `channel` | **Yes — canonical Splunk filters**            | Splunk applies these filters before returning the latency result; React does not join them.                                                                |
+| `business_unit`, `project_name` | **Yes — canonical Splunk filters** | Splunk applies these filters before returning the latency result; React does not join them. |
 
 ### 4. Client Questions
 
-- What is the exact field name for the displayed P95 value:
-  `p95_latency_ms`, `response_latency_ms`, or something else?
-- Is the latency value always returned in milliseconds?
-- Should React use the supplied `response_latency_ms`, calculate the value from
-  `timestamp_start` and `timestamp_end`, or only use the pre-calculated P95?
-- If request-level records are returned, will retries already be combined or
-  removed by Splunk?
-- Which response status should React expect when no valid latency value is
-  available?
+_No client questions remain for this KPI._
 
-## 4. Workflow Completion
+## 4. Workflow Completion — proposal approval pending
 
-_Status: This is a proposed KPI need. No approved workflow definition, event,
-or calculation is currently available, so the main view correctly shows
-`DATA PENDING`._
+_Status: This KPI is entirely a proposal and has no direct basis in the current
+client documentation. `correlation_id` connects related events within the same
+observed journey or session, which suggests that a completion metric might be
+possible, but it does not define a workflow or a successful completion. Wait
+for the client to approve the general idea before asking detailed questions or
+defining a Splunk contract._
 
 ### 1. Business Meaning
 
-Would show the percentage of eligible product workflows that reach an approved
-completed outcome. It should measure an important user journey, not merely a
-successful technical response or one completed system step.
+The proposal would show the percentage of eligible product journeys that reach
+a completed outcome. This business meaning has not been supplied or approved
+by the client.
 
-### 2. In Simple Terms
+### 2. Practical Interpretation
 
-This would tell us whether people finish the task they came to the product to
-do. We cannot calculate it until the product owner defines the task, its start,
-and what “finished” means.
-
-### 3. Required Fields
-
-| Required field                                              | Do we currently have it?                      | Description                                                                                  |
-| ----------------------------------------------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Workflow identifier                                         | **No — not documented**                       | A stable key that groups all events belonging to one user journey.                           |
-| Workflow type                                               | **No — not documented**                       | Identifies which journey is being measured when the product has more than one workflow.      |
-| Workflow start event and timestamp                          | **No — not documented**                       | Says that an eligible journey has begun and when it began.                                   |
-| Workflow completion event, outcome, and timestamp           | **No — not documented**                       | Says that the journey reached an approved successful end and when that happened.             |
-| Cancellation, abandonment, retry, and partial-success state | **No — not documented**                       | Distinguishes unfinished or partly finished journeys from completed journeys.                |
-| `correlation_id`                                            | **Available elsewhere — confirmation needed** | Can link related component logs, but it is not an approved workflow identifier.              |
-| `business_unit`, `project_name`, `channel`                  | **Yes — canonical Splunk filters**            | Splunk applies these filters before returning the workflow result; React does not join them. |
-
-### 4. Client Questions
-
-- Until the calculation is available, will Splunk return
-  `status: "DATA_PENDING"`, `value: null`, and a readable `reason`?
-- Will `workflow-completion` be the permanent metric ID?
-- When the KPI becomes available, will Splunk return a calculated completion
-  percentage or individual workflow records?
-- What will the exact field name be for the percentage: `completionRate`,
-  `completionPercent`, or something else?
-- Will the percentage be returned as `84`, meaning 84%, or as `0.84`?
-- Will the response also include the number of completed workflows and the
-  total number used for the percentage?
-- If more than one workflow type is returned, will each type have a stable ID
-  and display label?
-- Will the main card receive one combined value, or one value for each workflow
-  type?
-- How will Splunk distinguish `DATA_PENDING`, `NO_DATA`, and a workflow that
-  does not apply to the selected product?
-- Will a non-`OK` response always include a readable `reason`?
-- If a trend is added later, what date format and time interval will its points
-  use?
-
-## 5. Channel Mix
-
-_Status: `channel` is documented, but the percentage calculation and channel
-assignment rules are proposals._
-
-### 1. Business Meaning
-
-Shows how eligible product activity is distributed across entry channels such
-as Web, Teams, Mobile, and API. The current proposal measures the share of user
-queries by channel; it does not measure unique users, feature adoption, or the
-business value of a channel.
-
-### 2. In Simple Terms
-
-This shows where product questions are coming from. We need to decide whether
-the bars compare questions, visits, or people, and how a request is assigned to
-a channel.
+The related events connected by `correlation_id` may allow us to follow an
+observed journey from start to finish. That makes Workflow Completion a
+possible future KPI, not a documented requirement. The first step is simply to
+learn whether the client wants this idea included.
 
 ### 3. Required Fields
 
-| Required field                  | Do we currently have it?                      | Description                                                                                                      |
-| ------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `channel`                       | **Yes — documented**                          | The entry channel. Web, Teams, Mobile, and API are documented examples.                                          |
-| Normalized channel value        | **No — not documented**                       | A cleaned, approved channel name so spelling, letter case, aliases, and unknown values are handled consistently. |
-| `session_id`                    | **Yes — documented**                          | Groups activity into sessions if the client chooses a session-based mix.                                         |
-| `timestamp_start`               | **Yes — documented**                          | Places the query or session in the selected time period.                                                         |
-| Canonical `query_key`           | **No — not documented**                       | Identifies one user query if the client approves the proposed query-based mix.                                   |
-| `request_id` as the query key   | **Available elsewhere — confirmation needed** | Documented for Request Throughput but not approved for Channel Mix.                                              |
-| `correlation_id`                | **Available elsewhere — confirmation needed** | May connect a query to channel information in another log. It does not decide the channel.                       |
-| `business_unit`, `project_name` | **Yes — canonical Splunk filters**            | Splunk applies these filters before returning Channel Mix; React does not join them.                             |
+| Required field                                              | Do we currently have it?                         | Description                                                                                                                                      |
+| ----------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Workflow identifier                                         | **No — proposal only**                           | A possible future key for grouping one journey. The client documentation does not define one.                                                    |
+| Workflow type                                               | **No — proposal only**                           | A possible future way to distinguish journeys if the client confirms that multiple workflows exist. No workflow types are currently documented. |
+| Workflow start event and timestamp                          | **No — proposal only**                           | A possible future definition of where an approved workflow begins.                                                                               |
+| Workflow completion event, outcome, and timestamp           | **No — proposal only**                           | A possible future definition of a successful workflow ending.                                                                                    |
+| Cancellation, abandonment, retry, and partial-success state | **No — proposal only**                           | Possible future lifecycle rules if the KPI proposal is accepted.                                                                                 |
+| `correlation_id`                                            | **Yes — documented supporting evidence**         | Connects multiple related events within the same observed journey or session. It supports the proposal but does not define workflow completion.  |
+| `business_unit`, `project_name`                             | **Yes — canonical Splunk filters**               | Available filters, but no Workflow Completion calculation is approved for Splunk to apply them to.                                               |
 
 ### 4. Client Questions
 
-- Will Splunk return one array of channel values, or a separate metric object
-  for each channel?
-- What are the exact response fields for a channel's stable ID, display label,
-  and percentage?
-- Will `sharePercent` be returned as `52`, meaning 52%, or as `0.52`?
-- Will Splunk also return the query or session count behind each percentage?
-- Will the payload state whether the percentages are based on queries,
-  sessions, or users?
-- Will Web, Teams, Mobile, and API use stable IDs that do not change when their
-  display labels change?
-- Will unknown or unmapped channels be returned as a separate item?
-- Does Splunk guarantee that the returned percentages total 100 before
-  rounding?
-- Should React display channels in the order returned by Splunk, or use a fixed
-  order?
-- After a user selects one channel filter, will Splunk return only that channel,
-  the full channel mix, or a status saying the breakdown is unavailable?
-- When no channel activity exists, will Splunk return an empty array, items with
-  zero values, or a `NO_DATA` status?
-- Will a non-`OK` response include a readable `reason`?
+_No client questions at this stage. Wait for general confirmation that the
+client wants this proposed KPI before asking for definitions or details._
 
-## 6. Groundedness
+## 5. Groundedness
 
 _Status: The score, result, and 1–5 scale are documented, but the evaluation
 population, timing, and one-record rule still need confirmation._
@@ -315,7 +222,7 @@ Shows how well an evaluated answer is supported by the context supplied to the
 AI. It is a response-quality signal; it is not a complete factual-accuracy
 check and it is not, by itself, a hallucination rate.
 
-### 2. In Simple Terms
+### 2. Practical Interpretation
 
 This checks whether the answer can be backed up by the information the AI was
 given. A strong score does not prove that every statement is true outside that
@@ -332,7 +239,7 @@ information.
 | `finish_reason`                            | **Yes — documented**                             | Says why the model response stopped, such as normal completion, length, or content filtering.                            |
 | Evaluation timestamp                       | **No — not documented**                          | Places the evaluation in the selected period and supports freshness checks.                                              |
 | Evaluator version and evaluation type      | **No — not documented**                          | Identifies which evaluator produced the score and whether the result came from real use, offline evaluation, or testing. |
-| `business_unit`, `project_name`, `channel` | **Yes — canonical Splunk filters**               | Splunk applies these filters before returning Groundedness; React does not join them.                                    |
+| `business_unit`, `project_name` | **Yes — canonical Splunk filters** | Splunk applies these filters before returning Groundedness; React does not join them. |
 
 ### 4. Client Questions
 
@@ -355,7 +262,7 @@ information.
 - Should React round the score, or will Splunk return the final display
   precision?
 
-## 7. Relevance Quality
+## 6. Relevance Quality
 
 _Status: The score, result, calculation, and 1–5 scale are documented, but the
 evaluation population and time/filter fields are not._
@@ -366,7 +273,7 @@ Shows how well an evaluated response addresses the user's question. It measures
 response relevance, not whether the retrieved source documents were good or
 whether the user completed a task.
 
-### 2. In Simple Terms
+### 2. Practical Interpretation
 
 This checks whether the answer stayed focused on what the person asked, rather
 than giving unrelated or unhelpful information.
@@ -381,7 +288,7 @@ than giving unrelated or unhelpful information.
 | Evaluation timestamp                       | **No — not documented**                       | Places the score in the selected period and supports daily trend points.                   |
 | Evaluator version and evaluation type      | **No — not documented**                       | Distinguishes evaluator versions and real-use, offline, and test results.                  |
 | Response or request key                    | **Available elsewhere — confirmation needed** | Needed if the evaluation must be connected to the answer that was shown to the user.       |
-| `business_unit`, `project_name`, `channel` | **Yes — canonical Splunk filters**            | Splunk applies these filters before returning Relevance Quality; React does not join them. |
+| `business_unit`, `project_name` | **Yes — canonical Splunk filters** | Splunk applies these filters before returning Relevance Quality; React does not join them. |
 
 ### 4. Client Questions
 
@@ -406,7 +313,7 @@ than giving unrelated or unhelpful information.
 - Should React round the score, or will Splunk return the final display
   precision?
 
-## 8. Intent Resolution
+## 7. Intent Resolution
 
 _Status: The average-score formula exists, but the approved main-view
 specification still treats the displayed scale and direction as unresolved._
@@ -417,7 +324,7 @@ Shows how accurately the system understood and addressed the user's intended
 goal. It is a quality evaluation, not proof that the user completed the full
 workflow.
 
-### 2. In Simple Terms
+### 2. Practical Interpretation
 
 This checks whether the product understood what the person was trying to do.
 Understanding the request is useful, but it does not mean the person's task was
@@ -433,7 +340,7 @@ finished.
 | Evaluation timestamp                       | **No — not documented**                                  | Places the result in the selected period and daily trend.                                                                               |
 | Evaluator version and evaluation type      | **No — not documented**                                  | Says which evaluator produced the score and whether it came from real use or testing.                                                   |
 | Expected intent or approved comparison     | **No — not documented**                                  | Describes what the evaluator uses to decide whether the user's intent was understood.                                                   |
-| `business_unit`, `project_name`, `channel` | **Yes — canonical Splunk filters**                       | Splunk applies these filters before returning Intent Resolution; React does not join them.                                              |
+| `business_unit`, `project_name` | **Yes — canonical Splunk filters** | Splunk applies these filters before returning Intent Resolution; React does not join them. |
 
 ### 4. Client Questions
 
@@ -458,7 +365,7 @@ finished.
 - Should React round the score, or will Splunk return the final display
   precision?
 
-## 9. Retrieval Quality
+## 8. Retrieval Quality
 
 _Status: The 1–5 score and average calculation are documented, but the unit
 being scored and the evaluation population need confirmation._
@@ -469,7 +376,7 @@ Shows the evaluated relevance and ranking quality of the documents or chunks
 retrieved to help produce an answer. It measures the retrieval step, not the
 quality of the final answer itself.
 
-### 2. In Simple Terms
+### 2. Practical Interpretation
 
 This checks whether the product found useful source information before writing
 the answer. Good source material can help, but it does not guarantee a good
@@ -488,7 +395,7 @@ final answer.
 | `top_k`                                    | **Yes — documented**               | The number of source chunks requested.                                                     |
 | Evaluation key and timestamp               | **No — not documented**            | Identify one scored retrieval and place it in the selected period.                         |
 | Evaluator version and evaluation type      | **No — not documented**            | Distinguishes comparable evaluation methods and real-use or test populations.              |
-| `business_unit`, `project_name`, `channel` | **Yes — canonical Splunk filters** | Splunk applies these filters before returning Retrieval Quality; React does not join them. |
+| `business_unit`, `project_name` | **Yes — canonical Splunk filters** | Splunk applies these filters before returning Retrieval Quality; React does not join them. |
 
 ### 4. Client Questions
 
@@ -510,7 +417,7 @@ final answer.
 - Should React round the value to one decimal place, or will Splunk return the
   final display precision?
 
-## 10. Task Adherence
+## 9. Task Adherence
 
 _Status: The 1–5 score and average calculation are documented, but the task
 unit, evaluator population, and live coverage need confirmation._
@@ -521,7 +428,7 @@ Shows how well an evaluated AI response or agent action follows the system's
 instructions. It is an evaluator score and must not be used as a substitute for
 Workflow Completion.
 
-### 2. In Simple Terms
+### 2. Practical Interpretation
 
 This checks whether the AI followed the rules and instructions it was given.
 It does not tell us whether the user finished the job they came to do.
@@ -536,7 +443,7 @@ It does not tell us whether the user finished the job they came to do.
 | Evaluation timestamp                       | **No — not documented**            | Places the evaluation in the selected reporting period.                                 |
 | Evaluator version and evaluation type      | **No — not documented**            | Identifies the evaluation method and whether the result came from real use or testing.  |
 | Task or instruction version                | **No — not documented**            | Identifies the instructions against which adherence was judged.                         |
-| `business_unit`, `project_name`, `channel` | **Yes — canonical Splunk filters** | Splunk applies these filters before returning Task Adherence; React does not join them. |
+| `business_unit`, `project_name` | **Yes — canonical Splunk filters** | Splunk applies these filters before returning Task Adherence; React does not join them. |
 
 ### 4. Client Questions
 
@@ -558,7 +465,7 @@ It does not tell us whether the user finished the job they came to do.
 - Should React round the value to one decimal place, or will Splunk return the
   final display precision?
 
-## 11. Safety Evaluators
+## 10. Safety Evaluators
 
 _Status: Category-level safety fields exist, but combining them into one
 Product Owner KPI is a proposal with no approved calculation._
@@ -570,7 +477,7 @@ violence, sexual content, and self-harm. The current `CALCULATION PENDING`
 state means no single aggregate is approved; it is not a statement that the
 product is safe or that no safety events occurred.
 
-### 2. In Simple Terms
+### 2. Practical Interpretation
 
 We have several separate safety checks, but we have not agreed how to turn them
 into one useful dashboard result. Until we do, one combined number could be
@@ -588,7 +495,7 @@ misleading.
 | Request or evaluation key                  | **Available elsewhere — confirmation needed** | `request_id` exists elsewhere, but no approved key says which category results belong to one evaluated request. |
 | Evaluation timestamp, version, and type    | **No — not documented**                       | Needed for the reporting period and to separate real-use, offline, and test results.                            |
 | `guardrail_triggered`                      | **No — not documented**                       | Referenced by an alternative percentage proposal but absent from the KPI field mapping.                         |
-| `business_unit`, `project_name`, `channel` | **Yes — canonical Splunk filters**            | Splunk applies these filters before returning the Safety Evaluators result; React does not join them.           |
+| `business_unit`, `project_name` | **Yes — canonical Splunk filters** | Splunk applies these filters before returning the Safety Evaluators result; React does not join them. |
 
 ### 4. Client Questions
 
@@ -611,7 +518,7 @@ misleading.
   React response?
 - Should Splunk return the display limits, or are they fixed in the UI?
 
-## 12. MLflow Safety Score
+## 11. MLflow Safety Score
 
 _Status: The source field, average calculation, and 0–1 field description are
 documented, but the wider documentation contains a scale conflict and no
@@ -623,7 +530,7 @@ Shows the average MLflow safety-evaluator rating for an approved set of
 evaluations. It is an evaluator signal, not a safety verdict, security incident
 rate, satisfaction score, or release decision.
 
-### 2. In Simple Terms
+### 2. Practical Interpretation
 
 This is an average score from an automated safety check. Before using it, we
 need to confirm what the scale means, which evaluations go into the average,
@@ -638,7 +545,7 @@ and whether a high number is good.
 | Model key or model version                  | **Available elsewhere — confirmation needed**        | Model fields exist in governance mappings, but the approved connection to this KPI is not defined.         |
 | Evaluation timestamp                        | **No — not documented**                              | Places the rating in the selected period and supports freshness checks.                                    |
 | Evaluator version and evaluation type       | **No — not documented**                              | Identifies the evaluator and separates real-use, offline, and test results.                                |
-| `business_unit`, `project_name`, `channel`  | **Yes — canonical Splunk filters**                   | Splunk applies these filters before returning the MLflow Safety Score; React does not join them.           |
+| `business_unit`, `project_name` | **Yes — canonical Splunk filters** | Splunk applies these filters before returning the MLflow Safety Score; React does not join them. |
 
 ### 4. Client Questions
 
@@ -664,7 +571,7 @@ and whether a high number is good.
 - Should Splunk return the good/attention/poor limits, or are they fixed in the
   UI?
 
-## 13. PII Leakage (Agent Only)
+## 12. PII Leakage (Agent Only)
 
 _Status: A source field is mapped, but its data type, meaning, availability,
 agent coverage, and percentage calculation are not confirmed. The main view
@@ -676,7 +583,7 @@ Would show potential sensitive-data leakage flagged by the evaluator for
 supported agent requests. It is an evaluator result, not proof of a confirmed
 data breach or a guarantee that unflagged requests contain no sensitive data.
 
-### 2. In Simple Terms
+### 2. Practical Interpretation
 
 This would tell us how often an automated check thinks an agent may have
 revealed sensitive information. We first need to know which agents the check
@@ -692,7 +599,7 @@ supports and exactly what its result means.
 | Evaluation timestamp                       | **No — not documented**                          | Places the result in the selected period.                                                                                                         |
 | Evaluation type or environment             | **Available elsewhere — confirmation needed**    | Environment is documented elsewhere, but there is no approved rule separating real-use monitoring from offline or red-team tests.                 |
 | Supported/evaluated marker                 | **No — not documented**                          | Distinguishes requests that were checked from requests for which the evaluator was unavailable or not applicable.                                 |
-| `business_unit`, `project_name`, `channel` | **Yes — canonical Splunk filters**               | Splunk applies these filters before returning the PII Leakage result; React does not join them.                                                   |
+| `business_unit`, `project_name` | **Yes — canonical Splunk filters** | Splunk applies these filters before returning the PII Leakage result; React does not join them. |
 
 ### 4. Client Questions
 
@@ -715,7 +622,7 @@ supports and exactly what its result means.
 - Will a non-`OK` response always include a readable `reason`?
 - Should Splunk return the attention limit, or is it fixed in the UI?
 
-## 14. User Prompt Injected Attacks (UPIA)
+## 13. User Prompt Injected Attacks (UPIA)
 
 _Status: Evaluator outcome fields and a high-level defect-rate formula are
 mapped, but the test identity, success rule, and eligible test population are
@@ -727,7 +634,7 @@ Would show the percentage of approved prompt-injection test cases that
 successfully manipulated the system. It is a security-test result, not an
 ordinary production error rate or proof that no real-world attack occurred.
 
-### 2. In Simple Terms
+### 2. Practical Interpretation
 
 This tests whether harmful instructions hidden in content can trick the
 product. We cannot show a trustworthy percentage until we agree what one test
@@ -745,7 +652,7 @@ is and what counts as the product being tricked.
 | Overall success/failure rule               | **No — not documented**                                | Says how the four fields combine to determine whether one attack test succeeded.                  |
 | Test timestamp                             | **No — not documented**                                | Places the result in the selected period and supports freshness reporting.                        |
 | Test set, version, and environment         | **No — not documented**                                | Identifies the approved group of tests and separates test, red-team, and any production evidence. |
-| `business_unit`, `project_name`, `channel` | **Yes — canonical Splunk filters**                     | Splunk applies these filters before returning the UPIA result; React does not join them.          |
+| `business_unit`, `project_name` | **Yes — canonical Splunk filters** | Splunk applies these filters before returning the UPIA result; React does not join them. |
 
 ### 4. Client Questions
 
@@ -778,8 +685,8 @@ is and what counts as the product being tricked.
   Queries, queries-per-session, and average-session-duration displays are part
   of Session & Query Volume.
 - Repeated uses of the same KPI are documented once.
-- Drawer-only measures such as Session Depth Distribution, Conversations per
-  Session, and Channel Attribution Readiness are not part of the main view.
+- Drawer-only measures such as Session Depth Distribution and Conversations per
+  Session are not part of the main view.
 - Hallucination percentage is not displayed; the main view displays
   Groundedness only.
 - Product Owner mapping rows that are not rendered by

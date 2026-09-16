@@ -32,12 +32,6 @@
       "Performance and latency"
     ]
   },
-  "feature-usage-evidence": {
-    "description": "Shows whether evidence exists to define and measure feature usage. The measurement definition is still pending.",
-    "kpiCategories": [
-      "Feature usage (pending)"
-    ]
-  },
   "trust-and-measurement-readiness": {
     "description": "Shows the availability and decision-readiness of safety, security, evaluation, and prompt-injection evidence.",
     "kpiCategories": [

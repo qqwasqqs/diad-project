@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dashboard KPI Question Review"
+  short_description: "Separate client questions from internal KPI issues"
+  default_prompt: "Use $dashboard-kpi-question-review to assess these dashboard KPI questions and separate client decisions from Splunk-React contract issues."
