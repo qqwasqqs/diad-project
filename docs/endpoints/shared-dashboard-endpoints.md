@@ -7,14 +7,14 @@ These endpoints are shared across dashboards and are not scoped to a single pers
 **Method**: `POST`  
 **Path**: `/api/dashboard/metrics`
 
-Use this for compact card/callout/bar metrics (including Channel Mix snapshot values).
+Use this for compact card/callout/bar metrics.
 
 ### Request JSON
 
 ```json
 {
   "dashboard": "product-owner",
-  "sections": ["product-experience-pulse", "trust-and-measurement-readiness", "channel-mix"],
+  "sections": ["product-experience-pulse", "trust-and-measurement-readiness"],
   "metrics": [
     "session-query-volume",
     "user-satisfaction-rate",
@@ -23,11 +23,7 @@ Use this for compact card/callout/bar metrics (including Channel Mix snapshot va
     "safety-evaluators",
     "mlflow-safety-score",
     "pii-leakage-agent-only",
-    "upia",
-    "channel-mix-web",
-    "channel-mix-teams",
-    "channel-mix-mobile",
-    "channel-mix-api"
+    "upia"
   ],
   "filters": {
     "timeRange": {
@@ -36,7 +32,6 @@ Use this for compact card/callout/bar metrics (including Channel Mix snapshot va
     },
     "businessUnits": ["all"],
     "projects": ["all"],
-    "channels": ["all"],
     "timezone": "UTC"
   },
   "options": {
@@ -58,7 +53,6 @@ Use this for compact card/callout/bar metrics (including Channel Mix snapshot va
       "timeRange": "last_30_days",
       "businessUnits": ["all"],
       "projects": ["all"],
-      "channels": ["all"],
       "timezone": "UTC"
     }
   },
@@ -86,15 +80,6 @@ Use this for compact card/callout/bar metrics (including Channel Mix snapshot va
       "value": {
         "score": 0.91,
         "scaleMax": 1
-      }
-    },
-    {
-      "metricId": "channel-mix-web",
-      "section": "channel-mix",
-      "status": "OK",
-      "value": {
-        "label": "Web",
-        "sharePercent": 52
       }
     },
     {
@@ -136,7 +121,6 @@ Use this for chart payloads only. Call once per chart family (for example Adopti
     },
     "businessUnits": ["all"],
     "projects": ["all"],
-    "channels": ["all"],
     "timezone": "UTC"
   },
   "granularity": "day",

@@ -19,9 +19,8 @@ aggregate coverage. Do not return prompts, responses, feedback text,
 identifiers, correlation IDs, evaluator reasons, raw errors, or security-test
 content. Identifiers may be used inside Splunk for joins/deduplication only.
 
-Apply time range, business unit, project, channel, and timezone before
-aggregation. Use a metric event timestamp and the requested timezone for daily
-buckets.
+Apply time range, business unit, project, and timezone before aggregation. Use
+a metric event timestamp and the requested timezone for daily buckets.
 
 | Situation | Required result |
 | --- | --- |
@@ -31,23 +30,22 @@ buckets.
 | Coverage is requested | Approved aggregate eligible/included counts only; do not estimate a percentage |
 
 Never present an unfiltered portfolio result as filtered, or use a proxy metric
-for an unsupported value. Null, unknown, and unmapped channels must not become
-Web, Teams, Mobile, or API.
+for an unsupported value.
 
 ## Required normalized source fields
 
 | Population | Logical fields | Purpose / unresolved requirement |
 | --- | --- | --- |
-| User query and session | query_key, session_id, timestamp_start, channel_raw, channel_normalized, business_unit, project_name, eligibility marker | query_key must represent one submitted UI query. Confirm its canonical source, eligibility, deduplication, and retry rules; exclude tool/model calls, agent steps, and automatic retries. |
+| User query and session | query_key, session_id, timestamp_start, business_unit, project_name, eligibility marker | query_key must represent one submitted UI query. Confirm its canonical source, eligibility, deduplication, and retry rules; exclude tool/model calls, agent steps, and automatic retries. |
 | Feedback | user_feedback_score, feedback_timestamp, feedback_key, application_name, attributable dimensions | Confirm score encoding: current evidence conflicts between binary 1/0 and a related >= 3 rule. Confirm timestamp, changed-feedback rule, grain, and selected-filter attribution. |
 | Request latency | request_key, response_latency_ms, timestamp_start, timestamp_end, attributable dimensions | Confirm eligible request population, canonical request key, and selected-filter attribution. |
 | Evaluations | evaluation_key, evaluation_timestamp, evaluator version/population, groundedness_score, relevance_score, intent_resolution_score, retrieval_score, task_adherence_score, attributable dimensions | evaluation_run_id and completion_id are candidates, not confirmed grain. Keep online, offline, and test/red-team populations separate. |
 | MLflow safety | mlflow_safety_rating, evaluation key/timestamp/version/population, attributable dimensions | Normalize response/llm_judged/safety/rating/average. Documented scale is 0–1. |
 
 Use one eligible, deduplicated user-query population for all query/session
-totals, daily series, supporting ratios, and Channel Mix. Average only valid,
-comparable evaluator scores from one approved version/population. Do not mix
-MLflow 0–1 or F1-like values into the Product Owner 1–5 quality chart.
+totals, daily series, and supporting ratios. Average only valid, comparable
+evaluator scores from one approved version/population. Do not mix MLflow 0–1
+or F1-like values into the Product Owner 1–5 quality chart.
 
 ## Metrics endpoint: fields and aggregations
 
@@ -64,11 +62,6 @@ may map them to existing metric value objects.
 | mlflow-safety-score | Compatible mlflow_safety_rating, approved evaluation grain/version/population | mlflow_safety_score = AVG(mlflow_safety_rating); scale_max = 1 | OK only for the documented 0–1 population. |
 | pii-leakage-agent-only | Sensitive_data_leakage exists, but type, direction, coverage, and agent-only population are unconfirmed | No numeric aggregation | DATA_PENDING; never return 0 percent or a no-leakage conclusion. |
 | upia | indirect_attack, xpia_manipulated_content, xpia_intrusion, xpia_information_gathering; future contract also needs test_case_key and success taxonomy | No numeric aggregation yet | CALCULATION_PENDING: Test result contract not finalized. UI label can remain TEST RESULTS PENDING; current endpoint statuses have no separate code. |
-| channel-mix-web, channel-mix-teams, channel-mix-mobile, channel-mix-api | Eligible query_key, normalized channel_normalized, timestamp_start | Per named channel: classified_query_count; all_classified_query_count; share_percent = classified_query_count / all_classified_query_count × 100 | OK only for classified eligible queries. Keep unknown/null/unmapped channels separate. |
-
-Channel shares use the classified-query denominator after time scope and
-approved filters. The effect of a non-all global channel filter on Channel Mix
-is an open product-contract decision; SPL must not decide it implicitly.
 
 ## Timeseries endpoint: fields and aggregations
 
