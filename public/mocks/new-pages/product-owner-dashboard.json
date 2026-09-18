@@ -1,0 +1,185 @@
+{
+  "generatedAt": "2026-09-01T00:00:00.000Z",
+  "note": "Illustrative values. Not production telemetry. Definitions and coverage remain subject to the documented pending states.",
+  "productExperiencePulse": {
+    "sessionQueryVolume": {
+      "queries": 316000,
+      "sessions": 68000,
+      "queriesPerSession": 4.6
+    },
+    "endToEndLatency": {
+      "percentile": "P95",
+      "seconds": 1.2
+    },
+    "workflowCompletion": {
+      "id": "workflow-completion",
+      "label": "Workflow Completion",
+      "pendingState": "data",
+      "reason": "Completion event and formula not supplied"
+    }
+  },
+  "adoptionAndEngagement": {
+    "series": [
+      {
+        "id": "sessions",
+        "label": "Sessions",
+        "points": [
+          { "x": "Apr 20", "y": 15000 },
+          { "x": "Apr 21", "y": 14000 },
+          { "x": "Apr 22", "y": 18000 },
+          { "x": "Apr 23", "y": 21000 },
+          { "x": "Apr 24", "y": 22000 },
+          { "x": "Apr 25", "y": 24000 },
+          { "x": "Apr 26", "y": 26000 },
+          { "x": "Apr 27", "y": 28000 },
+          { "x": "Apr 28", "y": 25000 },
+          { "x": "Apr 29", "y": 30000 },
+          { "x": "Apr 30", "y": 27000 },
+          { "x": "May 1", "y": 29000 },
+          { "x": "May 2", "y": 32000 },
+          { "x": "May 3", "y": 30000 },
+          { "x": "May 4", "y": 33000 },
+          { "x": "May 5", "y": 31000 }
+        ]
+      },
+      {
+        "id": "queries",
+        "label": "Queries",
+        "points": [
+          { "x": "Apr 20", "y": 12000 },
+          { "x": "Apr 21", "y": 16000 },
+          { "x": "Apr 22", "y": 19000 },
+          { "x": "Apr 23", "y": 20000 },
+          { "x": "Apr 24", "y": 24000 },
+          { "x": "Apr 25", "y": 26000 },
+          { "x": "Apr 26", "y": 28000 },
+          { "x": "Apr 27", "y": 30000 },
+          { "x": "Apr 28", "y": 34000 },
+          { "x": "Apr 29", "y": 36000 },
+          { "x": "Apr 30", "y": 39000 },
+          { "x": "May 1", "y": 42000 },
+          { "x": "May 2", "y": 43000 },
+          { "x": "May 3", "y": 47000 },
+          { "x": "May 4", "y": 50000 },
+          { "x": "May 5", "y": 52000 }
+        ]
+      }
+    ],
+    "supporting": [
+      {
+        "id": "queries-per-session",
+        "label": "queries/session",
+        "amount": 4.6,
+        "decimals": 1
+      },
+      {
+        "id": "avg-session",
+        "label": "avg session",
+        "amount": 8.2,
+        "decimals": 1,
+        "unit": " min"
+      }
+    ]
+  },
+  "experienceAndResponseQuality": {
+    "series": [
+      {
+        "id": "groundedness",
+        "label": "Groundedness",
+        "points": [
+          { "x": "Apr 20", "y": 4.1 },
+          { "x": "Apr 22", "y": 4.3 },
+          { "x": "Apr 24", "y": 4.2 },
+          { "x": "Apr 26", "y": 4.4 },
+          { "x": "Apr 28", "y": 4.3 },
+          { "x": "Apr 30", "y": 4.2 },
+          { "x": "May 2", "y": 4.5 },
+          { "x": "May 4", "y": 4.4 },
+          { "x": "May 6", "y": 4.3 },
+          { "x": "May 8", "y": 4.5 },
+          { "x": "May 10", "y": 4.6 },
+          { "x": "May 12", "y": 4.5 }
+        ]
+      },
+      {
+        "id": "relevance-quality",
+        "label": "Relevance Quality",
+        "points": [
+          { "x": "Apr 20", "y": 3.8 },
+          { "x": "Apr 22", "y": 3.9 },
+          { "x": "Apr 24", "y": 4.0 },
+          { "x": "Apr 26", "y": 4.1 },
+          { "x": "Apr 28", "y": 4.0 },
+          { "x": "Apr 30", "y": 4.2 },
+          { "x": "May 2", "y": 4.1 },
+          { "x": "May 4", "y": 4.2 },
+          { "x": "May 6", "y": 4.1 },
+          { "x": "May 8", "y": 4.3 },
+          { "x": "May 10", "y": 4.2 },
+          { "x": "May 12", "y": 4.4 }
+        ]
+      },
+      {
+        "id": "intent-resolution",
+        "label": "Intent Resolution",
+        "points": [
+          { "x": "Apr 20", "y": 3.2 },
+          { "x": "Apr 22", "y": 3.4 },
+          { "x": "Apr 24", "y": 3.3 },
+          { "x": "Apr 26", "y": 3.5 },
+          { "x": "Apr 28", "y": 3.4 },
+          { "x": "Apr 30", "y": 3.6 },
+          { "x": "May 2", "y": 3.7 },
+          { "x": "May 4", "y": 3.6 },
+          { "x": "May 6", "y": 3.8 },
+          { "x": "May 8", "y": 3.7 },
+          { "x": "May 10", "y": 3.9 },
+          { "x": "May 12", "y": 3.8 }
+        ]
+      }
+    ],
+    "supporting": [
+      {
+        "id": "retrieval-quality",
+        "label": "Retrieval Quality",
+        "amount": 4.0,
+        "decimals": 1,
+        "unit": " / 5",
+        "max": 5
+      },
+      {
+        "id": "task-adherence",
+        "label": "Task Adherence",
+        "amount": 4.2,
+        "decimals": 1,
+        "unit": " / 5",
+        "max": 5
+      }
+    ]
+  },
+  "trustAndMeasurementReadiness": [
+    {
+      "id": "safety-evaluators",
+      "label": "Safety Evaluators",
+      "pendingState": "calculation"
+    },
+    {
+      "id": "mlflow-safety-score",
+      "label": "MLflow Safety Score",
+      "amount": 0.91,
+      "decimals": 2,
+      "unit": " / 1",
+      "max": 1
+    },
+    {
+      "id": "pii-leakage",
+      "label": "PII Leakage (Agent Only)",
+      "pendingState": "data"
+    },
+    {
+      "id": "upia",
+      "label": "UPIA",
+      "pendingState": "test-results"
+    }
+  ]
+}

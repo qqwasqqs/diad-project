@@ -97,72 +97,88 @@ mapping is reliable.
 - Can these records be connected to the selected business unit, project, and
   channel?
 
-## 2. User Satisfaction Rate — feedback trend and coverage pending
+## 2. API Error Rate — classification and coverage pending
 
 **Business meaning**
-Shows the share of valid feedback in the selected scope that is positive. It
-does not represent all users or all requests, measure workflow completion, or
-prove that latency causes satisfaction.
+Would show the share of eligible distinct user requests whose approved final
+outcome is an API error in the selected period and scope. It is a reliability
+signal, not a root-cause diagnosis, satisfaction measure, workflow-completion
+rate, or count of every failed internal component call.
 
 **In simple terms**
-We want to know whether the feedback people actually submit is positive or
-negative. Before we show a trend, we need to know when each feedback event
-happened, what response it refers to, and how its score should be interpreted.
+We want to know how often an eligible user request ends in an API error. Before
+we trust the percentage, we need to agree what one counted request is, which
+outcomes count as errors, and which outcomes belong in the total.
 
 **What is needed to display live data**
-An approved feedback scale and positive/negative classification, a feedback
-event timestamp for time-based trends, a valid-feedback denominator, and one
-approved feedback record per response or request. The drawer may continue to
-show the composition only after the same rules support the headline rate.
+An approved request-level counting grain, one final outcome and timestamp per
+counted request, an approved error classification and eligible denominator,
+and reliable business-unit/project attribution. The implemented `1.14%`, `114`
+error requests, and `10,000` eligible requests remain illustrative until those
+requirements are confirmed.
+
+**Proposed aggregation — approval pending**
+
+After applying the selected time, business-unit, and project filters, Splunk
+would select one approved final outcome per counted request and calculate:
+
+```text
+eligible_request_count = COUNT(DISTINCT request_id)
+  where final response_status is an approved eligible outcome
+
+error_request_count = COUNT(DISTINCT request_id)
+  where final response_status is an approved error outcome
+
+api_error_rate_percent =
+  error_request_count / eligible_request_count * 100
+```
+
+This is a proposed calculation, not an approved live rule. If the eligible
+request count is zero, the result is `NO_DATA`, not `0%`.
 
 **Fields needed**
 
-| Needed field | Status in Concept | Concept comparison |
+| Needed field or rule | Status in Concept | Concept comparison |
 | --- | --- | --- |
-| `user_feedback_score` | Existing for this metric | Listed for User Satisfaction Rate. |
-| `correlation_id` | Existing elsewhere only | Listed for User Accountability, not User Satisfaction Rate; the platform-wide logging decision makes it available for joins, subject to metric-specific approval. |
-| Feedback event `timestamp` | Not documented | The Concept explicitly says feedback timestamp is still open; it is not listed as a User Satisfaction Rate field. |
-| `user_id` | Existing for this metric | Listed for User Satisfaction Rate; aggregate/deduplicate only, never display. |
-| `application_name` | Existing for this metric | Listed for User Satisfaction Rate. |
-| `business_unit` | Existing elsewhere only | Listed for Business Ownership, not User Satisfaction Rate attribution. |
-| `project_name` | Existing elsewhere only | Listed for Business Ownership, not User Satisfaction Rate attribution. |
-| `channel` | Existing elsewhere only | Listed for Session & Query Volume and Access Traceability, not User Satisfaction Rate attribution. |
+| `response_status` | Existing for this metric | Listed for API Error Rate with documented values `success`, `error`, `timeout`, and `content_filtered`; their numerator/denominator treatment is not approved. |
+| `status_code` | Existing for this metric | Listed for API Error Rate; the treatment of HTTP `4xx`, `5xx`, and `429` outcomes is open. |
+| `error_code (API)` | Existing for this metric | Listed for API Error Rate as structured error evidence. It must not cause one failed request to be counted twice. |
+| `error_message (API)` | Existing for this metric | Listed for API Error Rate as diagnostic detail; never display or return it to the Product Owner view. |
+| `request_id` | Existing elsewhere only | Listed for Request Throughput and established as one user query, but not approved as the API Error Rate counting grain. |
+| Request/event `timestamp` | Existing elsewhere only | Listed for Request Throughput, but the timestamp for one final API outcome is not approved. |
+| `correlation_id` | Existing elsewhere only | Available platform-wide for internal joins when the approved request key is not carried directly by the outcome record. |
+| Final-outcome and eligible-denominator rule | Not documented | No rule selects one final request outcome or defines all numerator and denominator outcomes. |
+| `business_unit`, `project_name` | Existing elsewhere only | Available as canonical Splunk filters, but reliable attribution of API outcomes to both dimensions must be confirmed. |
 
 **Correlation needed**
-Use the platform-wide `correlation_id` to link feedback to the evaluated
-response or request. Then apply an approved first, latest, or feedback-history
-rule when feedback changes, deduplicate to the approved grain, and join the
-result to the selected scope. Correlation to latency is **not** required to
-draw a feedback trend; it would be a separate, future analysis and must not
-imply causation.
+Within Splunk, associate the approved terminal API outcome with the approved
+request key and timestamp, use `correlation_id` only where a cross-log join is
+needed, and remove repeated producer events or retries before aggregation.
+Apply the approved business-unit and project filters before calculating the
+error-request count, eligible-request count, and percentage. React receives
+only those ready-to-display aggregates and an availability state.
 
 **Client Questions**
 
-- Is feedback always only thumbs up or thumbs down?
-- Does `1` always mean thumbs up and `0` always mean thumbs down?
-- Can feedback also be neutral or use a larger rating scale?
-- Should the percentage use only people who left feedback, or all responses
-  that could have received feedback?
-- Does missing feedback mean “no feedback,” rather than negative feedback?
-- Does one feedback record belong to one answer, one query, one conversation,
-  or one session?
-- Can a person change their feedback? If yes, should we keep the first answer,
-  the latest answer, or every change?
-- Do we have the date and time when the feedback was submitted?
-- How do we know which answer received the feedback?
-- Can the feedback be connected to the selected business unit, project, and
-  channel?
-- How much feedback must we have before showing a percentage?
-- What should the drawer show when no one left feedback or the feedback cannot
-  be connected to the selected filters?
+- Should this KPI count one user-submitted request or every underlying API
+  call made while serving that request?
+- Which final outcomes should count as API errors, and which outcomes should be
+  included in the total eligible requests? Please clarify the treatment of
+  timeouts, content-filtered responses, HTTP `4xx`, `5xx`, and `429` outcomes.
+- Does the source evidence provide one request identifier, one final outcome,
+  and one timestamp that belong together for each counted request?
+- Can each counted request be reliably connected to the selected business unit
+  and project?
+- Is there a minimum number of eligible requests required before the
+  percentage should be shown?
 
 ## 3. End-to-End Latency — selected-scope trend coverage pending
 
 **Business meaning**
 Shows the user-experience speed of eligible requests from submission through
 final rendering. The Product Owner view uses P95, so it describes how long
-95% of eligible requests took. It is adjacent to satisfaction as decision
-context only; it is not evidence of a causal effect on satisfaction.
+95% of eligible requests took. It is displayed alongside API Error Rate as
+decision context only; neither signal proves that it caused the other.
 
 **In simple terms**
 We want to know whether users are waiting too long for an answer. Before we
@@ -194,7 +210,7 @@ final-response events for one eligible request, then deduplicate repeated
 telemetry before calculating P95. Confirm how the correlation ID behaves when
 one request has retries, multiple component events, or more than one final
 response. Correlate to selected dimensions only after attribution is reliable.
-Feedback correlation is not required for this metric and must not be inferred
+API-error correlation is not required for this metric and must not be inferred
 from adjacent visual placement.
 
 **Client Questions**
@@ -282,15 +298,16 @@ partial successes; then attribute eligible workflows to the selected scope.
 
 ## Excluded from this tracker
 
-This drawer intentionally does not add component latency, errors, raw feedback,
-user identifiers, or a feedback-to-latency causal analysis. Those are outside
-the Product Experience Pulse scope or lack an approved metric/display contract.
+This drawer intentionally does not add component latency, raw error messages,
+an error breakdown, user identifiers, User Satisfaction Rate, or a causal
+analysis between API errors and latency. Those are outside the current Product
+Experience Pulse scope or lack an approved metric/display contract.
 
 ## Quick view — required confirmations
 
 | Displayed metric | Confirmation needed |
 | --- | --- |
 | Session & Query Volume | Query identity; session and deduplication rules; time and selected-scope attribution. |
-| User Satisfaction Rate | Feedback scale and denominator; feedback timestamp; correlation-ID target and privacy rules. |
+| API Error Rate | Request-level grain; error and eligible-outcome rules; final-outcome timestamp; business-unit/project attribution; minimum sample. |
 | End-to-End Latency | Eligible-request definition; correlation-ID event pairing and deduplication; time and selected-scope attribution. |
 | Workflow Completion | Workflow definition/key; terminal outcomes and denominator; lifecycle coverage and API pending-state contract. |

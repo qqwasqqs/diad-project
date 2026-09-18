@@ -50,10 +50,10 @@
   ],
   "experienceLinkEvidence": [
     {
-      "id": "feedback-quality-correlation",
-      "label": "Feedback ↔ quality correlation",
+      "id": "api-errors-quality-correlation",
+      "label": "API errors ↔ quality correlation",
       "status": "PENDING",
-      "note": "Requires approved request correlation and feedback timestamp"
+      "note": "Requires a shared request population and approved error outcomes"
     },
     {
       "id": "latency-quality-correlation",
@@ -62,6 +62,6 @@
       "note": "Requires a shared request population and time alignment"
     }
   ],
-  "contextOnly": "CONTEXT ONLY — 84% positive · P95 1.20 s · NO CAUSAL CLAIM",
+  "contextOnly": "CONTEXT ONLY — API errors 1.14% · P95 1.20 s · NO CAUSAL CLAIM",
   "bottomNote": "EVALUATOR COVERAGE AND COMPARABILITY PENDING"
 }
