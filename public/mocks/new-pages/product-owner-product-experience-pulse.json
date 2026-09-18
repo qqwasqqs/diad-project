@@ -60,9 +60,10 @@
       ]
     }
   ],
-  "feedback": {
-    "positive": 84,
-    "negative": 16
+  "apiErrorRate": {
+    "errorRatePercent": 1.14,
+    "errorRequestCount": 114,
+    "eligibleRequestCount": 10000
   },
   "workflowSteps": [
     { "id": "workflow-key", "label": "Workflow key" },
@@ -78,9 +79,9 @@
       "coverage": "pending"
     },
     {
-      "id": "user-satisfaction-rate",
-      "signal": "User Satisfaction Rate",
-      "calculation": "Valid feedback share",
+      "id": "api-error-rate",
+      "signal": "API Error Rate",
+      "calculation": "Distinct error requests / eligible requests",
       "coverage": "pending"
     },
     {

@@ -7,7 +7,6 @@ import {
   TargetArrow24Regular,
 } from "@fluentui/react-icons";
 
-import { PositiveNegativeBar } from "@/components/shared/charts/PositiveNegativeBar";
 import DashboardDrawer from "@/components/shared/dashboard/DashboardDrawer";
 import DashboardLineChart, {
   type DashboardLineSeries,
@@ -18,6 +17,7 @@ import MetricContextTable, {
 } from "@/components/shared/dashboard/MetricContextTable";
 import PanelFootnote from "@/components/shared/dashboard/PanelFootnote";
 import PendingStateValue from "@/components/shared/dashboard/PendingStateValue";
+import ProductOwnerApiErrorRate from "@/components/shared/dashboard/ProductOwnerApiErrorRate";
 import useDrawerFilters from "@/components/shared/dashboard/useDrawerFilters";
 
 interface ProductExperiencePulseSeries {
@@ -31,9 +31,10 @@ interface ProductExperiencePulseSeries {
 export interface ProductExperiencePulseData {
   engagementSeries: ProductExperiencePulseSeries[];
   responsivenessSeries: ProductExperiencePulseSeries[];
-  feedback: {
-    positive: number;
-    negative: number;
+  apiErrorRate: {
+    errorRatePercent: number;
+    errorRequestCount: number;
+    eligibleRequestCount: number;
   };
   workflowSteps: Array<{
     id: string;
@@ -173,31 +174,27 @@ export default function ProductOwnerProductExperiencePulseDrawer({
 
         <div className="grid gap-3 md:grid-cols-[0.8fr_1.2fr]">
           <section
-            aria-labelledby="feedback-evidence-title"
+            aria-labelledby="api-error-evidence-title"
             className="rounded-lg border border-slate-200 bg-white p-3"
           >
             <h3
-              id="feedback-evidence-title"
+              id="api-error-evidence-title"
               className="text-xs font-semibold text-slate-800"
             >
-              Feedback evidence
+              API error evidence
             </h3>
 
-            <div className="mt-3 flex justify-between text-[10px] font-semibold text-slate-700">
-              <span>{data.feedback.positive}% positive</span>
-              <span>{data.feedback.negative}% negative</span>
-            </div>
-            <div className="mt-1">
-              <PositiveNegativeBar
-                positive={data.feedback.positive}
-                negative={data.feedback.negative}
+            <div className="mt-3">
+              <ProductOwnerApiErrorRate
+                {...data.apiErrorRate}
+                variant="drawer"
               />
             </div>
 
             <div className="mt-4">
-              <PendingLabel>FEEDBACK TREND / COVERAGE PENDING</PendingLabel>
+              <PendingLabel>ERROR CLASSIFICATION / COVERAGE PENDING</PendingLabel>
               <p className="mt-1 text-[10px] leading-4 text-slate-600">
-                Timestamp and request correlation require approval
+                Final outcome, retry, and selected-scope rules require approval
               </p>
             </div>
           </section>

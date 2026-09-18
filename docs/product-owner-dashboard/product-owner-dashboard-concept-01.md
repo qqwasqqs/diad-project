@@ -6,10 +6,17 @@
 
 This document completed steps 1-8 of the Persona Dashboard Design Procedure.
 Approval Gates 1 through 4 are approved. The six selected Gate 3 detail views
-were individually revised and approved by the user; their version-02 images are
-the current interaction authority in the clickability map. The approved final
-review completes this dashboard under the procedure. Every number in the
-companion image remains illustrative, not a validated production result.
+were individually revised and approved by the user; their version-02 images
+remain historical interaction references in the clickability map where a later
+implementation update has not superseded them. The approved final review
+completes this dashboard under the procedure. Every number in the companion
+image remains illustrative, not a validated production result.
+
+The current React implementation supersedes the companion image in one
+material respect: Product Experience Pulse displays API Error Rate instead of
+User Satisfaction Rate. The PNG remains a historical visual reference until a
+replacement image is approved; the implemented state and the text below are
+the current authority for that card and its drawer context.
 
 ## 1. Source baseline
 
@@ -53,8 +60,8 @@ formula directly defines *feature usage* or *workflow completion rate*.
 ### Likely interpretations
 
 - The first screen should answer whether people are using the experience,
-  whether users are satisfied, and whether response quality or latency could
-  explain a change.
+  whether eligible requests are failing, and whether response quality or
+  latency requires attention.
 - Product Owners need outcome-oriented summaries and trends, not raw traces,
   error messages, user identities, model/deployment configuration, or service
   diagnostics.
@@ -65,7 +72,8 @@ formula directly defines *feature usage* or *workflow completion rate*.
 ### Main-view questions
 
 1. Are people adopting and returning to the product?
-2. Are users satisfied, and is the user experience responsive?
+2. Are eligible requests completing without API errors, and is the user
+   experience responsive?
 3. Is response and agent quality supporting the intended user journey?
 4. Can the supplied telemetry measure feature usage and workflow completion?
 
@@ -83,13 +91,13 @@ a recorded treatment so that the 49-row source inventory remains visible.
 | Performance / Latency | Training Duration | `training_run_id`, `training_duration_ms`, `training_status` | `AVG(training_duration_ms)` | Supported | Training detail; outside the main Product Owner reading flow. |
 | Performance / Throughput | Request Throughput | `request_id`, `timestamp`, `session_id` | `COUNT(DISTINCT request_id) / time window seconds` | Derivable | Main supporting KPI; event grain and retry rules are open. |
 | Performance / Throughput | Token Throughput | token/search/span fields, `ActiveTokens`, `deployment_name` | source-specific averages or tokens per time unit | Conflicting | Technical/cost detail; definition pending. |
-| Reliability / Error Rate | API Error Rate | `status_code`, `error_code`, `response_status`, `error_message` | AI-related errors / total requests | Partially supported | Supporting experience-risk detail; numerator, denominator, retries, and time field are open. |
+| Reliability / Error Rate | API Error Rate | `status_code`, `error_code`, `response_status`, `error_message`; request identity/time are documented elsewhere | AI-related errors / total requests | Partially supported | Main Product Experience Pulse KPI. The UI shows an illustrative percentage and aggregate coverage counts; numerator, denominator, retries, and time/scope attribution remain open. |
 | Reliability / Error Rate | Training Failure Rate | `training_status` | failed training runs / all training runs | Supported | Training detail; not on main view. |
 | Reliability / Error Rate | Transcription Failure Rate | `transcription_status`, `confidence_score`, `word_error_rate` | failed transcription requests / all transcription requests | Supported | Feature-specific detail only if speech workflow is in scope. |
 | Reliability / Error Rate | Translation Failure Rate | `translation_status` | failed translation requests / all translation requests | Supported | Feature-specific detail only if translation workflow is in scope. |
 | Adoption / User Engagement | Session & Query Volume (Session Length / Query per Session) | `session_id`, `conversation_id`, `user_id`, `channel`, `timestamp_start` | average session length; queries / sessions | Supported | Main adoption KPI and 30-day sessions/queries trend. |
 | Adoption / User Engagement | Query & Prompt Length | `prompt_length`, `max_completion_tokens` | `AVG(prompt_length)` | Supported | Supporting usage detail; unit (characters vs tokens) must be labeled. |
-| Adoption / User Engagement | User Satisfaction Rate | `user_feedback_score`, `user_id`, `application_name` | `AVG(user_feedback_score)` | Partially supported | Main KPI. Feedback event timestamp, deduplication, eligible population, and attribution remain open. |
+| Adoption / User Engagement | User Satisfaction Rate | `user_feedback_score`, `user_id`, `application_name` | `AVG(user_feedback_score)` | Partially supported | Retained in the source inventory but removed from the current main view and Product Experience Pulse. A future presentation will be designed separately. |
 | Quality / AI Response Quality | Groundedness and Hallucination | evaluation ID, `groundedness_score`, result, `completion_id`, `finish_reason` | `AVG(groundedness_score)` | Partially supported | Main quality trend shows Groundedness only; Hallucination % is excluded pending an approved threshold and coverage rule. |
 | Quality / AI Response Quality | Response Coherence | `coherence_score`, `coherence_result` | `AVG(coherence_score)` | Supported | Main quality trend (1-5 scale). |
 | Quality / AI Response Quality | Relevance Quality | `relevance_score`, `relevance_result` | `AVG(relevance_score)` | Supported | Main quality trend (1-5 scale). |
@@ -135,10 +143,13 @@ a recorded treatment so that the 49-row source inventory remains visible.
 - **Workflow completion rate:** no direct completion event, terminal workflow
   state, or numerator/denominator rule is supplied. The image shows
   `WORKFLOW COMPLETION — DATA PENDING`.
-- **Performance effect on satisfaction:** latency has time fields, but the
-  User Satisfaction mapping does not provide a feedback timestamp or an
-  approved request/correlation join. The concept puts both signals beside each
-  other but does not claim causation or draw a combined trend.
+- **API Error Rate:** outcome fields are mapped and one `request_id` represents
+  one user query, but the approved error outcomes, eligible denominator,
+  terminal timestamp, retry/final-outcome rule, and selected-scope attribution
+  remain open. The illustrative `1.14%` value is not a production result.
+- **User Satisfaction Rate presentation:** the KPI remains in the source
+  inventory but is intentionally absent from the current implementation. Its
+  future form is outside this revision.
 
 ## 4. Dashboard-wide design rules
 
@@ -163,14 +174,14 @@ a recorded treatment so that the 49-row source inventory remains visible.
 
 Reading order:
 
-1. **Product experience pulse:** adoption, satisfaction, response speed, and
-   an honest workflow-completion availability state.
+1. **Product experience pulse:** adoption, API error evidence, response speed,
+   and an honest workflow-completion availability state.
 2. **Adoption and engagement:** daily sessions/queries trend plus a channel
    mix, answering where and how much the product is used.
-3. **Experience and response quality:** satisfaction and latency are adjacent
-   without asserting causation; groundedness, relevance, intent resolution,
-   retrieval quality, and task adherence explain whether responses support the
-   journey.
+3. **Experience and response quality:** groundedness, relevance, intent
+   resolution, retrieval quality, and task adherence indicate whether evaluated
+   responses support the journey. API-error and latency context remains
+   non-causal.
 4. **Trust and measurement gaps:** content trust signals plus explicit pending
    states for the unsupported feature-usage and workflow-completion measures.
 
@@ -190,8 +201,9 @@ persona-contained detail design. No clickability decision is made before Gate
 
 ### Likely interpretations
 
-- Adoption, satisfaction, experience latency, and response quality deserve the
-  greatest visual weight because they directly serve the Product Owner purpose.
+- Adoption, API error evidence, experience latency, and response quality
+  deserve the greatest visual weight in the current implementation because
+  they directly support the Product Owner's experience and reliability view.
 - A channel mix is a suitable product-usage breakdown because `channel` is a
   mapped session attribute.
 - Quality evaluators can support a Product Owner decision only as aggregated,
@@ -206,16 +218,18 @@ persona-contained detail design. No clickability decision is made before Gate
 - Sessions and queries can be daily-bucketed using `timestamp_start`; timezone,
   bucket boundary, deduplication, and session rules require confirmation.
 
-### Missing evidence and client questions
+### Missing evidence and decisions
 
 1. Which feature identifier/event and formula define feature usage?
 2. What terminal workflow state and eligible denominator define completion?
-3. Can feedback be timestamped and correlated to requests/latency without
-   exposing user data? What feedback deduplication/eligibility rule applies?
+3. Which final outcomes belong in API Error Rate, and which requests belong in
+   its eligible denominator? In particular, how should timeouts,
+   content-filtered responses, HTTP `4xx`, `5xx`, and `429` outcomes be treated?
 4. Can every visible KPI reliably honor BU, project, and channel filters? What
    does the UI show when only part of a selection is attributable?
 5. What are the event grain, retry, deduplication, timezone, comparison,
-   precision, rounding, freshness, loading, empty, and API-error rules?
+   precision, rounding, freshness, loading, empty, and error-state rules for
+   the remaining metrics?
 6. What evaluator coverage, score aggregation, thresholds, and access rules
    govern the quality and trust indicators?
 7. What pricing version, currency, request roll-up, and cost attribution rules
@@ -237,17 +251,17 @@ Composition/framing:
 - Directly below the header, slim pale-amber banner text reads exactly "ILLUSTRATIVE VALUES — TARGETS AND THRESHOLDS PENDING VALIDATION".
 - Section title "Product experience pulse". Four equal KPI cards in one row, each fully readable:
   1. "Session & Query Volume" — "316K queries" with small line "68K sessions · 4.6 queries/session".
-  2. "User Satisfaction Rate" — "84% positive" with small split bar labeled "84% / 16%".
+  2. "API Error Rate" — "1.14% errors" with small line "114 of 10,000 eligible requests". Use neutral styling because no attention threshold is approved.
   3. "End-to-End Latency" — "P95 1.20 s".
   4. "Workflow Completion" — "DATA PENDING" with small line "Completion event and formula not supplied".
 - Middle left wide card title exactly "Adoption and engagement". Show a clean 30-day dual-line chart with legend labels exactly "Sessions" and "Queries". Under it show small supporting labels exactly "4.6 queries/session" and "8.2 min avg session".
 - Middle right card title exactly "Channel mix". Show four compact horizontal bars with generic illustrative labels and values: "Web 52%", "Teams 28%", "Mobile 14%", "API 6%". Include a small note exactly "Illustrative channel breakdown".
-- Lower left card title exactly "Experience and response quality". Along the top show two side-by-side, clearly separate callouts: "User Satisfaction Rate 84% positive" and "End-to-End Latency P95 1.20 s". Add a subtle text note exactly "Adjacent signals — no causal claim". Below, show a small 30-day line chart with three compatible 1-5 series labeled exactly "Groundedness", "Relevance Quality", and "Intent Resolution". Add compact supporting values exactly "Retrieval Quality 4.0 / 5" and "Task Adherence 4.2 / 5".
+- Lower left card title exactly "Experience and response quality". Show a small 30-day line chart with three compatible 1-5 series labeled exactly "Groundedness", "Relevance Quality", and "Intent Resolution". Add compact supporting values exactly "Retrieval Quality 4.0 / 5" and "Task Adherence 4.2 / 5". Do not include User Satisfaction Rate in this section.
 - Lower right card title exactly "Feature usage evidence". Use an explicit pending state with a neutral simple icon and exact large label "DATA PENDING". Supporting text exactly "No feature identifier or usage formula supplied". Do not invent a feature-usage rate.
 - Bottom full-width strip title exactly "Trust and measurement readiness". Four separate indicators: "Safety Evaluators CALCULATION PENDING", "MLflow Safety Score 0.91 / 1", "PII Leakage (Agent Only) DATA PENDING", "UPIA TEST RESULTS PENDING".
 Color palette: dark forest-green navigation; warm-white canvas; white cards; charcoal text; indigo/blue neutral data series; muted green for favorable movement only; amber for attention/pending; red only for explicit risk.
 Text (verbatim): use every listed title, label, state, and illustrative value exactly.
-Constraints: Keep text large and fully readable. Use only mapped Product Owner KPIs and explicit pending states. Do not add feature-use percentages, workflow-completion percentages, uptime, SLA, total applications, health scores, recommendations, revenue, ROI, error-log tables, raw user IDs, raw prompts/responses, raw error messages, model/deployment configuration, technical service diagnostics, environment/model filters, corporate logos, trademarks, watermarks, stock imagery, or browser chrome. Do not represent missing data as zero. Do not imply that latency causes satisfaction; retain the explicit no-causal-claim note.
+Constraints: Keep text large and fully readable. Use only mapped Product Owner KPIs and explicit pending states. Do not add feature-use percentages, workflow-completion percentages, uptime, SLA, total applications, health scores, recommendations, revenue, ROI, error-log tables, raw user IDs, raw prompts/responses, raw error messages, model/deployment configuration, technical service diagnostics, environment/model filters, corporate logos, trademarks, watermarks, stock imagery, or browser chrome. Do not represent missing data as zero. Do not imply that API errors or latency cause a response-quality change.
 ```
 
 The intended generation mode is the built-in image-generation tool. The two
