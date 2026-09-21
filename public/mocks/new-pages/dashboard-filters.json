@@ -1,0 +1,22 @@
+{
+  "generatedAt": "2026-09-21T00:00:00.000Z",
+  "note": "Illustrative filter options. Not production telemetry. The application list is the one supplied by the product owner; it is not documented anywhere in docs/. Values are spelled as `application_name` carries them, so a value here is what the metrics endpoint receives \u2014 confirm each spelling against the distinct `application_name` values in Splunk before the source is connected. Business unit and project remain anonymous placeholders.",
+  "businessUnit": [
+    { "value": "all", "label": "All business units", "weight": 1 },
+    { "value": "a", "label": "Business Unit A", "weight": 0.84 },
+    { "value": "b", "label": "Business Unit B", "weight": 1.19 }
+  ],
+  "project": [
+    { "value": "all", "label": "All projects", "weight": 1 },
+    { "value": "a1", "label": "Project A1", "weight": 0.91 },
+    { "value": "b1", "label": "Project B1", "weight": 1.12 }
+  ],
+  "app": [
+    { "value": "all", "label": "All applications", "weight": 1 },
+    { "value": "AskHr", "label": "AskHr", "weight": 1.13 },
+    { "value": "CoPilot", "label": "CoPilot", "weight": 1.24 },
+    { "value": "Eu ICOP", "label": "Eu ICOP", "weight": 0.88 },
+    { "value": "ServiceNow", "label": "ServiceNow", "weight": 0.95 },
+    { "value": "Agentic AQi App", "label": "Agentic AQi App", "weight": 0.71 }
+  ]
+}

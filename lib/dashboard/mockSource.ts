@@ -13,6 +13,7 @@
 
 import type { NextRequest } from "next/server";
 
+import { mockScopeWeight } from "@/lib/dashboard/filterOptionsSource";
 import type { DashboardFilters, MetricRow, Series } from "@/types/dashboard";
 
 export const PERIOD_DAYS: Record<string, number> = {
@@ -36,19 +37,6 @@ export interface MockMetricRow extends MetricRow {
   max?: number;
 }
 
-/*
-  Illustrative weight per filter dimension.
-
-  Each selection has its own explicit weight rather than a hash, so a scope's
-  numbers are readable from the code and every selection visibly moves the
-  values. These are presentation weights for mock data, not measured ratios.
-*/
-export const SCOPE_WEIGHTS: Record<string, Record<string, number>> = {
-  businessUnit: { all: 1, a: 0.84, b: 1.19 },
-  project: { all: 1, a1: 0.91, b1: 1.12 },
-  channel: { all: 1, web: 1.08, api: 0.86, mobile: 0.73 },
-};
-
 export function readFilters(request: NextRequest): DashboardFilters {
   const params = request.nextUrl.searchParams;
 
@@ -56,7 +44,7 @@ export function readFilters(request: NextRequest): DashboardFilters {
     period: params.get("period") ?? undefined,
     businessUnit: params.get("businessUnit") ?? undefined,
     project: params.get("project") ?? undefined,
-    channel: params.get("channel") ?? undefined,
+    app: params.get("app") ?? undefined,
   };
 }
 
@@ -64,14 +52,19 @@ export function periodDays(filters: DashboardFilters): number {
   return PERIOD_DAYS[filters.period ?? DEFAULT_PERIOD] ?? PERIOD_DAYS[DEFAULT_PERIOD];
 }
 
-export function scopeFactor(filters: DashboardFilters): number {
-  const weight = (dimension: string, selected?: string) =>
-    SCOPE_WEIGHTS[dimension][selected ?? "all"] ?? 1;
+/*
+  Illustrative scaling for the selected scope.
 
+  Each selection carries its own explicit weight, listed beside the option in
+  the filter mock, so a scope's numbers stay readable and a dimension whose
+  values come from the source cannot gain an option that leaves the numbers
+  unchanged. These are presentation weights for mock data, not measured ratios.
+*/
+export function scopeFactor(filters: DashboardFilters): number {
   return (
-    weight("businessUnit", filters.businessUnit) *
-    weight("project", filters.project) *
-    weight("channel", filters.channel)
+    mockScopeWeight("businessUnit", filters.businessUnit) *
+    mockScopeWeight("project", filters.project) *
+    mockScopeWeight("app", filters.app)
   );
 }
 
@@ -153,8 +146,8 @@ export function sliceSeries(
 
   These helpers scope every metric by every filter, which is what makes a mock
   useful for exercising a UI. The calculation specifications do not permit that
-  in production: a metric may apply a business-unit, project, or channel filter
-  only where its source event is reliably attributed through an approved
+  in production: a metric may apply a business-unit, project, or app filter only
+  where its source event is reliably attributed through an approved
   correlation/enrichment contract.
 
   When implementing a real source, classify each metric:
