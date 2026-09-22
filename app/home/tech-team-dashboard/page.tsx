@@ -31,7 +31,7 @@ import CapacityAndEfficiencyDrawer from "@/components/shared/dashboard/drawers/t
 import AiModelQualityDrawer from "@/components/shared/dashboard/drawers/tech-team/AiModelQualityDrawer";
 import EvaluatorReadinessDrawer from "@/components/shared/dashboard/drawers/tech-team/EvaluatorReadinessDrawer";
 import { useTechTeamMainView } from "@/hooks/useTechTeamDashboard";
-import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
+import { useSelectedDashboardFilters } from "@/hooks/useSelectedDashboardFilters";
 import type { MetricRow, Series } from "@/types/dashboard";
 
 /*
@@ -122,17 +122,9 @@ export default function TechTeamDashboard() {
     the hook, which keys its cache on it, so changing a filter refetches the
     payload for that scope.
   */
-  const period = useDashboardFiltersStore((state) => state.period);
-  const businessUnit = useDashboardFiltersStore((state) => state.businessUnit);
-  const project = useDashboardFiltersStore((state) => state.project);
-  const channel = useDashboardFiltersStore((state) => state.channel);
+  const filters = useSelectedDashboardFilters();
 
-  const { mainViewData: data } = useTechTeamMainView({
-    period,
-    businessUnit,
-    project,
-    channel,
-  });
+  const { mainViewData: data } = useTechTeamMainView(filters);
 
   /*
     One drawer at a time. The six keys match the six clickable elements in the

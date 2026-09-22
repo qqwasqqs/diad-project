@@ -104,5 +104,43 @@ export interface DashboardFilters {
   period?: string;
   businessUnit?: string;
   project?: string;
-  channel?: string;
+  app?: string;
+}
+
+/*
+  A fully specified selection: every dimension has a value, `all` included.
+
+  `DashboardFilters` above is the request shape, where a dimension may be
+  absent. This is what the bar always holds and what a page reads.
+*/
+export interface DashboardFilterSelection {
+  period: string;
+  businessUnit: string;
+  project: string;
+  app: string;
+}
+
+/*
+  One selectable value in the filter bar.
+
+  The dimensions below are data-derived: their values are the distinct values
+  present in the source, so they are served by `/api/dashboard/filters` rather
+  than hard-coded in the client.
+*/
+export interface DashboardFilterOption {
+  value: string;
+  label: string;
+}
+
+/*
+  Options for every data-derived filter dimension.
+
+  `period` is absent on purpose: it is a fixed request parameter (the contract's
+  relative `timeRange`), not a set of values discovered in the data, so it stays
+  a constant in the filter store.
+*/
+export interface DashboardFilterOptions {
+  businessUnit: DashboardFilterOption[];
+  project: DashboardFilterOption[];
+  app: DashboardFilterOption[];
 }

@@ -30,7 +30,7 @@ import ExecutivePulseDrawer from "@/components/shared/dashboard/drawers/executiv
 import EngagementDrawer from "@/components/shared/dashboard/drawers/executive/EngagementDrawer";
 import CostAllocationDrawer from "@/components/shared/dashboard/drawers/executive/CostAllocationDrawer";
 import SafetyAndRiskDrawer from "@/components/shared/dashboard/drawers/executive/SafetyAndRiskDrawer";
-import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
+import { useSelectedDashboardFilters } from "@/hooks/useSelectedDashboardFilters";
 import type { Series } from "@/types/dashboard";
 import type { ExecutivePulseCard } from "@/types/executiveDashboard";
 
@@ -148,20 +148,12 @@ export default function ExecutiveDashboard() {
     the hook, which keys its cache on it, so changing a filter refetches the
     payload for that scope.
   */
-  const period = useDashboardFiltersStore((state) => state.period);
-  const businessUnit = useDashboardFiltersStore((state) => state.businessUnit);
-  const project = useDashboardFiltersStore((state) => state.project);
-  const channel = useDashboardFiltersStore((state) => state.channel);
+  const filters = useSelectedDashboardFilters();
 
   const [openDrawer, setOpenDrawer] = useState<DrawerKey | null>(null);
   const closeDrawer = () => setOpenDrawer(null);
 
-  const { mainViewData: data } = useExecutiveMainView({
-    period,
-    businessUnit,
-    project,
-    channel,
-  });
+  const { mainViewData: data } = useExecutiveMainView(filters);
 
   const drawers = data?.drawers;
 

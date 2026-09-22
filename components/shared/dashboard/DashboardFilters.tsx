@@ -2,27 +2,22 @@
 
 import type { ReactNode } from "react";
 import {
+  AppsRegular,
   BuildingMultipleRegular,
   CalendarLtrRegular,
-  ChannelRegular,
   FolderRegular,
 } from "@fluentui/react-icons";
 
 import DashboardFilter, { type DashboardFilterSize } from "./DashboardFilter";
+import { useDashboardFilterOptions } from "@/hooks/useDashboardFilterOptions";
+import { useSelectedDashboardFilters } from "@/hooks/useSelectedDashboardFilters";
 import {
-  BUSINESS_UNIT_OPTIONS,
-  CHANNEL_OPTIONS,
   PERIOD_OPTIONS,
-  PROJECT_OPTIONS,
   useDashboardFiltersStore,
 } from "@/store/dashboardFiltersStore";
+import type { DashboardFilterSelection } from "@/types/dashboard";
 
-export interface DashboardFilterValues {
-  period: string;
-  businessUnit: string;
-  project: string;
-  channel: string;
-}
+export type DashboardFilterValues = DashboardFilterSelection;
 
 export interface DashboardFilterState {
   values: DashboardFilterValues;
@@ -48,12 +43,19 @@ interface DashboardFiltersContentProps {
   trailing?: ReactNode;
 }
 
+/*
+  The business unit, project, and app values are the distinct values present in
+  the source, so they are fetched rather than declared here. Until they arrive
+  each of those filters offers only `all`, the scope already selected.
+*/
 function DashboardFiltersContent({
   values,
   onChange,
   size,
   trailing,
 }: DashboardFiltersContentProps) {
+  const { filterOptions } = useDashboardFilterOptions();
+
   const update = (field: keyof DashboardFilterValues, value: string) => {
     onChange({ ...values, [field]: value });
   };
@@ -76,7 +78,7 @@ function DashboardFiltersContent({
         ariaLabel="Business unit"
         value={values.businessUnit}
         icon={<BuildingMultipleRegular />}
-        options={BUSINESS_UNIT_OPTIONS}
+        options={filterOptions.businessUnit}
         onChange={(value) => update("businessUnit", value)}
         size={size}
       />
@@ -84,16 +86,16 @@ function DashboardFiltersContent({
         ariaLabel="Project"
         value={values.project}
         icon={<FolderRegular />}
-        options={PROJECT_OPTIONS}
+        options={filterOptions.project}
         onChange={(value) => update("project", value)}
         size={size}
       />
       <DashboardFilter
-        ariaLabel="Channel"
-        value={values.channel}
-        icon={<ChannelRegular />}
-        options={CHANNEL_OPTIONS}
-        onChange={(value) => update("channel", value)}
+        ariaLabel="Application"
+        value={values.app}
+        icon={<AppsRegular />}
+        options={filterOptions.app}
+        onChange={(value) => update("app", value)}
         size={size}
       />
       {trailing}
@@ -101,6 +103,11 @@ function DashboardFiltersContent({
   );
 }
 
+/*
+  The bar reads the selection through the same hook the pages use, so the
+  labels it shows and the scope the page requests can never disagree — on
+  arriving at a dashboard both are the unfiltered default.
+*/
 function StoreBackedDashboardFilters({
   size,
   trailing,
@@ -108,25 +115,22 @@ function StoreBackedDashboardFilters({
   size: DashboardFilterSize;
   trailing?: ReactNode;
 }) {
-  const period = useDashboardFiltersStore((state) => state.period);
-  const businessUnit = useDashboardFiltersStore((state) => state.businessUnit);
-  const project = useDashboardFiltersStore((state) => state.project);
-  const channel = useDashboardFiltersStore((state) => state.channel);
+  const values = useSelectedDashboardFilters();
   const setPeriod = useDashboardFiltersStore((state) => state.setPeriod);
   const setBusinessUnit = useDashboardFiltersStore((state) => state.setBusinessUnit);
   const setProject = useDashboardFiltersStore((state) => state.setProject);
-  const setChannel = useDashboardFiltersStore((state) => state.setChannel);
+  const setApp = useDashboardFiltersStore((state) => state.setApp);
 
   return (
     <DashboardFiltersContent
       size={size}
       trailing={trailing}
-      values={{ period, businessUnit, project, channel }}
-      onChange={(values) => {
-        setPeriod(values.period);
-        setBusinessUnit(values.businessUnit);
-        setProject(values.project);
-        setChannel(values.channel);
+      values={values}
+      onChange={(next) => {
+        setPeriod(next.period);
+        setBusinessUnit(next.businessUnit);
+        setProject(next.project);
+        setApp(next.app);
       }}
     />
   );

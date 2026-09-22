@@ -46,7 +46,7 @@ import FailureSurfaceDrawer from "@/components/shared/dashboard/drawers/operatio
 import OperationalControlCoverageDrawer from "@/components/shared/dashboard/drawers/operations/OperationalControlCoverageDrawer";
 import SafetyAndSecurityReadinessDrawer from "@/components/shared/dashboard/drawers/operations/SafetyAndSecurityReadinessDrawer";
 import { useOperationsMainView } from "@/hooks/useOperationsDashboard";
-import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
+import { useSelectedDashboardFilters } from "@/hooks/useSelectedDashboardFilters";
 import type { MetricRow, Series } from "@/types/dashboard";
 import operationsTeamSections from "@/content/dashboards/operations-team-sections.json";
 
@@ -177,20 +177,12 @@ export default function OperationsTeamDashboard() {
     the hook, which keys its cache on it, so changing a filter refetches the
     payload for that scope.
   */
-  const period = useDashboardFiltersStore((state) => state.period);
-  const businessUnit = useDashboardFiltersStore((state) => state.businessUnit);
-  const project = useDashboardFiltersStore((state) => state.project);
-  const channel = useDashboardFiltersStore((state) => state.channel);
+  const filters = useSelectedDashboardFilters();
 
   const [openDrawer, setOpenDrawer] = useState<DrawerKey | null>(null);
   const closeDrawer = () => setOpenDrawer(null);
 
-  const { mainViewData: data } = useOperationsMainView({
-    period,
-    businessUnit,
-    project,
-    channel,
-  });
+  const { mainViewData: data } = useOperationsMainView(filters);
 
   const drawers = data?.drawers;
 

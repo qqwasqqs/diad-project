@@ -8,7 +8,7 @@ const initialDrawerFilters: DashboardFilterValues = {
   period: "30d",
   businessUnit: "all",
   project: "all",
-  channel: "all",
+  app: "all",
 };
 
 export default function useDrawerFilters() {
