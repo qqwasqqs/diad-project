@@ -1,6 +1,13 @@
 {
   "generatedAt": "2026-09-01T00:00:00.000Z",
   "note": "Illustrative values. Not production telemetry. Definitions and coverage remain subject to the documented pending states.",
+  "feedbackSummary": {
+    "status": "OK",
+    "positivePercent": 84,
+    "negativePercent": 16,
+    "includedApplicationCount": 3,
+    "illustrative": true
+  },
   "productExperiencePulse": {
     "sessionQueryVolume": {
       "queries": 316000,
@@ -156,6 +163,10 @@
         "max": 5
       }
     ]
+  },
+  "featureUsageEvidence": {
+    "statusLabel": "DATA PENDING",
+    "description": "No feature identifier or usage formula supplied"
   },
   "trustAndMeasurementReadiness": [
     {

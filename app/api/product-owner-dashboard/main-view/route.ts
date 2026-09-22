@@ -31,6 +31,7 @@ import type { DashboardFilters, Series } from "@/types/dashboard";
 import type {
   ProductOwnerApiErrorRateValue,
   ProductOwnerDashboardPayload,
+  ProductOwnerFeedbackSummaryData,
   ProductOwnerSupportingStat,
 } from "@/types/productOwnerDashboard";
 
@@ -59,6 +60,7 @@ interface MockSupportingStat extends MockMetricRow {
 interface MockMainPayload {
   generatedAt: string;
   note: string;
+  feedbackSummary: ProductOwnerFeedbackSummaryData;
   productExperiencePulse: {
     sessionQueryVolume: {
       queries: number;
@@ -79,6 +81,7 @@ interface MockMainPayload {
     series: Series[];
     supporting: MockSupportingStat[];
   };
+  featureUsageEvidence: ProductOwnerDashboardPayload["featureUsageEvidence"];
   trustAndMeasurementReadiness: MockMetricRow[];
 }
 
@@ -147,6 +150,9 @@ function applyFilters(
   );
 
   return {
+    // Feedback values and application coverage are already supplied as one
+    // aggregate. Do not calculate them from the other mock metrics.
+    feedbackSummary: mock.feedbackSummary,
     productExperiencePulse: {
       sessionQueryVolume: {
         queries: Math.round(
@@ -190,6 +196,7 @@ function applyFilters(
         factor,
       ),
     },
+    featureUsageEvidence: mock.featureUsageEvidence,
     trustAndMeasurementReadiness:
       mock.trustAndMeasurementReadiness.map((row) => formatRow(row, factor)),
     drawers: {

@@ -25,7 +25,30 @@ export interface ProductOwnerSupportingStat {
   value: string;
 }
 
+/*
+  Splunk supplies the complete feedback aggregate, including the number of
+  applications that contributed feedback. React does not classify records or
+  derive either percentage or coverage count.
+*/
+export type ProductOwnerFeedbackSummaryData =
+  | {
+      status: "OK";
+      positivePercent: number;
+      negativePercent: number;
+      includedApplicationCount: number;
+      illustrative?: boolean;
+    }
+  | {
+      status:
+        | "DATA_PENDING"
+        | "CALCULATION_PENDING"
+        | "FILTER_BREAKDOWN_UNAVAILABLE"
+        | "NO_DATA";
+      reason?: string;
+    };
+
 export interface ProductOwnerDashboardPayload {
+  feedbackSummary: ProductOwnerFeedbackSummaryData;
   productExperiencePulse: {
     sessionQueryVolume: {
       queries: number;
@@ -46,6 +69,10 @@ export interface ProductOwnerDashboardPayload {
   experienceAndResponseQuality: {
     series: Series[];
     supporting: ProductOwnerSupportingStat[];
+  };
+  featureUsageEvidence: {
+    statusLabel: "DATA PENDING";
+    description: string;
   };
   trustAndMeasurementReadiness: MetricRow[];
   drawers: {

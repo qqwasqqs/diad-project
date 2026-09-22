@@ -26,9 +26,11 @@ import DashboardSectionAction from "@/components/shared/dashboard/DashboardSecti
 import DashboardSectionInfo, {
   type DashboardSectionInfoContent,
 } from "@/components/shared/dashboard/DashboardSectionInfo";
+import DataPendingCard from "@/components/shared/dashboard/DataPendingCard";
 import { MetricCard } from "@/components/shared/dashboard/MetricCard";
 import PendingStateValue from "@/components/shared/dashboard/PendingStateValue";
 import ProductOwnerApiErrorRate from "@/components/shared/dashboard/ProductOwnerApiErrorRate";
+import ProductOwnerFeedbackSummary from "@/components/shared/dashboard/ProductOwnerFeedbackSummary/ProductOwnerFeedbackSummary";
 import StatusCallout, {
   type StatusCalloutVariant,
 } from "@/components/shared/dashboard/StatusCallout";
@@ -208,6 +210,9 @@ export default function ProductOwnerDashboard() {
         title="AI Observability — Product Owner Dashboard"
         description="Understand adoption, user experience, and business value"
       >
+        {data?.feedbackSummary && (
+          <ProductOwnerFeedbackSummary data={data.feedbackSummary} />
+        )}
         <DashboardGrid>
           <DashboardPanel
             template="segmented"
@@ -373,6 +378,19 @@ export default function ProductOwnerDashboard() {
               axes={experienceQualityAxes}
               supportingStats={experienceQualityStats}
             />
+          </DashboardPanel>
+
+          <DashboardPanel
+            template="single"
+            title="Feature usage evidence"
+            fillHeight
+          >
+            {data?.featureUsageEvidence && (
+              <DataPendingCard
+                statusLabel={data.featureUsageEvidence.statusLabel}
+                description={data.featureUsageEvidence.description}
+              />
+            )}
           </DashboardPanel>
 
           <DashboardPanel
