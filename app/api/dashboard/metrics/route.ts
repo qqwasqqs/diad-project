@@ -1,27 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import {
-  loadMockMetrics,
-  parseMetricsRequest,
-} from "@/lib/server/dashboard/productOwnerDemoSource";
-import { isLocalDesignModeServer } from "@/lib/localDesignMode";
+import { parseDashboardMetricsRequest } from "@/lib/server/dashboard/dashboardRequestParsers";
+import { loadDashboardMetrics } from "@/lib/server/dashboard/dashboardDataSource";
+import { DashboardSplunkContractError } from "@/lib/server/dashboard/dashboardSplunkSource";
+import { UnsupportedDashboardEnvironmentError } from "@/lib/localDesignMode";
+import type { MetricsRequestDto } from "@/types/dashboardEndpointDtos";
 
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
-  if (!isLocalDesignModeServer()) {
-    return NextResponse.json(
-      { error: "Splunk metrics source is not configured in this MVP" },
-      { status: 501 },
-    );
-  }
+  let input: MetricsRequestDto;
+
   try {
-    const input = parseMetricsRequest(await request.json());
-    return NextResponse.json(await loadMockMetrics(input));
+    input = parseDashboardMetricsRequest(await request.json());
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Invalid metrics request" },
       { status: 400 },
+    );
+  }
+
+  try {
+    return NextResponse.json(await loadDashboardMetrics(input));
+  } catch (error) {
+    const status =
+      error instanceof DashboardSplunkContractError
+        ? 501
+        : error instanceof UnsupportedDashboardEnvironmentError
+          ? 500
+          : 502;
+
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to load metrics" },
+      { status },
     );
   }
 }

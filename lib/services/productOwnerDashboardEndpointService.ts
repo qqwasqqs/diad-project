@@ -1,16 +1,14 @@
-import apiClient from "@/lib/apiClient";
 import {
   adaptProductOwnerMetrics,
   adaptProductOwnerTimeseries,
 } from "@/lib/dashboard/productOwnerEndpointAdapter";
+import { dashboardEndpointService } from "@/lib/services/dashboardEndpointService";
 import type { DashboardFilters } from "@/types/dashboard";
 import type {
   DashboardEndpointFiltersDto,
   MetricsRequestDto,
-  MetricsResponseDto,
   ProductOwnerChartId,
   TimeseriesRequestDto,
-  TimeseriesResponseDto,
 } from "@/types/dashboardEndpointDtos";
 
 export type ProductOwnerFilters = Pick<
@@ -61,11 +59,9 @@ export const productOwnerDashboardEndpointService = {
       filters: toEndpointFilters(filters),
       options: { includePending: true, includeCoverage: true },
     };
-    const { data } = await apiClient.post<MetricsResponseDto>(
-      "/api/dashboard/metrics",
-      request,
-    );
-    return adaptProductOwnerMetrics(data);
+    const response = await dashboardEndpointService.getMetrics(request);
+
+    return adaptProductOwnerMetrics(response);
   },
 
   async getTimeseries(chartId: ProductOwnerChartId, filters: ProductOwnerFilters) {
@@ -77,10 +73,8 @@ export const productOwnerDashboardEndpointService = {
       granularity: "day",
       options: { includeSupportingStats: true },
     };
-    const { data } = await apiClient.post<TimeseriesResponseDto>(
-      "/api/dashboard/timeseries",
-      request,
-    );
-    return adaptProductOwnerTimeseries(data);
+    const response = await dashboardEndpointService.getTimeseries(request);
+
+    return adaptProductOwnerTimeseries(response);
   },
 };
