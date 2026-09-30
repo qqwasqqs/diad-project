@@ -32,7 +32,13 @@ export default function EvaluatorReadinessDrawer({
   icons,
 }: EvaluatorReadinessDrawerProps) {
   return (
-    <DetailDrawer open={open} onClose={onClose} content={content} size="wide">
+    <DetailDrawer
+      open={open}
+      onClose={onClose}
+      content={content}
+      size="wide"
+      showScopeFilters
+    >
       <DrawerSection title="Evaluator readiness matrix">
         <DrawerRowList rows={rows} icons={icons} />
       </DrawerSection>

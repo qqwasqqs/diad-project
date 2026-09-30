@@ -25,10 +25,14 @@ export const PERIOD_DAYS: Record<string, number> = {
 export const DEFAULT_PERIOD = "30d";
 
 /*
-  A mock row carries the numbers the display string is built from, rather than
-  the finished string, so it can be scaled and reformatted per scope.
+  The numbers a display string is built from, rather than the finished string,
+  so a value can be scaled and reformatted per scope.
+
+  Carried by main-view rows and by the drawer context rows that quote the same
+  metric, so both surfaces state one scoped value rather than one scoped and one
+  portfolio-wide.
 */
-export interface MockMetricRow extends MetricRow {
+export interface MockAmount {
   amount?: number;
   unit?: string;
   prefix?: string;
@@ -36,6 +40,8 @@ export interface MockMetricRow extends MetricRow {
   // Upper bound for bounded scores, so scaling cannot push them past their scale.
   max?: number;
 }
+
+export interface MockMetricRow extends MetricRow, MockAmount {}
 
 export function readFilters(request: NextRequest): DashboardFilters {
   const params = request.nextUrl.searchParams;
@@ -87,19 +93,18 @@ export function shiftBounded(
 }
 
 /*
-  Formats one row for the given scope.
+  Scales one amount to the selected scope and formats it.
 
-  A pending state is never replaced by a number, whatever the scope is. A row
-  with no amount passes through unchanged.
+  The single formatting rule: wherever the same metric appears — a main-view
+  row, a drawer stat card, a provenance table's latest column — it is built from
+  here, so the surfaces cannot quote different values for one scope.
+
+  Returns undefined for a row that carries no amount, which is how a caller
+  tells "nothing to scope" from a scoped zero.
 */
-export function formatRow(row: MockMetricRow, factor: number): MetricRow {
-  if (row.pendingState || row.amount === undefined) {
-    return {
-      id: row.id,
-      label: row.label,
-      value: row.value,
-      pendingState: row.pendingState,
-    };
+export function formatAmount(row: MockAmount, factor: number): string | undefined {
+  if (row.amount === undefined) {
+    return undefined;
   }
 
   const scaled =
@@ -107,8 +112,26 @@ export function formatRow(row: MockMetricRow, factor: number): MetricRow {
       ? shiftBounded(row.amount, row.max, factor)
       : row.amount * factor;
 
-  const decimals = row.decimals ?? 0;
-  const value = `${row.prefix ?? ""}${scaled.toFixed(decimals)}${row.unit ?? ""}`;
+  return `${row.prefix ?? ""}${scaled.toFixed(row.decimals ?? 0)}${row.unit ?? ""}`;
+}
+
+/*
+  Formats one row for the given scope.
+
+  A pending state is never replaced by a number, whatever the scope is. A row
+  with no amount passes through unchanged.
+*/
+export function formatRow(row: MockMetricRow, factor: number): MetricRow {
+  const value = row.pendingState ? undefined : formatAmount(row, factor);
+
+  if (value === undefined) {
+    return {
+      id: row.id,
+      label: row.label,
+      value: row.value,
+      pendingState: row.pendingState,
+    };
+  }
 
   return { id: row.id, label: row.label, value };
 }

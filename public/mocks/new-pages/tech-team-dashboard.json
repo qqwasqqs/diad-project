@@ -2722,29 +2722,37 @@
           "id": "end-to-end-p95",
           "metric": "End-to-End P95",
           "calculation": "P95",
-          "latest": "1.20 s",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 1.2,
+          "unit": " s",
+          "decimals": 2
         },
         {
           "id": "model-response-avg",
           "metric": "Model Response avg",
           "calculation": "avg",
-          "latest": "760 ms",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 760,
+          "unit": " ms",
+          "decimals": 0
         },
         {
           "id": "retrieval-avg",
           "metric": "Retrieval avg",
           "calculation": "avg",
-          "latest": "210 ms",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 210,
+          "unit": " ms",
+          "decimals": 0
         },
         {
           "id": "tool-call-avg",
           "metric": "Tool Call avg",
           "calculation": "avg",
-          "latest": "180 ms",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 180,
+          "unit": " ms",
+          "decimals": 0
         }
       ],
       "notes": [
@@ -2762,29 +2770,37 @@
           "id": "request-throughput",
           "metric": "Request Throughput",
           "calculation": "COUNT(DISTINCT request_id) / window_seconds",
-          "latest": "42.8 req/s",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 42.8,
+          "unit": " req/s",
+          "decimals": 1
         },
         {
           "id": "inference-error-rate",
           "metric": "Inference Error Rate",
           "calculation": "errored eligible keys / eligible keys",
-          "latest": "1.14%",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 1.14,
+          "unit": "%",
+          "decimals": 2
         },
         {
           "id": "pipeline-duration",
           "metric": "Pipeline Duration avg",
           "calculation": "AVG(final pipeline-run duration)",
-          "latest": "42 s",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 42,
+          "unit": " s",
+          "decimals": 0
         },
         {
           "id": "indexing-ai-services",
           "metric": "Indexing / AI Services avg",
           "calculation": "AVG(service operation latency)",
-          "latest": "620 ms",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 620,
+          "unit": " ms",
+          "decimals": 0
         }
       ],
       "notes": [
@@ -2808,57 +2824,73 @@
           "id": "pipeline",
           "metric": "Pipeline",
           "calculation": "failed runs / eligible runs",
-          "latest": "0.7%",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 0.7,
+          "unit": "%",
+          "decimals": 1
         },
         {
           "id": "job",
           "metric": "Job",
           "calculation": "failed jobs / eligible jobs",
-          "latest": "0.9%",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 0.9,
+          "unit": "%",
+          "decimals": 1
         },
         {
           "id": "inference",
           "metric": "Inference",
           "calculation": "errored calls / eligible calls",
-          "latest": "1.14%",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 1.14,
+          "unit": "%",
+          "decimals": 2
         },
         {
           "id": "api-service",
           "metric": "API Service",
           "calculation": "errored requests / eligible requests",
-          "latest": "0.8%",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 0.8,
+          "unit": "%",
+          "decimals": 1
         },
         {
           "id": "training",
           "metric": "Training",
           "calculation": "failed runs / eligible runs",
-          "latest": "0.5%",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 0.5,
+          "unit": "%",
+          "decimals": 1
         },
         {
           "id": "indexing",
           "metric": "Indexing",
           "calculation": "failed operations / eligible operations",
-          "latest": "0.6%",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 0.6,
+          "unit": "%",
+          "decimals": 1
         },
         {
           "id": "transcription",
           "metric": "Transcription",
           "calculation": "failed operations / eligible operations",
-          "latest": "0.4%",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 0.4,
+          "unit": "%",
+          "decimals": 1
         },
         {
           "id": "translation",
           "metric": "Translation",
           "calculation": "failed operations / eligible operations",
-          "latest": "0.3%",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 0.3,
+          "unit": "%",
+          "decimals": 1
         }
       ],
       "notes": [
@@ -2887,15 +2919,19 @@
           "id": "cost-per-request",
           "metric": "Cost per Request",
           "calculation": "Average included token cost per request",
-          "latest": "$0.12",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 0.12,
+          "prefix": "$",
+          "decimals": 2
         },
         {
           "id": "token-usage-request",
           "metric": "Token Usage / Request",
           "calculation": "Average total tokens per request",
-          "latest": "2.4K tokens",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 2.4,
+          "unit": "K tokens",
+          "decimals": 1
         }
       ],
       "notes": [
@@ -2981,8 +3017,11 @@
           "metric": "MLflow Safety Score",
           "calculation": "AVG(Safety)",
           "scale": "0–1",
-          "latest": "0.91 / 1",
-          "coverage": "filter-breakdown"
+          "coverage": "filter-breakdown",
+          "amount": 0.91,
+          "unit": " / 1",
+          "decimals": 2,
+          "max": 1
         }
       ],
       "notes": [

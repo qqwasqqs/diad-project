@@ -32,6 +32,11 @@ interface DetailDrawerProps {
   size?: "default" | "wide";
   children?: ReactNode;
   headerFilters?: DashboardFilterState;
+  /*
+    Shows the compact filter row bound to the page's global scope, so changing
+    a filter without leaving the drawer re-scopes the payload behind it.
+  */
+  showScopeFilters?: boolean;
 }
 
 export default function DetailDrawer({
@@ -41,6 +46,7 @@ export default function DetailDrawer({
   size = "default",
   children,
   headerFilters,
+  showScopeFilters = false,
 }: DetailDrawerProps) {
   if (!content) {
     return null;
@@ -82,6 +88,7 @@ export default function DetailDrawer({
       description={content.description}
       size={size}
       headerFilters={headerFilters}
+      showScopeFilters={showScopeFilters}
     >
       <IllustrativeValuesBanner message={content.bannerMessage} />
 

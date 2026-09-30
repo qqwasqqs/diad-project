@@ -30,7 +30,13 @@ export default function RequestPathLatencyDrawer({
   series,
 }: RequestPathLatencyDrawerProps) {
   return (
-    <DetailDrawer open={open} onClose={onClose} content={content} size="wide">
+    <DetailDrawer
+      open={open}
+      onClose={onClose}
+      content={content}
+      size="wide"
+      showScopeFilters
+    >
       {/* Latest values come from the provenance rows, so the cards and the
           table below them cannot disagree. */}
       <DrawerStatGrid

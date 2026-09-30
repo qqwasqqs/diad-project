@@ -33,7 +33,13 @@ export default function AiModelQualityDrawer({
   supporting,
 }: AiModelQualityDrawerProps) {
   return (
-    <DetailDrawer open={open} onClose={onClose} content={content} size="wide">
+    <DetailDrawer
+      open={open}
+      onClose={onClose}
+      content={content}
+      size="wide"
+      showScopeFilters
+    >
       <DrawerSection title="Quality trend">
         <DashboardLineChart
           series={series}

@@ -61,6 +61,13 @@ interface DashboardDrawerProps {
     footer?: ReactNode;
     /* Enables the compact, locally controlled filter row under the drawer title. */
     headerFilters?: DashboardFilterState;
+    /*
+      Enables the same compact filter row, but bound to the global scope the
+      page already reads, so a selection made here re-scopes the payload the
+      drawer is showing rather than only moving a label. Use this or
+      `headerFilters`, not both: a drawer either changes the scope or demos it.
+    */
+    showScopeFilters?: boolean;
 }
 export default function DashboardDrawer({
     open,
@@ -72,6 +79,7 @@ export default function DashboardDrawer({
     onClose,
     footer,
     headerFilters,
+    showScopeFilters = false,
 }: DashboardDrawerProps) {
     const styles = useStyles();
     return (
@@ -96,7 +104,7 @@ export default function DashboardDrawer({
                         />
                     }
                 >
-                    {headerFilters ? (
+                    {headerFilters || showScopeFilters ? (
                         <DashboardHeader
                             template="drawer"
                             title={title}

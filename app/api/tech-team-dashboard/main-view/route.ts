@@ -18,13 +18,20 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { isLocalDesignModeServer } from "@/lib/localDesignMode";
 import {
+  formatAmount,
   formatRow,
   readFilters,
   scopeFactor,
   sliceSeries,
+  type MockAmount,
   type MockMetricRow,
 } from "@/lib/dashboard/mockSource";
-import type { DashboardFilters, Series } from "@/types/dashboard";
+import type {
+  ContextRow,
+  DashboardFilters,
+  DrawerContent,
+  Series,
+} from "@/types/dashboard";
 import type { TechTeamDashboardPayload } from "@/types/techTeamDashboard";
 
 const MOCK_PATH = path.join(
@@ -34,6 +41,20 @@ const MOCK_PATH = path.join(
   "new-pages",
   "tech-team-dashboard.json",
 );
+
+/*
+  A drawer's provenance rows quote the same metrics the main view shows, so they
+  carry amounts here too rather than finished strings. A drawer that printed the
+  mock's portfolio-wide string while a narrower scope was selected would
+  contradict the panel behind it — and its own filter row.
+*/
+type MockContextRow = Omit<ContextRow, "latest"> & MockAmount;
+
+interface MockDrawerContent extends Omit<DrawerContent, "contextRows"> {
+  contextRows: MockContextRow[];
+}
+
+type MockDrawers = Record<keyof TechTeamDashboardPayload["drawers"], MockDrawerContent>;
 
 /*
   Shape of the mock file: numeric amounts and a full 90-day range, because the
@@ -48,7 +69,9 @@ interface MockPayload
     | "capacityAndEfficiency"
     | "aiModelQuality"
     | "evaluatorReadiness"
+    | "drawers"
   > {
+  drawers: MockDrawers;
   requestPathHealth: {
     latencySeries: Series[];
     diagnostics: MockMetricRow[];
@@ -69,6 +92,25 @@ interface MockPayload
   `attributionRule` in lib/dashboard/mockSource for what the real source must do
   instead, and the note on `loadFromSource` below.
 */
+/*
+  Resolves a drawer's provenance rows for the selected scope.
+
+  `latest` is built from the same helper the main-view rows use, so a metric
+  shown in both places reads the same in both. A row with no amount keeps its
+  coverage state and simply has no latest value.
+*/
+function scopeDrawer(drawer: MockDrawerContent, factor: number): DrawerContent {
+  return {
+    ...drawer,
+    contextRows: drawer.contextRows.map(
+      ({ amount, unit, prefix, decimals, max, ...row }): ContextRow => ({
+        ...row,
+        latest: formatAmount({ amount, unit, prefix, decimals, max }, factor),
+      }),
+    ),
+  };
+}
+
 function applyFilters(
   mock: MockPayload,
   filters: DashboardFilters,
@@ -105,6 +147,23 @@ function applyFilters(
     evaluatorReadiness: mock.evaluatorReadiness.map((row) =>
       formatRow(row, factor),
     ),
+
+    /*
+      Drawer prose — provenance, decisions, notes — passes through unscoped, but
+      the numbers inside it do not. The drawers carry their own filter row, so a
+      selection made there has to move the values the drawer is showing.
+    */
+    drawers: {
+      latencyChart: scopeDrawer(mock.drawers.latencyChart, factor),
+      diagnostics: scopeDrawer(mock.drawers.diagnostics, factor),
+      failureLocalization: scopeDrawer(mock.drawers.failureLocalization, factor),
+      capacityAndEfficiency: scopeDrawer(
+        mock.drawers.capacityAndEfficiency,
+        factor,
+      ),
+      aiModelQuality: scopeDrawer(mock.drawers.aiModelQuality, factor),
+      evaluatorReadiness: scopeDrawer(mock.drawers.evaluatorReadiness, factor),
+    },
   };
 }
 
