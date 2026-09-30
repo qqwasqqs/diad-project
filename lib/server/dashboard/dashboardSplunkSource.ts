@@ -5,152 +5,63 @@ import type {
   TimeseriesResponseDto,
 } from "@/types/dashboardEndpointDtos";
 
-import { fetchSplunkReport } from "@/lib/services/splunkReportService";
+const MISSING_FUNCTION_CONTRACT = [
+  "approved saved-search names and routing for each metrics request and chartId",
+  "Azure Function argument names for timeRange, businessUnits, projects, and timezone",
+  "Azure Function encoding rules for array-valued businessUnits and projects",
+  "confirmation that the Function forwards those arguments to saved-search placeholders",
+  "approved result fields for the metrics and timeseries response DTOs",
+].join("; ");
 
 export class DashboardSplunkContractError extends Error {
-  constructor(message: string) {
-    super(message);
+  constructor(endpoint: "metrics" | "timeseries") {
+    super(
+      `Cannot call Splunk for dashboard ${endpoint}: the dashboard saved-search/Function contract is missing ${MISSING_FUNCTION_CONTRACT}.`,
+    );
     this.name = "DashboardSplunkContractError";
   }
 }
 
-/*
-  This is the server-only boundary for saved-search selection, Splunk calls,
-  raw-response logging, and the later DTO mapping stage.
+const METRICS_SAVED_SEARCH = "| savedsearch consolidated_metric_final";
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
-  The existing Azure Function report client (`fetchSplunkReport.getReport`) is
-  currently wired to pass only `saved_search_name`.
-
-  For now we use it only to verify connectivity and log the raw response. We do
-  not implement field mapping in this stage.
-
-  Filters are still validated and recorded in the response metadata, but they
-  are not forwarded to Splunk until the Function argument contract is confirmed.
-*/
-function requireSavedSearch(name: string, envKey: string): string {
-  if (!name.trim()) {
-    throw new DashboardSplunkContractError(
-      `Missing dashboard saved-search configuration: set ${envKey} to an approved Splunk saved search name for this endpoint.`,
-    );
-  }
-
-  return name.trim();
-}
-
-function buildAppliedFilters(request: MetricsRequestDto | TimeseriesRequestDto) {
-  return {
-    timeRange: request.filters.timeRange.value,
-    businessUnits: request.filters.businessUnits,
-    projects: request.filters.projects,
-    timezone: request.filters.timezone,
-  };
-}
-
-function buildResponseMeta(request: MetricsRequestDto | TimeseriesRequestDto) {
-  return {
-    dashboard: request.dashboard,
-    requestId: crypto.randomUUID(),
-    generatedAt: new Date().toISOString(),
-    appliedFilters: buildAppliedFilters(request),
-  };
-}
-
-function metricsSavedSearch(request: MetricsRequestDto): string {
-  if (request.dashboard !== "product-owner") {
-    throw new DashboardSplunkContractError(
-      `No saved-search routing configured for dashboard "${request.dashboard}" metrics request.`,
-    );
-  }
-
-  return requireSavedSearch(
-    process.env.PRODUCT_OWNER_DASHBOARD_METRICS_SAVED_SEARCH_NAME ?? "",
-    "PRODUCT_OWNER_DASHBOARD_METRICS_SAVED_SEARCH_NAME",
-  );
-}
-
-function timeseriesSavedSearch(request: TimeseriesRequestDto): string {
-  if (request.dashboard !== "product-owner") {
-    throw new DashboardSplunkContractError(
-      `No saved-search routing configured for dashboard "${request.dashboard}" timeseries request.`,
-    );
-  }
-
-  const chartId = request.chartId;
-  const envKey =
-    chartId === "adoption-and-engagement"
-      ? "PRODUCT_OWNER_DASHBOARD_TIMESERIES_SAVED_SEARCH_NAME_ADOPTION_AND_ENGAGEMENT"
-      : "PRODUCT_OWNER_DASHBOARD_TIMESERIES_SAVED_SEARCH_NAME_EXPERIENCE_AND_RESPONSE_QUALITY";
-
-  const value = process.env[envKey] ?? "";
-  return requireSavedSearch(value, envKey);
-}
-
-function logSplunkResponse(context: {
-  endpoint: "metrics" | "timeseries";
-  savedSearchName: string;
-  request: MetricsRequestDto | TimeseriesRequestDto;
-  results: unknown;
-}) {
-  try {
-    // Log only the existence/shape of the response to confirm connectivity.
-    const preview =
-      Array.isArray(context.results) && context.results.length > 0
-        ? (context.results[0] as unknown)
-        : context.results;
-
-    console.log("[Dashboard Splunk Raw Response]", {
-      endpoint: context.endpoint,
-      dashboard: context.request.dashboard,
-      chartId: "chartId" in context.request ? context.request.chartId : undefined,
-      savedSearchName: context.savedSearchName,
-      requestedFilters: context.request.filters,
-      resultCount: Array.isArray(context.results) ? context.results.length : undefined,
-      firstRow: preview,
-    });
-  } catch (error) {
-    console.warn("[Dashboard Splunk Raw Response] failed to log", error);
-  }
-}
-
+// Stage 1 connectivity test: logs the raw response and returns no metrics; filters and mapping come in stage 2.
 export async function loadSplunkMetrics(
   request: MetricsRequestDto,
 ): Promise<MetricsResponseDto> {
-  const savedSearchName = metricsSavedSearch(request);
-  const results = await fetchSplunkReport.getReport(savedSearchName);
-  logSplunkResponse({ endpoint: "metrics", savedSearchName, request, results });
+  // Dynamic import: keyvault.ts throws on load without KEY_VAULT_URL, which would break mock mode.
+  const { fetchSplunkReport } = await import("@/lib/services/splunkReportService");
+
+  const end = new Date();
+  const start = new Date(end.getTime() - THIRTY_DAYS_MS);
+
+  const raw = await fetchSplunkReport.postSplunkQuery(
+    METRICS_SAVED_SEARCH,
+    start.toISOString(),
+    end.toISOString(),
+  );
+
+  console.log("[dashboard] Splunk metrics raw response:", JSON.stringify(raw, null, 2));
 
   return {
-    meta: buildResponseMeta(request),
-    metrics: request.metrics.map((metricId) => ({
-      metricId,
-      status: "ERROR",
-      value: null,
-      reason:
-        "Splunk connection verified and raw response logged. Field mapping is not implemented yet.",
-    })),
+    meta: {
+      dashboard: "product-owner",
+      requestId: crypto.randomUUID(),
+      generatedAt: end.toISOString(),
+      appliedFilters: {
+        timeRange: request.filters.timeRange.value,
+        businessUnits: [...request.filters.businessUnits],
+        projects: [...request.filters.projects],
+        timezone: request.filters.timezone,
+      },
+    },
+    metrics: [],
   };
 }
 
 export async function loadSplunkTimeseries(
   request: TimeseriesRequestDto,
 ): Promise<TimeseriesResponseDto> {
-  const savedSearchName = timeseriesSavedSearch(request);
-  const results = await fetchSplunkReport.getReport(savedSearchName);
-  logSplunkResponse({ endpoint: "timeseries", savedSearchName, request, results });
-
-  return {
-    meta: {
-      ...buildResponseMeta(request),
-      chartId: request.chartId,
-      granularity: request.granularity,
-    },
-    series: request.metrics.map((metricId) => ({
-      metricId,
-      status: "ERROR",
-      points: [],
-      reason:
-        "Splunk connection verified and raw response logged. Field mapping is not implemented yet.",
-    })),
-    supportingStats: [],
-  };
+  void request;
+  throw new DashboardSplunkContractError("timeseries");
 }

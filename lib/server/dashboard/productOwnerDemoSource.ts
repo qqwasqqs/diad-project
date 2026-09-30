@@ -4,9 +4,6 @@
 import { promises as fs } from "fs";
 import path from "path";
 
-import {
-  mockFilterOptions,
-} from "@/lib/dashboard/filterOptionsSource";
 import { periodDays, scopeFactor, shiftBounded } from "@/lib/dashboard/mockSource";
 import type { DashboardFilters, Series } from "@/types/dashboard";
 import type {
@@ -14,14 +11,30 @@ import type {
   DashboardEndpointMetaDto,
   MetricsRequestDto,
   MetricsResponseDto,
-  ProductOwnerChartId,
-  ProductOwnerMetricId,
+  // ProductOwnerChartId,
+  // ProductOwnerMetricId,
   SupportingStatDto,
   TimeseriesRequestDto,
   TimeseriesResponseDto,
 } from "@/types/dashboardEndpointDtos";
 
 const MOCK_DIRECTORY = path.join(process.cwd(), "public", "mocks", "new-pages");
+
+/*
+  TECH DEBT — request validation is temporarily disabled.
+  Why: this validation was written for the local demo (business units a/b,
+  projects a1/b1, exactly one of each). Both API routes use it for every
+  environment, so real dev/prod filters were rejected with HTTP 400 before
+  reaching dashboardSplunkSource.ts. For now we only want to prove the Splunk
+  connection works, so parseMetricsRequest/parseTimeseriesRequest pass input
+  through unchanged.
+  Later: move this validation out of the mock provider into a shared server
+  module (e.g. dashboardRequestParsers.ts) with real, environment-appropriate
+  allowlists, used by both productOwnerDemoSource.ts and
+  dashboardSplunkSource.ts. Then uncomment/relocate the code marked below.
+*/
+
+/* VALIDATION DISABLED — see TECH DEBT note above.
 const METRIC_IDS: ProductOwnerMetricId[] = [
   "session-query-volume",
   "api-error-rate",
@@ -36,6 +49,9 @@ const CHART_METRICS: Record<ProductOwnerChartId, string[]> = {
     "intent-resolution",
   ],
 };
+const BUSINESS_UNIT_VALUES = new Set(["all", "a", "b"]);
+const PROJECT_VALUES = new Set(["all", "a1", "b1"]);
+*/
 
 interface MockStat {
   id: string;
@@ -63,6 +79,7 @@ async function readMock<T>(name: string): Promise<T> {
   return JSON.parse(contents) as T;
 }
 
+/* VALIDATION DISABLED — see TECH DEBT note above.
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -87,12 +104,11 @@ function parseFilters(value: unknown): DashboardEndpointFiltersDto {
   }
   const businessUnit = value.businessUnits[0];
   const project = value.projects[0];
-  const options = mockFilterOptions();
   if (
     typeof businessUnit !== "string" ||
     typeof project !== "string" ||
-    !options.businessUnit.some((item) => item.value === businessUnit) ||
-    !options.project.some((item) => item.value === project)
+    !BUSINESS_UNIT_VALUES.has(businessUnit) ||
+    !PROJECT_VALUES.has(project)
   ) {
     throw new Error("Unknown business unit or project in local demo");
   }
@@ -106,8 +122,11 @@ function parseFilters(value: unknown): DashboardEndpointFiltersDto {
     timezone: "UTC",
   };
 }
+*/
 
 export function parseMetricsRequest(value: unknown): MetricsRequestDto {
+  return value as MetricsRequestDto;
+  /* VALIDATION DISABLED — see TECH DEBT note above.
   if (
     !isRecord(value) ||
     value.dashboard !== "product-owner" ||
@@ -127,9 +146,12 @@ export function parseMetricsRequest(value: unknown): MetricsRequestDto {
     filters: parseFilters(value.filters),
     options: { includePending: true, includeCoverage: true },
   };
+  */
 }
 
 export function parseTimeseriesRequest(value: unknown): TimeseriesRequestDto {
+  return value as TimeseriesRequestDto;
+  /* VALIDATION DISABLED — see TECH DEBT note above.
   if (
     !isRecord(value) ||
     value.dashboard !== "product-owner" ||
@@ -150,6 +172,7 @@ export function parseTimeseriesRequest(value: unknown): TimeseriesRequestDto {
     granularity: "day",
     options: { includeSupportingStats: true },
   };
+  */
 }
 
 function toMockFilters(filters: DashboardEndpointFiltersDto): DashboardFilters {

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
   ArrowSync24Regular,
   Clock24Regular,
   DataTrending24Regular,
+  ErrorCircle24Regular,
   Hourglass24Regular,
   LockClosed24Regular,
   Person24Regular,
@@ -15,6 +16,7 @@ import {
 
 import HorizontalBarList from "@/components/shared/charts/HorizontalBarList";
 import DashboardGrid from "@/components/shared/dashboard/DashboardGrid";
+
 import DashboardLineChart, {
   type DashboardLineAxisConfig,
   type DashboardLineAxisId,
@@ -34,14 +36,31 @@ import ProductOwnerFeedbackSummary from "@/components/shared/dashboard/ProductOw
 import StatusCallout, {
   type StatusCalloutVariant,
 } from "@/components/shared/dashboard/StatusCallout";
-import ProductOwnerAdoptionAndEngagementDrawer from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerAdoptionAndEngagementDrawer";
-import ProductOwnerChannelMixDrawer from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerChannelMixDrawer";
-import ProductOwnerExperienceQualityDrawer from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerExperienceQualityDrawer";
-import ProductOwnerProductExperiencePulseDrawer from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerProductExperiencePulseDrawer";
-import ProductOwnerTrustEvidenceDrawer from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerTrustEvidenceDrawer";
+import ProductOwnerAdoptionAndEngagementDrawer, {
+  type ProductOwnerAdoptionAndEngagementData,
+} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerAdoptionAndEngagementDrawer";
+import ProductOwnerChannelMixDrawer, {
+  type ProductOwnerChannelMixData,
+} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerChannelMixDrawer";
+import ProductOwnerExperienceQualityDrawer, {
+  type ProductOwnerExperienceQualityData,
+} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerExperienceQualityDrawer";
+import ProductOwnerProductExperiencePulseDrawer, {
+  type ProductExperiencePulseData,
+} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerProductExperiencePulseDrawer";
+import ProductOwnerTrustEvidenceDrawer, {
+  type ProductOwnerTrustEvidenceData,
+} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerTrustEvidenceDrawer";
 import productOwnerSections from "@/content/dashboards/product-owner-sections.json";
-import { useDashboardProductOwnerMainView } from "@/hooks/useProductOwnerDashboard";
+// import { useDashboardProductOwnerMainView } from "@/hooks/useProductOwnerDashboard";
 import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
+import { useProductOwnerMainView } from "@/hooks/useProductOwnerDashboardEndpoints";
+import adoptionAndEngagementData from "@/public/mocks/new-pages/product-owner-adoption-and-engagement.json";
+import channelMixData from "@/public/mocks/new-pages/product-owner-channel-mix.json";
+import experienceQualityData from "@/public/mocks/new-pages/product-owner-experience-quality.json";
+import productExperiencePulseData from "@/public/mocks/new-pages/product-owner-product-experience-pulse.json";
+import trustEvidenceData from "@/public/mocks/new-pages/product-owner-trust-evidence.json";
+import type { DashboardAvailabilityStatus } from "@/types/dashboardEndpointDtos";
 
 /*
   Product Owner main view.
@@ -52,6 +71,10 @@ import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
   the Product Owner request contract; the existing Channel Mix card remains
   local until that metric is replaced.
 */
+import type {
+  ProductOwnerChartModel,
+  ProductOwnerMetricModel,
+} from "@/types/productOwnerDashboardModels";
 
 const sectionInfo = productOwnerSections as Record<
   string,
@@ -73,10 +96,16 @@ const productExperiencePulseSections = [
   { id: "workflow-completion" },
 ];
 
+const compactNumber = new Intl.NumberFormat("en", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+const wholeNumber = new Intl.NumberFormat("en", { maximumFractionDigits: 0 });
+
 const adoptionAndEngagementAxes: DashboardLineAxisConfig[] = [
   {
     id: "left",
-    tickFormatter: (value: number) => `${Math.round(value / 1000)}K`,
+    tickFormatter: (value: number) => compactNumber.format(value),
   },
   {
     id: "right",
@@ -119,6 +148,44 @@ const qualitySeriesColors: Record<string, string> = {
   "relevance-quality": "#7c3aed",
   "intent-resolution": "#0f766e",
 };
+const seriesPresentation: Record<
+  string,
+  Pick<DashboardLineSeries, "label" | "color" | "yAxis">
+> = {
+  sessions: { label: "Sessions", color: "#3b82f6", yAxis: "left" },
+  queries: { label: "Queries", color: "#8b5cf6", yAxis: "right" },
+  groundedness: { label: "Groundedness", color: "#4f46e5" },
+  "relevance-quality": { label: "Relevance Quality", color: "#7c3aed" },
+  "intent-resolution": { label: "Intent Resolution", color: "#0f766e" },
+};
+
+const itemLabels: Record<string, string> = {
+  sessions: "Sessions",
+  queries: "Queries",
+  "queries-per-session": "Queries per session",
+  "avg-session-duration-minutes": "Average session duration",
+  groundedness: "Groundedness",
+  "relevance-quality": "Relevance Quality",
+  "intent-resolution": "Intent Resolution",
+  "retrieval-quality": "Retrieval Quality",
+  "task-adherence": "Task Adherence",
+};
+
+const statusLabels: Record<DashboardAvailabilityStatus, string> = {
+  OK: "OK",
+  DATA_PENDING: "DATA PENDING",
+  CALCULATION_PENDING: "CALCULATION PENDING",
+  FILTER_BREAKDOWN_UNAVAILABLE: "FILTER BREAKDOWN UNAVAILABLE",
+  NO_DATA: "NO DATA",
+  ERROR: "UNAVAILABLE",
+};
+
+const trustReadinessSections = [
+  { id: "safety-evaluators" },
+  { id: "mlflow-safety-score" },
+  { id: "pii-leakage" },
+  { id: "upia" },
+];
 
 const trustReadinessPresentation: Record<
   string,
@@ -147,12 +214,90 @@ const compactNumberFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
+function requestErrorMessage(error: Error | null): string {
+  return error?.message ?? "The endpoint request failed";
+}
+
+function MetricStateValue({ children }: { children: ReactNode }) {
+  return (
+    <div className="text-[26px] leading-tight font-semibold text-slate-500">
+      {children}
+    </div>
+  );
+}
+
+function MetricSupportingState({ children }: { children: ReactNode }) {
+  return <span className="text-xs text-neutral-500">{children}</span>;
+}
+
+function metricUnavailable(
+  metric: ProductOwnerMetricModel | undefined,
+): { label: string; reason: string } {
+  if (!metric) {
+    return { label: "DATA PENDING", reason: "Metric was not returned" };
+  }
+
+  if (metric.status === "OK") {
+    return { label: "OK", reason: "" };
+  }
+
+  return { label: statusLabels[metric.status], reason: metric.reason };
+}
+
+function toLineSeries(chart: ProductOwnerChartModel | undefined): DashboardLineSeries[] {
+  if (!chart) {
+    return [];
+  }
+
+  return chart.series.flatMap((item) => {
+    const presentation = seriesPresentation[item.id];
+
+    return item.status === "OK" && presentation
+      ? [{ id: item.id, ...presentation, points: item.points }]
+      : [];
+  });
+}
+
+function ChartRequestState({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex min-h-[300px] items-center justify-center text-sm text-neutral-600">
+      {children}
+    </div>
+  );
+}
+
+function ChartAvailabilityNotes({ chart }: { chart: ProductOwnerChartModel }) {
+  const unavailable = [...chart.series, ...chart.supportingStats].filter(
+    (item) => item.status !== "OK",
+  );
+
+  if (unavailable.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-3 space-y-1 text-xs text-neutral-600">
+      {unavailable.map((item) => (
+        <div key={item.id}>
+          <span className="font-semibold">{itemLabels[item.id] ?? item.id}:</span>{" "}
+          {statusLabels[item.status]} — {item.reason}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function ProductOwnerDashboard() {
   const period = useDashboardFiltersStore((state) => state.period);
   const businessUnit = useDashboardFiltersStore((state) => state.businessUnit);
   const project = useDashboardFiltersStore((state) => state.project);
 
-  const { mainViewData: data } = useDashboardProductOwnerMainView({
+  // const { mainViewData: data } = useDashboardProductOwnerMainView({
+  //   period,
+  //   businessUnit,
+  //   project,
+  // });
+  const { metrics, adoption, quality } = useProductOwnerMainView({
     period,
     businessUnit,
     project,
@@ -166,43 +311,68 @@ export default function ProductOwnerDashboard() {
   const [experienceQualityOpen, setExperienceQualityOpen] = useState(false);
   const [trustEvidenceOpen, setTrustEvidenceOpen] = useState(false);
 
-  const pulse = data?.productExperiencePulse;
-  const drawers = data?.drawers;
 
-  const adoptionAndEngagementSeries: DashboardLineSeries[] =
-    data?.adoptionAndEngagement.series.map((series) => ({
-      ...series,
-      color:
-        adoptionSeriesPresentation[series.id]?.color ??
-        "var(--color-chart-series-1)",
-      yAxis: adoptionSeriesPresentation[series.id]?.yAxis ?? "left",
-    })) ?? [];
+  const sessionMetric = metrics.data?.metrics.find(
+    (metric) => metric.id === "session-query-volume",
+  );
+  const apiErrorMetric = metrics.data?.metrics.find(
+    (metric) => metric.id === "api-error-rate",
+  );
+  const latencyMetric = metrics.data?.metrics.find(
+    (metric) => metric.id === "end-to-end-latency-p95",
+  );
+  const workflowMetric = metrics.data?.metrics.find(
+    (metric) => metric.id === "workflow-completion",
+  );
 
-  const adoptionAndEngagementStats =
-    data?.adoptionAndEngagement.supporting.map((stat) => ({
-      id: stat.id,
-      value: stat.value,
-      text: stat.label,
-      icon: adoptionStatPresentation[stat.id]?.icon,
-      iconColor: adoptionStatPresentation[stat.id]?.iconColor,
-    })) ?? [];
+  const adoptionSeries = toLineSeries(adoption.data);
+  const adoptionStats =
+    adoption.data?.supportingStats.flatMap((stat) => {
+      if (stat.status !== "OK") {
+        return [];
+      }
 
-  const experienceQualitySeries: DashboardLineSeries[] =
-    data?.experienceAndResponseQuality.series.map((series) => ({
-      ...series,
-      color:
-        qualitySeriesColors[series.id] ?? "var(--color-chart-series-1)",
-    })) ?? [];
+      if (stat.id === "queries-per-session") {
+        return [
+          {
+            id: stat.id,
+            icon: <Person24Regular key="queries-per-session" aria-hidden="true" />,
+            value: stat.value.toFixed(1),
+            text: "queries/session",
+            iconColor: "#4f46e5",
+          },
+        ];
+      }
 
-  const experienceQualityStats =
-    data?.experienceAndResponseQuality.supporting.map((stat) => ({
-      id: stat.id,
-      value: stat.value,
-      text: stat.label,
-    })) ?? [];
+      if (stat.id === "avg-session-duration-minutes") {
+        return [
+          {
+            id: stat.id,
+            icon: <Clock24Regular key="avg-session" aria-hidden="true" />,
+            value: `${stat.value.toFixed(1)} min`,
+            text: "avg session",
+            iconColor: "#2563eb",
+          },
+        ];
+      }
 
-  const trustReadinessSections =
-    data?.trustAndMeasurementReadiness.map((row) => ({ id: row.id })) ?? [];
+      return [];
+    }) ?? [];
+
+  const qualitySeries = toLineSeries(quality.data);
+  const qualityStats =
+    quality.data?.supportingStats.flatMap((stat) =>
+      stat.status === "OK" &&
+      (stat.id === "retrieval-quality" || stat.id === "task-adherence")
+        ? [
+            {
+              id: stat.id,
+              value: `${stat.value.toFixed(1)} / 5`,
+              text: itemLabels[stat.id],
+            },
+          ]
+        : [],
+    ) ?? [];
 
   return (
     <>
@@ -237,34 +407,61 @@ export default function ProductOwnerDashboard() {
               title="Session & Query Volume"
               className="h-[170px] metricCard-violet"
               primaryContent={
-                pulse && (
+                metrics.isPending ? (
+                  <MetricStateValue>LOADING…</MetricStateValue>
+                ) : metrics.isError ? (
+                  <MetricStateValue>REQUEST FAILED</MetricStateValue>
+                ) : sessionMetric?.status === "OK" &&
+                  sessionMetric.id === "session-query-volume" ? (
                   <div className="text-[38px] leading-none font-semibold text-neutral-950">
-                    {compactNumberFormatter.format(
-                      pulse.sessionQueryVolume.queries,
-                    )}{" "}
+                    {compactNumber.format(sessionMetric.queries)}{" "}
                     <span className="text-4xl font-normal">queries</span>
                   </div>
+                ) : (
+                  <MetricStateValue>{metricUnavailable(sessionMetric).label}</MetricStateValue>
                 )
               }
               supportingContent={
-                pulse && (
-                  <span className="text-xs text-neutral-500">
-                    {compactNumberFormatter.format(
-                      pulse.sessionQueryVolume.sessions,
-                    )}{" "}
-                    sessions • {pulse.sessionQueryVolume.queriesPerSession}{" "}
-                    queries/session
-                  </span>
-                )
+                <MetricSupportingState>
+                  {metrics.isPending
+                    ? "Loading metric data"
+                    : metrics.isError
+                      ? requestErrorMessage(metrics.error)
+                      : sessionMetric?.status === "OK" &&
+                          sessionMetric.id === "session-query-volume"
+                        ? `${compactNumber.format(sessionMetric.sessions)} sessions • ${sessionMetric.queriesPerSession.toFixed(1)} queries/session`
+                        : metricUnavailable(sessionMetric).reason}
+                </MetricSupportingState>
               }
             />
             <MetricCard
-              icon={<Warning24Regular className="text-slate-600" />}
+              icon={<ErrorCircle24Regular className="text-amber-700" />}
               title="API Error Rate"
-              className="h-[170px]"
-              iconWrapperClassName="h-10 w-10 bg-slate-100"
+              className="h-[170px] metricCard-warning"
               primaryContent={
-                pulse && <ProductOwnerApiErrorRate {...pulse.apiErrorRate} />
+                metrics.isPending ? (
+                  <MetricStateValue>LOADING…</MetricStateValue>
+                ) : metrics.isError ? (
+                  <MetricStateValue>REQUEST FAILED</MetricStateValue>
+                ) : apiErrorMetric?.status === "OK" && apiErrorMetric.id === "api-error-rate" ? (
+                  <div className="text-[38px] leading-none font-semibold text-neutral-950">
+                    {apiErrorMetric.errorRatePercent.toFixed(1)}%{" "}
+                    <span className="text-4xl font-normal">errors</span>
+                  </div>
+                ) : (
+                  <MetricStateValue>{metricUnavailable(apiErrorMetric).label}</MetricStateValue>
+                )
+              }
+              supportingContent={
+                <MetricSupportingState>
+                  {metrics.isPending
+                    ? "Loading metric data"
+                    : metrics.isError
+                      ? requestErrorMessage(metrics.error)
+                      : apiErrorMetric?.status === "OK" && apiErrorMetric.id === "api-error-rate"
+                        ? `${wholeNumber.format(apiErrorMetric.errorRequestCount)} errors • ${wholeNumber.format(apiErrorMetric.eligibleRequestCount)} eligible requests`
+                        : metricUnavailable(apiErrorMetric).reason}
+                </MetricSupportingState>
               }
             />
             <MetricCard
@@ -272,14 +469,32 @@ export default function ProductOwnerDashboard() {
               title="End-to-End Latency"
               className="h-[170px] metricCard-success"
               primaryContent={
-                pulse && (
+                metrics.isPending ? (
+                  <MetricStateValue>LOADING…</MetricStateValue>
+                ) : metrics.isError ? (
+                  <MetricStateValue>REQUEST FAILED</MetricStateValue>
+                ) : latencyMetric?.status === "OK" &&
+                  latencyMetric.id === "end-to-end-latency-p95" ? (
                   <div className="text-[38px] leading-none font-semibold text-neutral-950">
-                    {pulse.endToEndLatency.percentile}{" "}
+                    P95{" "}
                     <span className="text-4xl font-normal">
-                      {pulse.endToEndLatency.seconds.toFixed(2)} s
+                      {latencyMetric.seconds.toFixed(2)} s
                     </span>
                   </div>
+                ) : (
+                  <MetricStateValue>{metricUnavailable(latencyMetric).label}</MetricStateValue>
                 )
+              }
+              supportingContent={
+                metrics.isPending || metrics.isError || latencyMetric?.status !== "OK" ? (
+                  <MetricSupportingState>
+                    {metrics.isPending
+                      ? "Loading metric data"
+                      : metrics.isError
+                        ? requestErrorMessage(metrics.error)
+                        : metricUnavailable(latencyMetric).reason}
+                  </MetricSupportingState>
+                ) : undefined
               }
             />
             <MetricCard
@@ -287,21 +502,22 @@ export default function ProductOwnerDashboard() {
               title="Workflow Completion"
               className="h-[170px] metricCard-warning"
               primaryContent={
-                pulse?.workflowCompletion.pendingState ? (
-                  <PendingStateValue
-                    state={pulse.workflowCompletion.pendingState}
-                    className="!text-[30px] !leading-none"
-                  />
+                metrics.isPending ? (
+                  <MetricStateValue>LOADING…</MetricStateValue>
+                ) : metrics.isError ? (
+                  <MetricStateValue>REQUEST FAILED</MetricStateValue>
                 ) : (
-                  pulse?.workflowCompletion.value ?? null
+                  <MetricStateValue>{metricUnavailable(workflowMetric).label}</MetricStateValue>
                 )
               }
               supportingContent={
-                pulse && (
-                  <span className="text-xs text-neutral-500">
-                    {pulse.workflowCompletion.reason}
-                  </span>
-                )
+                <MetricSupportingState>
+                  {metrics.isPending
+                    ? "Loading metric data"
+                    : metrics.isError
+                      ? requestErrorMessage(metrics.error)
+                      : metricUnavailable(workflowMetric).reason}
+                </MetricSupportingState>
               }
             />
           </DashboardPanel>
@@ -322,14 +538,27 @@ export default function ProductOwnerDashboard() {
               />
             }
           >
-            <DashboardLineChart
-              description=""
-              height={320}
-              supportingStatsVariant="productOwner"
-              series={adoptionAndEngagementSeries}
-              axes={adoptionAndEngagementAxes}
-              supportingStats={adoptionAndEngagementStats}
-            />
+            {adoption.isPending ? (
+              <ChartRequestState>Loading adoption and engagement…</ChartRequestState>
+            ) : adoption.isError ? (
+              <ChartRequestState>
+                <span role="alert">{requestErrorMessage(adoption.error)}</span>
+              </ChartRequestState>
+            ) : adoption.data ? (
+              <>
+                <DashboardLineChart
+                  description=""
+                  height={320}
+                  supportingStatsVariant="productOwner"
+                  series={adoptionSeries}
+                  axes={adoptionAndEngagementAxes}
+                  supportingStats={adoptionStats}
+                />
+                <ChartAvailabilityNotes chart={adoption.data} />
+              </>
+            ) : (
+              <ChartRequestState>No adoption data returned</ChartRequestState>
+            )}
           </DashboardPanel>
 
           <DashboardPanel
@@ -348,9 +577,16 @@ export default function ProductOwnerDashboard() {
               />
             }
           >
-            <HorizontalBarList values={channelMixValues} />
-            <div className="mt-2 text-[11px] font-medium text-neutral-500">
-              Illustrative channel breakdown
+            <div className="flex min-h-[300px] flex-col justify-center gap-4">
+              <StatusCallout
+                icon={<DataTrending24Regular aria-hidden="true" />}
+                title="Channel Mix"
+                primaryContent="DATA PENDING"
+                variant="warning"
+              />
+              <p className="text-xs text-neutral-500">
+                Channel Mix is not included in the current dashboard endpoint contract.
+              </p>
             </div>
           </DashboardPanel>
 
@@ -370,26 +606,26 @@ export default function ProductOwnerDashboard() {
               />
             }
           >
-            <DashboardLineChart
-              height={300}
-              supportingStatsVariant="productOwner"
-              supportingStatsTemplate="right"
-              series={experienceQualitySeries}
-              axes={experienceQualityAxes}
-              supportingStats={experienceQualityStats}
-            />
-          </DashboardPanel>
-
-          <DashboardPanel
-            template="single"
-            title="Feature usage evidence"
-            fillHeight
-          >
-            {data?.featureUsageEvidence && (
-              <DataPendingCard
-                statusLabel={data.featureUsageEvidence.statusLabel}
-                description={data.featureUsageEvidence.description}
-              />
+            {quality.isPending ? (
+              <ChartRequestState>Loading experience and response quality…</ChartRequestState>
+            ) : quality.isError ? (
+              <ChartRequestState>
+                <span role="alert">{requestErrorMessage(quality.error)}</span>
+              </ChartRequestState>
+            ) : quality.data ? (
+              <>
+                <DashboardLineChart
+                  height={300}
+                  supportingStatsVariant="productOwner"
+                  supportingStatsTemplate="right"
+                  series={qualitySeries}
+                  axes={experienceQualityAxes}
+                  supportingStats={qualityStats}
+                />
+                <ChartAvailabilityNotes chart={quality.data} />
+              </>
+            ) : (
+              <ChartRequestState>No quality data returned</ChartRequestState>
             )}
           </DashboardPanel>
 
@@ -411,67 +647,44 @@ export default function ProductOwnerDashboard() {
               />
             }
           >
-            {(data?.trustAndMeasurementReadiness ?? []).map((row) => {
-              const presentation = trustReadinessPresentation[row.id];
-
-              return (
-                <StatusCallout
-                  key={row.id}
-                  icon={presentation?.icon}
-                  title={row.label}
-                  primaryContent={
-                    row.pendingState ? (
-                      <PendingStateValue
-                        state={row.pendingState}
-                        className="!text-lg !tracking-tight"
-                      />
-                    ) : (
-                      row.value ?? ""
-                    )
-                  }
-                  variant={presentation?.variant ?? "neutral"}
-                />
-              );
-            })}
+            {trustReadinessCallouts.map(({ id, icon, title, primaryContent, variant }) => (
+              <StatusCallout
+                key={id}
+                icon={icon}
+                title={title}
+                primaryContent={primaryContent}
+                variant={variant}
+              />
+            ))}
           </DashboardPanel>
         </DashboardGrid>
       </DashboardPage>
 
-      {drawers?.channelMix && (
-        <ProductOwnerChannelMixDrawer
-          open={channelMixOpen}
-          onClose={() => setChannelMixOpen(false)}
-          data={drawers.channelMix}
-        />
-      )}
-      {drawers?.adoptionAndEngagement && (
-        <ProductOwnerAdoptionAndEngagementDrawer
-          open={adoptionAndEngagementOpen}
-          onClose={() => setAdoptionAndEngagementOpen(false)}
-          data={drawers.adoptionAndEngagement}
-        />
-      )}
-      {drawers?.productExperiencePulse && (
-        <ProductOwnerProductExperiencePulseDrawer
-          open={productExperiencePulseOpen}
-          onClose={() => setProductExperiencePulseOpen(false)}
-          data={drawers.productExperiencePulse}
-        />
-      )}
-      {drawers?.experienceAndResponseQuality && (
-        <ProductOwnerExperienceQualityDrawer
-          open={experienceQualityOpen}
-          onClose={() => setExperienceQualityOpen(false)}
-          data={drawers.experienceAndResponseQuality}
-        />
-      )}
-      {drawers?.trustAndMeasurementReadiness && (
-        <ProductOwnerTrustEvidenceDrawer
-          open={trustEvidenceOpen}
-          onClose={() => setTrustEvidenceOpen(false)}
-          data={drawers.trustAndMeasurementReadiness}
-        />
-      )}
+      <ProductOwnerChannelMixDrawer
+        open={channelMixOpen}
+        onClose={() => setChannelMixOpen(false)}
+        data={channelMixData as ProductOwnerChannelMixData}
+      />
+      <ProductOwnerAdoptionAndEngagementDrawer
+        open={adoptionAndEngagementOpen}
+        onClose={() => setAdoptionAndEngagementOpen(false)}
+        data={adoptionAndEngagementData as ProductOwnerAdoptionAndEngagementData}
+      />
+      <ProductOwnerProductExperiencePulseDrawer
+        open={productExperiencePulseOpen}
+        onClose={() => setProductExperiencePulseOpen(false)}
+        data={productExperiencePulseData as ProductExperiencePulseData}
+      />
+      <ProductOwnerExperienceQualityDrawer
+        open={experienceQualityOpen}
+        onClose={() => setExperienceQualityOpen(false)}
+        data={experienceQualityData as ProductOwnerExperienceQualityData}
+      />
+      <ProductOwnerTrustEvidenceDrawer
+        open={trustEvidenceOpen}
+        onClose={() => setTrustEvidenceOpen(false)}
+        data={trustEvidenceData as ProductOwnerTrustEvidenceData}
+      />
     </>
   );
 }
