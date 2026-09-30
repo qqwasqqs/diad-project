@@ -1,37 +1,6 @@
 "use client";
 
 import { useState } from "react";
-
-import DashboardPage from "@/components/shared/dashboard/DashboardPage";
-import DashboardGrid from "@/components/shared/dashboard/DashboardGrid";
-import DashboardPanel from "@/components/shared/dashboard/DashboardPanel";
-import DashboardSectionAction from "@/components/shared/dashboard/DashboardSectionAction";
-import DashboardSectionInfo, {
-  type DashboardSectionInfoContent,
-} from "@/components/shared/dashboard/DashboardSectionInfo";
-import { MetricCard } from "@/components/shared/dashboard/MetricCard";
-import ProductOwnerAdoptionAndEngagementDrawer, {
-  type ProductOwnerAdoptionAndEngagementData,
-} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerAdoptionAndEngagementDrawer";
-import ProductOwnerChannelMixDrawer, {
-  type ProductOwnerChannelMixData,
-} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerChannelMixDrawer";
-import ProductOwnerExperienceQualityDrawer, {
-  type ProductOwnerExperienceQualityData,
-} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerExperienceQualityDrawer";
-import ProductOwnerTrustEvidenceDrawer, {
-  type ProductOwnerTrustEvidenceData,
-} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerTrustEvidenceDrawer";
-import ProductOwnerProductExperiencePulseDrawer, {
-  type ProductExperiencePulseData,
-} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerProductExperiencePulseDrawer";
-import { PositiveNegativeBar } from "@/components/shared/charts/PositiveNegativeBar";
-import HorizontalBarList from "@/components/shared/charts/HorizontalBarList";
-import DashboardLineChart, {
-  type DashboardLineAxisConfig,
-  type DashboardLineSeries,
-} from "@/components/shared/dashboard/DashboardLineChart";
-import StatusCallout from "@/components/shared/dashboard/StatusCallout";
 import {
   ArrowSync24Regular,
   Clock24Regular,
@@ -41,20 +10,55 @@ import {
   Person24Regular,
   Scales32Regular,
   ShieldCheckmark24Regular,
-  ThumbLike24Regular,
+  Warning24Regular,
 } from "@fluentui/react-icons";
-import adoptionAndEngagementData from "@/public/mocks/new-pages/product-owner-adoption-and-engagement.json";
-import productExperiencePulseData from "@/public/mocks/new-pages/product-owner-product-experience-pulse.json";
-import channelMixData from "@/public/mocks/new-pages/product-owner-channel-mix.json";
-import experienceQualityData from "@/public/mocks/new-pages/product-owner-experience-quality.json";
-import trustEvidenceData from "@/public/mocks/new-pages/product-owner-trust-evidence.json";
+
+import HorizontalBarList from "@/components/shared/charts/HorizontalBarList";
+import DashboardGrid from "@/components/shared/dashboard/DashboardGrid";
+import DashboardLineChart, {
+  type DashboardLineAxisConfig,
+  type DashboardLineAxisId,
+  type DashboardLineSeries,
+} from "@/components/shared/dashboard/DashboardLineChart";
+import DashboardPage from "@/components/shared/dashboard/DashboardPage";
+import DashboardPanel from "@/components/shared/dashboard/DashboardPanel";
+import DashboardSectionAction from "@/components/shared/dashboard/DashboardSectionAction";
+import DashboardSectionInfo, {
+  type DashboardSectionInfoContent,
+} from "@/components/shared/dashboard/DashboardSectionInfo";
+import DataPendingCard from "@/components/shared/dashboard/DataPendingCard";
+import { MetricCard } from "@/components/shared/dashboard/MetricCard";
+import PendingStateValue from "@/components/shared/dashboard/PendingStateValue";
+import ProductOwnerApiErrorRate from "@/components/shared/dashboard/ProductOwnerApiErrorRate";
+import ProductOwnerFeedbackSummary from "@/components/shared/dashboard/ProductOwnerFeedbackSummary/ProductOwnerFeedbackSummary";
+import StatusCallout, {
+  type StatusCalloutVariant,
+} from "@/components/shared/dashboard/StatusCallout";
+import ProductOwnerAdoptionAndEngagementDrawer from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerAdoptionAndEngagementDrawer";
+import ProductOwnerChannelMixDrawer from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerChannelMixDrawer";
+import ProductOwnerExperienceQualityDrawer from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerExperienceQualityDrawer";
+import ProductOwnerProductExperiencePulseDrawer from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerProductExperiencePulseDrawer";
+import ProductOwnerTrustEvidenceDrawer from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerTrustEvidenceDrawer";
 import productOwnerSections from "@/content/dashboards/product-owner-sections.json";
+import { useDashboardProductOwnerMainView } from "@/hooks/useProductOwnerDashboard";
+import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
+
+/*
+  Product Owner main view.
+
+  Metric values come from the main-view endpoint through
+  useDashboardProductOwnerMainView. The page only supplies presentation details
+  such as icons, chart colors, axes, and panel layout. Channel is not part of
+  the Product Owner request contract; the existing Channel Mix card remains
+  local until that metric is replaced.
+*/
 
 const sectionInfo = productOwnerSections as Record<
   string,
   DashboardSectionInfoContent
 >;
 
+// Intentionally retained locally until the Channel Mix metric is replaced.
 const channelMixValues = [
   { label: "Web", value: 52 },
   { label: "Teams", value: 28 },
@@ -64,60 +68,9 @@ const channelMixValues = [
 
 const productExperiencePulseSections = [
   { id: "session-query-volume" },
-  { id: "user-satisfaction-rate" },
+  { id: "api-error-rate" },
   { id: "end-to-end-latency" },
   { id: "workflow-completion" },
-];
-
-const adoptionAndEngagementSeries: DashboardLineSeries[] = [
-  {
-    id: "sessions",
-    label: "Sessions",
-    color: "#3b82f6",
-    yAxis: "left",
-    points: [
-      { x: "Apr 20", y: 15000 },
-      { x: "Apr 21", y: 14000 },
-      { x: "Apr 22", y: 18000 },
-      { x: "Apr 23", y: 21000 },
-      { x: "Apr 24", y: 22000 },
-      { x: "Apr 25", y: 24000 },
-      { x: "Apr 26", y: 26000 },
-      { x: "Apr 27", y: 28000 },
-      { x: "Apr 28", y: 25000 },
-      { x: "Apr 29", y: 30000 },
-      { x: "Apr 30", y: 27000 },
-      { x: "May 1", y: 29000 },
-      { x: "May 2", y: 32000 },
-      { x: "May 3", y: 30000 },
-      { x: "May 4", y: 33000 },
-      { x: "May 5", y: 31000 },
-    ],
-  },
-  {
-    id: "queries",
-    label: "Queries",
-    color: "#8b5cf6",
-    yAxis: "right",
-    points: [
-      { x: "Apr 20", y: 12000 },
-      { x: "Apr 21", y: 16000 },
-      { x: "Apr 22", y: 19000 },
-      { x: "Apr 23", y: 20000 },
-      { x: "Apr 24", y: 24000 },
-      { x: "Apr 25", y: 26000 },
-      { x: "Apr 26", y: 28000 },
-      { x: "Apr 27", y: 30000 },
-      { x: "Apr 28", y: 34000 },
-      { x: "Apr 29", y: 36000 },
-      { x: "Apr 30", y: 39000 },
-      { x: "May 1", y: 42000 },
-      { x: "May 2", y: 43000 },
-      { x: "May 3", y: 47000 },
-      { x: "May 4", y: 50000 },
-      { x: "May 5", y: 52000 },
-    ],
-  },
 ];
 
 const adoptionAndEngagementAxes: DashboardLineAxisConfig[] = [
@@ -131,82 +84,27 @@ const adoptionAndEngagementAxes: DashboardLineAxisConfig[] = [
   },
 ];
 
-const adoptionAndEngagementStats = [
-  {
-    id: "queries-per-session",
+const adoptionSeriesPresentation: Record<
+  string,
+  { color: string; yAxis: DashboardLineAxisId }
+> = {
+  sessions: { color: "#3b82f6", yAxis: "left" },
+  queries: { color: "#8b5cf6", yAxis: "right" },
+};
+
+const adoptionStatPresentation: Record<
+  string,
+  { icon: React.ReactNode; iconColor: string }
+> = {
+  "queries-per-session": {
     icon: <Person24Regular aria-hidden="true" />,
-    value: "4.6",
-    text: "queries/session",
     iconColor: "#4f46e5",
   },
-  {
-    id: "avg-session",
+  "avg-session": {
     icon: <Clock24Regular aria-hidden="true" />,
-    value: "8.2 min",
-    text: "avg session",
     iconColor: "#2563eb",
   },
-];
-
-const experienceQualitySeries: DashboardLineSeries[] = [
-  {
-    id: "groundedness",
-    label: "Groundedness",
-    color: "#4f46e5",
-    points: [
-      { x: "Apr 20", y: 4.1 },
-      { x: "Apr 22", y: 4.3 },
-      { x: "Apr 24", y: 4.2 },
-      { x: "Apr 26", y: 4.4 },
-      { x: "Apr 28", y: 4.3 },
-      { x: "Apr 30", y: 4.2 },
-      { x: "May 2", y: 4.5 },
-      { x: "May 4", y: 4.4 },
-      { x: "May 6", y: 4.3 },
-      { x: "May 8", y: 4.5 },
-      { x: "May 10", y: 4.6 },
-      { x: "May 12", y: 4.5 },
-    ],
-  },
-  {
-    id: "relevance-quality",
-    label: "Relevance Quality",
-    color: "#7c3aed",
-    points: [
-      { x: "Apr 20", y: 3.8 },
-      { x: "Apr 22", y: 3.9 },
-      { x: "Apr 24", y: 4.0 },
-      { x: "Apr 26", y: 4.1 },
-      { x: "Apr 28", y: 4.0 },
-      { x: "Apr 30", y: 4.2 },
-      { x: "May 2", y: 4.1 },
-      { x: "May 4", y: 4.2 },
-      { x: "May 6", y: 4.1 },
-      { x: "May 8", y: 4.3 },
-      { x: "May 10", y: 4.2 },
-      { x: "May 12", y: 4.4 },
-    ],
-  },
-  {
-    id: "intent-resolution",
-    label: "Intent Resolution",
-    color: "#0f766e",
-    points: [
-      { x: "Apr 20", y: 3.2 },
-      { x: "Apr 22", y: 3.4 },
-      { x: "Apr 24", y: 3.3 },
-      { x: "Apr 26", y: 3.5 },
-      { x: "Apr 28", y: 3.4 },
-      { x: "Apr 30", y: 3.6 },
-      { x: "May 2", y: 3.7 },
-      { x: "May 4", y: 3.6 },
-      { x: "May 6", y: 3.8 },
-      { x: "May 8", y: 3.7 },
-      { x: "May 10", y: 3.9 },
-      { x: "May 12", y: 3.8 },
-    ],
-  },
-];
+};
 
 const experienceQualityAxes: DashboardLineAxisConfig[] = [
   {
@@ -216,63 +114,95 @@ const experienceQualityAxes: DashboardLineAxisConfig[] = [
   },
 ];
 
-const experienceQualityStats = [
-  {
-    id: "retrieval-quality",
-    value: "4.0 / 5",
-    text: "Retrieval Quality",
-  },
-  {
-    id: "task-adherence",
-    value: "4.2 / 5",
-    text: "Task Adherence",
-  },
-];
+const qualitySeriesColors: Record<string, string> = {
+  groundedness: "#4f46e5",
+  "relevance-quality": "#7c3aed",
+  "intent-resolution": "#0f766e",
+};
 
-const trustReadinessSections = [
-  { id: "safety-evaluators" },
-  { id: "mlflow-safety-score" },
-  { id: "pii-leakage" },
-  { id: "upia" },
-];
-
-const trustReadinessCallouts = [
-  {
-    id: "safety-evaluators",
+const trustReadinessPresentation: Record<
+  string,
+  { icon: React.ReactNode; variant: StatusCalloutVariant }
+> = {
+  "safety-evaluators": {
     icon: <ShieldCheckmark24Regular aria-hidden="true" />,
-    title: "Safety Evaluators",
-    primaryContent: "CALCULATION PENDING",
-    variant: "warning" as const,
+    variant: "warning",
   },
-  {
-    id: "mlflow-safety-score",
+  "mlflow-safety-score": {
     icon: <Scales32Regular aria-hidden="true" />,
-    title: "MLflow Safety Score",
-    primaryContent: "0.91 / 1",
-    variant: "success" as const,
+    variant: "success",
   },
-  {
-    id: "pii-leakage",
+  "pii-leakage": {
     icon: <LockClosed24Regular aria-hidden="true" />,
-    title: "PII Leakage (Agent Only)",
-    primaryContent: "DATA PENDING",
-    variant: "danger" as const,
+    variant: "danger",
   },
-  {
-    id: "upia",
+  upia: {
     icon: <ShieldCheckmark24Regular aria-hidden="true" />,
-    title: "UPIA",
-    primaryContent: "TEST RESULTS PENDING",
-    variant: "warning" as const,
+    variant: "warning",
   },
-];
+};
+
+const compactNumberFormatter = new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  maximumFractionDigits: 0,
+});
 
 export default function ProductOwnerDashboard() {
-  const [adoptionAndEngagementOpen, setAdoptionAndEngagementOpen] = useState(false);
+  const period = useDashboardFiltersStore((state) => state.period);
+  const businessUnit = useDashboardFiltersStore((state) => state.businessUnit);
+  const project = useDashboardFiltersStore((state) => state.project);
+
+  const { mainViewData: data } = useDashboardProductOwnerMainView({
+    period,
+    businessUnit,
+    project,
+  });
+
+  const [adoptionAndEngagementOpen, setAdoptionAndEngagementOpen] =
+    useState(false);
   const [channelMixOpen, setChannelMixOpen] = useState(false);
-  const [productExperiencePulseOpen, setProductExperiencePulseOpen] = useState(false);
+  const [productExperiencePulseOpen, setProductExperiencePulseOpen] =
+    useState(false);
   const [experienceQualityOpen, setExperienceQualityOpen] = useState(false);
   const [trustEvidenceOpen, setTrustEvidenceOpen] = useState(false);
+
+  const pulse = data?.productExperiencePulse;
+  const drawers = data?.drawers;
+
+  const adoptionAndEngagementSeries: DashboardLineSeries[] =
+    data?.adoptionAndEngagement.series.map((series) => ({
+      ...series,
+      color:
+        adoptionSeriesPresentation[series.id]?.color ??
+        "var(--color-chart-series-1)",
+      yAxis: adoptionSeriesPresentation[series.id]?.yAxis ?? "left",
+    })) ?? [];
+
+  const adoptionAndEngagementStats =
+    data?.adoptionAndEngagement.supporting.map((stat) => ({
+      id: stat.id,
+      value: stat.value,
+      text: stat.label,
+      icon: adoptionStatPresentation[stat.id]?.icon,
+      iconColor: adoptionStatPresentation[stat.id]?.iconColor,
+    })) ?? [];
+
+  const experienceQualitySeries: DashboardLineSeries[] =
+    data?.experienceAndResponseQuality.series.map((series) => ({
+      ...series,
+      color:
+        qualitySeriesColors[series.id] ?? "var(--color-chart-series-1)",
+    })) ?? [];
+
+  const experienceQualityStats =
+    data?.experienceAndResponseQuality.supporting.map((stat) => ({
+      id: stat.id,
+      value: stat.value,
+      text: stat.label,
+    })) ?? [];
+
+  const trustReadinessSections =
+    data?.trustAndMeasurementReadiness.map((row) => ({ id: row.id })) ?? [];
 
   return (
     <>
@@ -280,216 +210,268 @@ export default function ProductOwnerDashboard() {
         title="AI Observability — Product Owner Dashboard"
         description="Understand adoption, user experience, and business value"
       >
+        {data?.feedbackSummary && (
+          <ProductOwnerFeedbackSummary data={data.feedbackSummary} />
+        )}
         <DashboardGrid>
-        <DashboardPanel
-          template="segmented"
-          footer={
-            <DashboardSectionInfo
-              sectionTitle="Product experience pulse"
-              content={sectionInfo["product-experience-pulse"]}
-            />
-          }
-          title="Product experience pulse"
-          sections={productExperiencePulseSections}
-          className="xl:col-span-2"
-          actions={
-            <DashboardSectionAction
-              onClick={() => setProductExperiencePulseOpen(true)}
-              label="View product experience pulse details"
-            />
-          }
-        >
-          <MetricCard
-            icon={<DataTrending24Regular className="text-blue-600" />}
-            title="Session & Query Volume"
-            className="h-[170px] metricCard-violet"
-            primaryContent={
-              <div className="text-[38px] leading-none font-semibold text-neutral-950">
-                316K <span className="text-4xl font-normal">queries</span>
-              </div>
-            }
-            supportingContent={
-              <span className="text-xs text-neutral-500">
-                68K sessions • 4.6 queries/session
-              </span>
-            }
-          />
-          <MetricCard
-            icon={<ThumbLike24Regular className="text-green-600" />}
-            title="User Satisfaction Rate"
-            className="h-[170px] metricCard-success"
-            primaryContent={
-              <div className="text-[38px] leading-none font-semibold text-neutral-950">
-                84% <span className="text-4xl font-normal">positive</span>
-              </div>
-            }
-            supportingContent={
-              <PositiveNegativeBar
-                positive={84}
-                negative={16}
+          <DashboardPanel
+            template="segmented"
+            footer={
+              <DashboardSectionInfo
+                sectionTitle="Product experience pulse"
+                content={sectionInfo["product-experience-pulse"]}
               />
             }
-          />
-          <MetricCard
-            icon={<ArrowSync24Regular className="text-green-600" />}
-            title="End-to-End Latency"
-            className="h-[170px] metricCard-success"
-            primaryContent={
-              <div className="text-[38px] leading-none font-semibold text-neutral-950">
-                P95 <span className="text-4xl font-normal">1.20 s</span>
-              </div>
+            title="Product experience pulse"
+            sections={productExperiencePulseSections}
+            className="xl:col-span-2"
+            actions={
+              <DashboardSectionAction
+                onClick={() => setProductExperiencePulseOpen(true)}
+                label="View product experience pulse details"
+              />
             }
-          />
-          <MetricCard
-            icon={<Hourglass24Regular className="text-amber-700" />}
-            title="Workflow Completion"
-            className="h-[170px] metricCard-warning"
-            primaryContent={
-              <div className="text-[30px] leading-none font-semibold text-slate-500">
-                DATA PENDING
-              </div>
+          >
+            <MetricCard
+              icon={<DataTrending24Regular className="text-blue-600" />}
+              title="Session & Query Volume"
+              className="h-[170px] metricCard-violet"
+              primaryContent={
+                pulse && (
+                  <div className="text-[38px] leading-none font-semibold text-neutral-950">
+                    {compactNumberFormatter.format(
+                      pulse.sessionQueryVolume.queries,
+                    )}{" "}
+                    <span className="text-4xl font-normal">queries</span>
+                  </div>
+                )
+              }
+              supportingContent={
+                pulse && (
+                  <span className="text-xs text-neutral-500">
+                    {compactNumberFormatter.format(
+                      pulse.sessionQueryVolume.sessions,
+                    )}{" "}
+                    sessions • {pulse.sessionQueryVolume.queriesPerSession}{" "}
+                    queries/session
+                  </span>
+                )
+              }
+            />
+            <MetricCard
+              icon={<Warning24Regular className="text-slate-600" />}
+              title="API Error Rate"
+              className="h-[170px]"
+              iconWrapperClassName="h-10 w-10 bg-slate-100"
+              primaryContent={
+                pulse && <ProductOwnerApiErrorRate {...pulse.apiErrorRate} />
+              }
+            />
+            <MetricCard
+              icon={<ArrowSync24Regular className="text-green-600" />}
+              title="End-to-End Latency"
+              className="h-[170px] metricCard-success"
+              primaryContent={
+                pulse && (
+                  <div className="text-[38px] leading-none font-semibold text-neutral-950">
+                    {pulse.endToEndLatency.percentile}{" "}
+                    <span className="text-4xl font-normal">
+                      {pulse.endToEndLatency.seconds.toFixed(2)} s
+                    </span>
+                  </div>
+                )
+              }
+            />
+            <MetricCard
+              icon={<Hourglass24Regular className="text-amber-700" />}
+              title="Workflow Completion"
+              className="h-[170px] metricCard-warning"
+              primaryContent={
+                pulse?.workflowCompletion.pendingState ? (
+                  <PendingStateValue
+                    state={pulse.workflowCompletion.pendingState}
+                    className="!text-[30px] !leading-none"
+                  />
+                ) : (
+                  pulse?.workflowCompletion.value ?? null
+                )
+              }
+              supportingContent={
+                pulse && (
+                  <span className="text-xs text-neutral-500">
+                    {pulse.workflowCompletion.reason}
+                  </span>
+                )
+              }
+            />
+          </DashboardPanel>
+
+          <DashboardPanel
+            footer={
+              <DashboardSectionInfo
+                sectionTitle="Adoption and engagement"
+                content={sectionInfo["adoption-and-engagement"]}
+              />
             }
-            supportingContent={
-              <span className="text-xs text-neutral-500">
-                Completion event and formula not supplied
-              </span>
+            template="single"
+            title="Adoption and engagement"
+            actions={
+              <DashboardSectionAction
+                onClick={() => setAdoptionAndEngagementOpen(true)}
+                label="View engagement patterns details"
+              />
             }
-          />
-        </DashboardPanel>
+          >
+            <DashboardLineChart
+              description=""
+              height={320}
+              supportingStatsVariant="productOwner"
+              series={adoptionAndEngagementSeries}
+              axes={adoptionAndEngagementAxes}
+              supportingStats={adoptionAndEngagementStats}
+            />
+          </DashboardPanel>
 
+          <DashboardPanel
+            footer={
+              <DashboardSectionInfo
+                sectionTitle="Channel mix"
+                content={sectionInfo["channel-mix"]}
+              />
+            }
+            template="single"
+            title="Channel mix"
+            actions={
+              <DashboardSectionAction
+                onClick={() => setChannelMixOpen(true)}
+                label="View channel mix details"
+              />
+            }
+          >
+            <HorizontalBarList values={channelMixValues} />
+            <div className="mt-2 text-[11px] font-medium text-neutral-500">
+              Illustrative channel breakdown
+            </div>
+          </DashboardPanel>
 
+          <DashboardPanel
+            template="single"
+            title="Experience and response quality"
+            footer={
+              <DashboardSectionInfo
+                sectionTitle="Experience and response quality"
+                content={sectionInfo["experience-and-response-quality"]}
+              />
+            }
+            actions={
+              <DashboardSectionAction
+                onClick={() => setExperienceQualityOpen(true)}
+                label="View experience quality evidence details"
+              />
+            }
+          >
+            <DashboardLineChart
+              height={300}
+              supportingStatsVariant="productOwner"
+              supportingStatsTemplate="right"
+              series={experienceQualitySeries}
+              axes={experienceQualityAxes}
+              supportingStats={experienceQualityStats}
+            />
+          </DashboardPanel>
 
-        <DashboardPanel
-          footer={
-            <DashboardSectionInfo
-              sectionTitle="Adoption and engagement"
-              content={sectionInfo["adoption-and-engagement"]}
-            />
-          }
-          template="single"
-          title="Adoption and engagement"
-          actions={
-            <DashboardSectionAction
-              onClick={() => setAdoptionAndEngagementOpen(true)}
-              label="View engagement patterns details"
-            />
-          }
-        >
-          <DashboardLineChart
-            description=""
-            height={320}
-            supportingStatsVariant="productOwner"
-            series={adoptionAndEngagementSeries}
-            axes={adoptionAndEngagementAxes}
-            supportingStats={adoptionAndEngagementStats}
-          />
-        </DashboardPanel>
+          <DashboardPanel
+            template="single"
+            title="Feature usage evidence"
+            fillHeight
+          >
+            {data?.featureUsageEvidence && (
+              <DataPendingCard
+                statusLabel={data.featureUsageEvidence.statusLabel}
+                description={data.featureUsageEvidence.description}
+              />
+            )}
+          </DashboardPanel>
 
-        <DashboardPanel
-          footer={
-            <DashboardSectionInfo
-              sectionTitle="Channel mix"
-              content={sectionInfo["channel-mix"]}
-            />
-          }
-          template="single"
-          title="Channel mix"
-          actions={
-            <DashboardSectionAction
-              onClick={() => setChannelMixOpen(true)}
-              label="View channel mix details"
-            />
-          }
-        >
-          <HorizontalBarList values={channelMixValues} />
-          <div className="mt-2 text-[11px] font-medium text-neutral-500">
-            Illustrative channel breakdown
-          </div>
-        </DashboardPanel>
+          <DashboardPanel
+            template="segmented"
+            title="Trust and measurement readiness"
+            sections={trustReadinessSections}
+            footer={
+              <DashboardSectionInfo
+                sectionTitle="Trust and measurement readiness"
+                content={sectionInfo["trust-and-measurement-readiness"]}
+              />
+            }
+            className="xl:col-span-2"
+            actions={
+              <DashboardSectionAction
+                onClick={() => setTrustEvidenceOpen(true)}
+                label="View trust evidence decision guide"
+              />
+            }
+          >
+            {(data?.trustAndMeasurementReadiness ?? []).map((row) => {
+              const presentation = trustReadinessPresentation[row.id];
 
-        <DashboardPanel
-          template="single"
-          title="Experience and response quality"
-          footer={
-            <DashboardSectionInfo
-              sectionTitle="Experience and response quality"
-              content={sectionInfo["experience-and-response-quality"]}
-            />
-          }
-          actions={
-            <DashboardSectionAction
-              onClick={() => setExperienceQualityOpen(true)}
-              label="View experience quality evidence details"
-            />
-          }
-        >
-          <DashboardLineChart
-            height={300}
-            supportingStatsVariant="productOwner"
-            supportingStatsTemplate="right"
-            series={experienceQualitySeries}
-            axes={experienceQualityAxes}
-            supportingStats={experienceQualityStats}
-          />
-        </DashboardPanel>
+              return (
+                <StatusCallout
+                  key={row.id}
+                  icon={presentation?.icon}
+                  title={row.label}
+                  primaryContent={
+                    row.pendingState ? (
+                      <PendingStateValue
+                        state={row.pendingState}
+                        className="!text-lg !tracking-tight"
+                      />
+                    ) : (
+                      row.value ?? ""
+                    )
+                  }
+                  variant={presentation?.variant ?? "neutral"}
+                />
+              );
+            })}
+          </DashboardPanel>
+        </DashboardGrid>
+      </DashboardPage>
 
-        <DashboardPanel
-          template="segmented"
-          title="Trust and measurement readiness"
-          sections={trustReadinessSections}
-          footer={
-            <DashboardSectionInfo
-              sectionTitle="Trust and measurement readiness"
-              content={sectionInfo["trust-and-measurement-readiness"]}
-            />
-          }
-          className="xl:col-span-2"
-          actions={
-            <DashboardSectionAction
-              onClick={() => setTrustEvidenceOpen(true)}
-              label="View trust evidence decision guide"
-            />
-          }
-        >
-          {trustReadinessCallouts.map(({ id, icon, title, primaryContent, variant }) => (
-            <StatusCallout
-              key={id}
-              icon={icon}
-              title={title}
-              primaryContent={primaryContent}
-              variant={variant}
-            />
-          ))}
-        </DashboardPanel>
-
-      </DashboardGrid>
-    </DashboardPage>
-
-    <ProductOwnerChannelMixDrawer
-      open={channelMixOpen}
-      onClose={() => setChannelMixOpen(false)}
-      data={channelMixData as ProductOwnerChannelMixData}
-    />
-    <ProductOwnerAdoptionAndEngagementDrawer
-      open={adoptionAndEngagementOpen}
-      onClose={() => setAdoptionAndEngagementOpen(false)}
-      data={adoptionAndEngagementData as ProductOwnerAdoptionAndEngagementData}
-    />
-    <ProductOwnerProductExperiencePulseDrawer
-      open={productExperiencePulseOpen}
-      onClose={() => setProductExperiencePulseOpen(false)}
-      data={productExperiencePulseData as ProductExperiencePulseData}
-    />
-    <ProductOwnerExperienceQualityDrawer
-      open={experienceQualityOpen}
-      onClose={() => setExperienceQualityOpen(false)}
-      data={experienceQualityData as ProductOwnerExperienceQualityData}
-    />
-    <ProductOwnerTrustEvidenceDrawer
-      open={trustEvidenceOpen}
-      onClose={() => setTrustEvidenceOpen(false)}
-      data={trustEvidenceData as ProductOwnerTrustEvidenceData}
-    />
+      {drawers?.channelMix && (
+        <ProductOwnerChannelMixDrawer
+          open={channelMixOpen}
+          onClose={() => setChannelMixOpen(false)}
+          data={drawers.channelMix}
+        />
+      )}
+      {drawers?.adoptionAndEngagement && (
+        <ProductOwnerAdoptionAndEngagementDrawer
+          open={adoptionAndEngagementOpen}
+          onClose={() => setAdoptionAndEngagementOpen(false)}
+          data={drawers.adoptionAndEngagement}
+        />
+      )}
+      {drawers?.productExperiencePulse && (
+        <ProductOwnerProductExperiencePulseDrawer
+          open={productExperiencePulseOpen}
+          onClose={() => setProductExperiencePulseOpen(false)}
+          data={drawers.productExperiencePulse}
+        />
+      )}
+      {drawers?.experienceAndResponseQuality && (
+        <ProductOwnerExperienceQualityDrawer
+          open={experienceQualityOpen}
+          onClose={() => setExperienceQualityOpen(false)}
+          data={drawers.experienceAndResponseQuality}
+        />
+      )}
+      {drawers?.trustAndMeasurementReadiness && (
+        <ProductOwnerTrustEvidenceDrawer
+          open={trustEvidenceOpen}
+          onClose={() => setTrustEvidenceOpen(false)}
+          data={drawers.trustAndMeasurementReadiness}
+        />
+      )}
     </>
   );
 }

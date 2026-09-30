@@ -35,16 +35,16 @@ The field status describes the current documentation, not verified live data.
 
 ### React team data-contract boundary
 
-For the remaining unvalidated KPIs, the client questions are limited to the
-data contract between Splunk and the React application. The React team needs to
-know the response shape, field names, value types, units, aggregation level,
-allowed status values, and missing-data behaviour.
+For the remaining unvalidated KPIs, client questions are limited to unresolved
+business meaning, product scope, source-field meaning, required source
+evidence, and the coverage evidence needed to interpret a result. Endpoint
+property names, transport types, units, response shapes, and technical status
+encoding are agreed directly by the Splunk and React teams.
 
-The React team does not need to define how a source application decides when a
-request starts, when an answer is complete, or how an evaluator produces its
-result. Splunk should either return a ready-to-display aggregate or return a
-clearly documented set of records from which React is expected to calculate
-the display value.
+Splunk performs the KPI calculation, filtering, correlation, retry handling,
+and deduplication, then returns a ready-to-display aggregate. React displays
+that result and its availability state; it does not calculate a KPI from raw
+records.
 
 The Required Fields tables retain the source evidence needed somewhere in the
 data chain. They do not mean that every raw field must be returned to React.
@@ -96,47 +96,76 @@ session begins.
 
 _No client questions remain for this KPI._
 
-## 2. User Satisfaction Rate
+## 2. API Error Rate — classification and denominator pending
 
-_Status: The KPI remains in scope, but it is available only for applications
-that collect user feedback. The response must distinguish unsupported
-applications from applications that support feedback but received none._
+_Status: API Error Rate replaces User Satisfaction Rate in Product Experience
+Pulse. The implemented `1.14%`, `114` error requests, and `10,000` eligible
+requests are illustrative. Source outcome fields and a high-level error-rate
+formula are documented, but the approved counting grain, error classification,
+eligible denominator, metric timestamp, and selected-scope attribution remain
+open. Live data must remain `CALCULATION_PENDING` until those rules are
+confirmed._
 
 ### 1. Business Meaning
 
-Shows the percentage of valid feedback that is positive for the selected
-period and scope, but only for applications that track user feedback. It
-describes the feedback received; it does not represent all users or all
-responses, and it does not prove that another KPI caused the result.
+Would show the percentage of eligible distinct user requests whose approved
+final outcome is an API error in the selected period and scope. It is a
+reliability signal, not a root-cause diagnosis, satisfaction measure, workflow
+completion rate, or statement that every failed component call reached a user.
 
 ### 2. Practical Interpretation
 
-This indicates what share of submitted feedback was positive for applications
-that provide feedback data. An application that does not support feedback must
-be shown as unavailable or not applicable, not as having zero satisfaction.
+This would tell the Product Owner how often eligible requests ended in an
+approved error outcome. Before the percentage can be treated as live, we need
+to agree what one counted request is, which outcomes count as errors, and which
+outcomes belong in the total.
+
+### Proposed Aggregation — approval pending
+
+After applying the selected time, business-unit, and project filters, Splunk
+would select one approved final outcome per counted request and calculate:
+
+```text
+eligible_request_count = COUNT(DISTINCT request_id)
+  where final response_status is an approved eligible outcome
+
+error_request_count = COUNT(DISTINCT request_id)
+  where final response_status is an approved error outcome
+
+api_error_rate_percent =
+  error_request_count / eligible_request_count * 100
+```
+
+This formula is a proposal, not an approved live calculation. If the eligible
+request count is zero, the result is `NO_DATA`, not `0%`.
 
 ### 3. Required Fields
 
-| Required field                             | Do we currently have it?                         | Description                                                                                                                 |
-| ------------------------------------------ | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| `user_feedback_score`                      | **Yes — documented, meaning needs confirmation** | Described as `1 = thumbs up` and `0 = thumbs down`, but another source uses a score of 3 or more as positive.               |
-| `user_id`                                  | **Yes — documented**                             | A hashed user identifier that can support private aggregate handling. It must not be displayed.                             |
-| `application_name`                         | **Yes — documented**                             | The application to which the feedback belongs.                                                                              |
-| Feedback availability or support indicator | **No — not documented**                          | Tells React whether the selected application tracks feedback or whether the KPI does not apply.                              |
-| Feedback timestamp                         | **No — not documented for this KPI**             | The time at which the feedback was submitted; required for the selected period and a trend.                                 |
-| Feedback key                               | **No — not documented**                          | Identifies one feedback record so duplicates or later changes can be handled.                                               |
-| Response or request key                    | **Available elsewhere — confirmation needed**    | Needed to say which answer or request received the feedback. `request_id` is documented elsewhere but is not approved here. |
-| `correlation_id`                           | **Available elsewhere — confirmation needed**    | Can connect feedback with related logs, but the valid feedback target is not yet defined.                                   |
-| `business_unit`, `project_name`            | **Yes — canonical Splunk filters**               | Splunk applies these filters before returning the satisfaction result; React does not join them.                            |
+| Required field or rule | Do we currently have it? | Description |
+| --- | --- | --- |
+| `response_status` | **Yes — documented, classification needs confirmation** | Documented values are `success`, `error`, `timeout`, and `content_filtered`; the approved numerator and denominator treatment is not defined. |
+| `status_code` | **Yes — documented, classification needs confirmation** | HTTP response status recorded for API calls. The approved treatment of `4xx`, `5xx`, and `429` outcomes is open. |
+| `error_code (API)` | **Yes — documented, classification needs confirmation** | Structured API error evidence. It may support classification but must not cause one request to be counted twice. |
+| `error_message (API)` | **Yes — documented, diagnostic only** | Root-cause detail for internal investigation. It must not be returned to or displayed on the Product Owner dashboard. |
+| `request_id` | **Available elsewhere — confirmation needed** | Documented as one user query for Request Throughput. Its use as the API Error Rate counting grain is not yet approved. |
+| Request/event `timestamp` | **Available elsewhere — confirmation needed** | Documented for Request Throughput, but the event that places one final API outcome in the selected period is not approved. |
+| `correlation_id` | **Available elsewhere — confirmation needed** | Available for joining related component logs when an outcome record does not directly carry the approved request key. |
+| Final-outcome and eligible-denominator rule | **No — not documented** | Defines which outcome represents one request and which outcomes enter the numerator and denominator. |
+| `business_unit`, `project_name` | **Yes — canonical Splunk filters** | Splunk applies these filters before calculating the aggregate; React does not join records to them. |
 
 ### 4. Client Questions
 
-- If individual records are returned, what values and data type can
-  `user_feedback_score` contain?
-- If individual records are returned, will each record contain a feedback key,
-  a timestamp, and the ID of the answer or request it belongs to?
-- Will the response include coverage counts so React can show how much feedback
-  the percentage represents?
+- Should this KPI count one user-submitted request or every underlying API
+  call made while serving that request?
+- Which final outcomes should count as API errors, and which outcomes should be
+  included in the total eligible requests? Please clarify the treatment of
+  timeouts, content-filtered responses, HTTP `4xx`, `5xx`, and `429` outcomes.
+- Does the source evidence provide one request identifier, one final outcome,
+  and one timestamp that belong together for each counted request?
+- Can each counted request be reliably connected to the selected business unit
+  and project?
+- Is there a minimum number of eligible requests required before the
+  percentage should be shown?
 
 ## 3. End-to-End Latency
 
@@ -685,6 +714,9 @@ is and what counts as the product being tricked.
   Queries, queries-per-session, and average-session-duration displays are part
   of Session & Query Volume.
 - Repeated uses of the same KPI are documented once.
+- User Satisfaction Rate remains in the Product Owner source inventory but is
+  not currently rendered on the main view; its future presentation is outside
+  this document.
 - Drawer-only measures such as Session Depth Distribution and Conversations per
   Session are not part of the main view.
 - Hallucination percentage is not displayed; the main view displays
