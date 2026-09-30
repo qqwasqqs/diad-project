@@ -1,0 +1,45 @@
+{
+  "request-path-health": {
+    "description": "Shows how latency moves through the request path alongside independent diagnostic context. Component times are not additive, and the asynchronous pipeline and indexing measures are never added to request latency.",
+    "kpiCategories": [
+      "Performance and latency",
+      "Request throughput",
+      "Reliability",
+      "Pipeline and service runtime"
+    ]
+  },
+  "failure-localization": {
+    "description": "Compares illustrative failure-rate signals across eight workloads so follow-up can be located. Each rate has its own denominator, so the values are compared and never summed, and no approved threshold or breach is implied.",
+    "kpiCategories": [
+      "Reliability",
+      "Pipeline and workload failures",
+      "Inference and API errors"
+    ]
+  },
+  "capacity-and-efficiency": {
+    "description": "Shows measured cost and token consumption per request beside capacity signals that have no approved definition or formula yet. Pending states do not stand in for a zero or for a favorable value.",
+    "kpiCategories": [
+      "Cost evaluation",
+      "Consumption",
+      "Token throughput and limits (pending)",
+      "Cache utilization (pending)"
+    ]
+  },
+  "ai-and-model-quality": {
+    "description": "Shows the three compatible 1-5 evaluator scores as a trend. Retrieval quality and the 0-1 MLflow correctness score are reported separately because they are measured on their own scales.",
+    "kpiCategories": [
+      "AI response quality",
+      "RAG quality",
+      "ML evaluation"
+    ]
+  },
+  "evaluator-readiness": {
+    "description": "Shows which safety and security evidence is available for follow-up. The illustrative MLflow score does not imply a favorable result, and no incident, breach, or successful attack is claimed.",
+    "kpiCategories": [
+      "Content safety",
+      "Security",
+      "ML evaluation",
+      "Prompt-injection testing (pending)"
+    ]
+  }
+}

@@ -16,6 +16,9 @@ import DashboardPage from "@/components/shared/dashboard/DashboardPage";
 import DashboardGrid from "@/components/shared/dashboard/DashboardGrid";
 import DashboardPanel from "@/components/shared/dashboard/DashboardPanel";
 import DashboardLineChart from "@/components/shared/dashboard/DashboardLineChart";
+import DashboardSectionInfo, {
+  type DashboardSectionInfoContent,
+} from "@/components/shared/dashboard/DashboardSectionInfo";
 import MetricList, {
   type MetricListItem,
 } from "@/components/shared/dashboard/MetricList";
@@ -33,6 +36,12 @@ import EvaluatorReadinessDrawer from "@/components/shared/dashboard/drawers/tech
 import { useTechTeamMainView } from "@/hooks/useTechTeamDashboard";
 import { useSelectedDashboardFilters } from "@/hooks/useSelectedDashboardFilters";
 import type { MetricRow, Series } from "@/types/dashboard";
+import techTeamSections from "@/content/dashboards/tech-team-sections.json";
+
+const sectionInfo = techTeamSections as Record<
+  string,
+  DashboardSectionInfoContent
+>;
 
 /*
   Technical Teams main view.
@@ -170,6 +179,12 @@ export default function TechTeamDashboard() {
           template="segmented"
           title="Request-path health"
           className="xl:col-span-12"
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Request-path health"
+              content={sectionInfo["request-path-health"]}
+            />
+          }
           sections={[
             {
               id: "latency-trend",
@@ -218,6 +233,12 @@ export default function TechTeamDashboard() {
           template="single"
           title="Failure localization"
           className="xl:col-span-7"
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Failure localization"
+              content={sectionInfo["failure-localization"]}
+            />
+          }
           actions={
             <DashboardSectionAction
               onClick={() => setOpenDrawer("failureLocalization")}
@@ -236,6 +257,12 @@ export default function TechTeamDashboard() {
           template="single"
           title="Capacity and efficiency"
           className="xl:col-span-5"
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Capacity and efficiency"
+              content={sectionInfo["capacity-and-efficiency"]}
+            />
+          }
           actions={
             <DashboardSectionAction
               onClick={() => setOpenDrawer("capacityAndEfficiency")}
@@ -252,6 +279,12 @@ export default function TechTeamDashboard() {
           template="single"
           title="AI and model quality"
           className="xl:col-span-7"
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="AI and model quality"
+              content={sectionInfo["ai-and-model-quality"]}
+            />
+          }
           actions={
             <DashboardSectionAction
               onClick={() => setOpenDrawer("aiModelQuality")}
@@ -290,6 +323,12 @@ export default function TechTeamDashboard() {
           template="single"
           title="Evaluator readiness and security tests"
           className="xl:col-span-5"
+          footer={
+            <DashboardSectionInfo
+              sectionTitle="Evaluator readiness and security tests"
+              content={sectionInfo["evaluator-readiness"]}
+            />
+          }
           actions={
             <DashboardSectionAction
               onClick={() => setOpenDrawer("evaluatorReadiness")}
