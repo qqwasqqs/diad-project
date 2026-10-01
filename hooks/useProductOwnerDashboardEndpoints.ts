@@ -25,8 +25,8 @@ export function useProductOwnerTimeseries(
   });
 }
 
-/** Page-level composition: three independent requests, no combined API payload. */
-export function useProductOwnerDashboardEndpointDemo(filters: ProductOwnerFilters) {
+/** Main-view composition: three independent requests, no combined API payload. */
+export function useProductOwnerMainView(filters: ProductOwnerFilters) {
   const metrics = useProductOwnerMetrics(filters);
   const adoption = useProductOwnerTimeseries("adoption-and-engagement", filters);
   const quality = useProductOwnerTimeseries("experience-and-response-quality", filters);

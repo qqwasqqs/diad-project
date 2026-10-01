@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { useProductOwnerDashboardEndpointDemo } from "@/hooks/useProductOwnerDashboardEndpoints";
+import { useProductOwnerMainView } from "@/hooks/useProductOwnerDashboardEndpoints";
 import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
 
 interface DemoResultProps {
@@ -33,7 +33,7 @@ export default function ProductOwnerArchitectureDemoPage() {
   const period = useDashboardFiltersStore((state) => state.period);
   const businessUnit = useDashboardFiltersStore((state) => state.businessUnit);
   const project = useDashboardFiltersStore((state) => state.project);
-  const { metrics, adoption, quality } = useProductOwnerDashboardEndpointDemo({
+  const { metrics, adoption, quality } = useProductOwnerMainView({
     period,
     businessUnit,
     project,

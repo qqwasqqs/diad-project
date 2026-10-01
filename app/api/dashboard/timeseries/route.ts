@@ -1,27 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import {
-  loadMockTimeseries,
-  parseTimeseriesRequest,
-} from "@/lib/server/dashboard/productOwnerDemoSource";
-import { isLocalDesignModeServer } from "@/lib/localDesignMode";
+import { parseDashboardTimeseriesRequest } from "@/lib/server/dashboard/dashboardRequestParsers";
+import { loadDashboardTimeseries } from "@/lib/server/dashboard/dashboardDataSource";
+import { DashboardSplunkContractError } from "@/lib/server/dashboard/dashboardSplunkSource";
+import { UnsupportedDashboardEnvironmentError } from "@/lib/localDesignMode";
+import type { TimeseriesRequestDto } from "@/types/dashboardEndpointDtos";
 
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
-  if (!isLocalDesignModeServer()) {
-    return NextResponse.json(
-      { error: "Splunk timeseries source is not configured in this MVP" },
-      { status: 501 },
-    );
-  }
+  let input: TimeseriesRequestDto;
+
   try {
-    const input = parseTimeseriesRequest(await request.json());
-    return NextResponse.json(await loadMockTimeseries(input));
+    input = parseDashboardTimeseriesRequest(await request.json());
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Invalid timeseries request" },
+      {
+        error: error instanceof Error ? error.message : "Invalid timeseries request",
+      },
       { status: 400 },
+    );
+  }
+
+  try {
+    return NextResponse.json(await loadDashboardTimeseries(input));
+  } catch (error) {
+    const status =
+      error instanceof DashboardSplunkContractError
+        ? 501
+        : error instanceof UnsupportedDashboardEnvironmentError
+          ? 500
+          : 502;
+
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to load timeseries" },
+      { status },
     );
   }
 }

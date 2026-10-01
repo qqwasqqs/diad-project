@@ -11,6 +11,35 @@ function normalizeEnvironment(value: string | undefined): string {
   return value?.trim().toLowerCase() ?? "";
 }
 
+export type DashboardRuntimeEnvironment = "local" | "dev" | "prod";
+
+export class UnsupportedDashboardEnvironmentError extends Error {
+  constructor(value: string) {
+    super(
+      `Unsupported ENVIRONMENT value "${value}". Expected local, dev, prod, or an empty value for local.`,
+    );
+    this.name = "UnsupportedDashboardEnvironmentError";
+  }
+}
+
+/*
+  Dashboard endpoint source selection is independent from the UI design-mode
+  flag. An unset value is local; deployed environments always use Splunk.
+*/
+export function getDashboardRuntimeEnvironment(): DashboardRuntimeEnvironment {
+  const environment = normalizeEnvironment(process.env.ENVIRONMENT);
+
+  if (!environment || environment === "local") {
+    return "local";
+  }
+
+  if (environment === "dev" || environment === "prod") {
+    return environment;
+  }
+
+  throw new UnsupportedDashboardEnvironmentError(environment);
+}
+
 // Shared toggle based on public env var so client-side code can read it.
 export function isLocalDesignModeEnabled(): boolean {
   return isEnabledFlag(process.env.NEXT_PUBLIC_LOCAL_DESIGN_MODE);
@@ -18,10 +47,7 @@ export function isLocalDesignModeEnabled(): boolean {
 
 // Server-side safety check: design mode is only valid in ENVIRONMENT=local.
 export function isLocalDesignModeServer(): boolean {
-  return (
-    isLocalDesignModeEnabled() &&
-    normalizeEnvironment(process.env.ENVIRONMENT) === "local"
-  );
+  return isLocalDesignModeEnabled() && getDashboardRuntimeEnvironment() === "local";
 }
 
 // Client-side check: optionally constrained by NEXT_PUBLIC_ENVIRONMENT when provided.
