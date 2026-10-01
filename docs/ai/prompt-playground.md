@@ -7,9 +7,8 @@ The Product Owner dashboard uses a lot of hard-coded data and data defined direc
 
 We should use hooks as well to retrieve data from those JSON files. We need to move all the values that are currently hard-coded in the Product Owner dashboard into the JSON file allocated for that dashboard. We should then fetch that data using hooks, just as it is done in the Tech Team dashboard. Specifically, we should create a hook called `useDashboardProductOwnerMainView` and also use the `useDashboardFiltersStore`.
 
-<<<<<<< HEAD
 The purpose of this is to simulate requesting data from Splunk so we can easily replace the connections once we have the capability to request live data. I will create a plan for this implementation; let me know when you are ready to review it so I can provide my feedback before we move to the next stage.
-=======
+
  **Start by tracing both pages and their data sources.** The demo currently requests one metrics response and two independent chart responses. The real page also contains Channel Mix, Trust and Measurement Readiness, five drawers, hardcoded chart values, and direct JSON mock imports. Account for every displayed value; simply adding the demo hook to the real page is not sufficient.
 
  **Migrate the real page:**
@@ -44,4 +43,3 @@ Leave all five drawers on their current mock data for this stage. Do not build d
 The Splunk source still needs confirmed saved-search routing, filter arguments, and result fields. Complete a filtered live connection only where those contracts can be verified. Otherwise, finish the main-page migration, retain a clear failure in dev/prod, and report the precise missing Splunk details. Do not describe an unfiltered call or placeholder response as a working connection.
 
 Run focused typecheck, lint, and local mock-flow validation. Report which main-view sections use endpoint data, which remain pending, what Splunk work is blocked, and which drawer discrepancies stage two must resolve. Preserve unrelated worktree changes and do not deploy.
->>>>>>> feat(product-owner): wire dashboard to Splunk-backed data source

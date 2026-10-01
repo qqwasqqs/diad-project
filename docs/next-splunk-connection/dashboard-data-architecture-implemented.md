@@ -265,14 +265,16 @@ live endpoint results.
 
 | Main-view section | Current source | Current behavior |
 | --- | --- | --- |
+| User Feedback summary | Main-view endpoint (`useDashboardProductOwnerMainView`) | Not in the metrics/timeseries contract. The local fixture returns an illustrative feedback aggregate. |
 | Session and Query Volume | Metrics endpoint | Local fixture returns queries, sessions, and queries per session. |
-| API Error Rate | Metrics endpoint | Local response is `CALCULATION_PENDING` until error classification and eligible-request rules are approved. |
+| API Error Rate | Metrics endpoint | Local response is `CALCULATION_PENDING` until error classification and eligible-request rules are approved. When OK, the card renders the rate and request counts. |
 | End-to-End Latency P95 | Metrics endpoint | Local fixture returns milliseconds; the Product Owner adapter exposes seconds. |
 | Workflow Completion | Metrics endpoint | Local response is `DATA_PENDING`; no numeric value is substituted. |
 | Adoption and Engagement | Timeseries endpoint | Local fixture returns sessions, queries, and supported statistics. The chart has its own loading and error state. |
-| Channel Mix | No executable endpoint contract | Main view shows `DATA PENDING` with an explanation. |
+| Channel Mix | No executable endpoint contract | Main view shows a local illustrative channel breakdown, labeled as illustrative. |
 | Experience and Response Quality | Timeseries endpoint | Local fixture returns approved series and statistics. Intent Resolution remains `CALCULATION_PENDING`. The chart has its own loading and error state. |
-| Trust and Measurement Readiness | No executable endpoint contract | Main view shows explicit calculation, data, or test-result pending states. |
+| Feature Usage Evidence | Main-view endpoint (`useDashboardProductOwnerMainView`) | Not in the metrics/timeseries contract. Shows `DATA PENDING` with the reason from the main-view payload. |
+| Trust and Measurement Readiness | Main-view endpoint (`useDashboardProductOwnerMainView`) | Not in the metrics/timeseries contract. Rows show explicit calculation, data, or test-result pending states, or a supplied value. |
 
 The metrics query has one loading and error state shared by the four metric
 cards because those values are intentionally fetched in one request. Each chart

@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "generatedAt": "2026-09-01T00:00:00.000Z",
   "note": "Illustrative values. Not production telemetry. Definitions and coverage remain subject to the documented pending states.",
   "feedbackSummary": {
@@ -11,8 +10,8 @@
   },
   "productExperiencePulse": {
     "sessionQueryVolume": {
-      "queries": 316000,
-      "sessions": 68000,
+      "queries": 316020,
+      "sessions": 68700,
       "queriesPerSession": 4.6
     },
     "endToEndLatency": {
@@ -23,18 +22,6 @@
       "id": "workflow-completion",
       "label": "Workflow Completion",
       "pendingState": "data",
-=======
-  "productExperiencePulse": {
-    "sessionQueryVolume": {
-      "queries": 316020,
-      "sessions": 68700,
-      "queriesPerSession": 4.6
-    },
-    "endToEndLatency": {
-      "seconds": 1.2
-    },
-    "workflowCompletion": {
->>>>>>> feat(product-owner): wire dashboard to Splunk-backed data source
       "reason": "Completion event and formula not supplied"
     }
   },
@@ -44,24 +31,6 @@
         "id": "sessions",
         "label": "Sessions",
         "points": [
-<<<<<<< HEAD
-          { "x": "Apr 20", "y": 15000 },
-          { "x": "Apr 21", "y": 14000 },
-          { "x": "Apr 22", "y": 18000 },
-          { "x": "Apr 23", "y": 21000 },
-          { "x": "Apr 24", "y": 22000 },
-          { "x": "Apr 25", "y": 24000 },
-          { "x": "Apr 26", "y": 26000 },
-          { "x": "Apr 27", "y": 28000 },
-          { "x": "Apr 28", "y": 25000 },
-          { "x": "Apr 29", "y": 30000 },
-          { "x": "Apr 30", "y": 27000 },
-          { "x": "May 1", "y": 29000 },
-          { "x": "May 2", "y": 32000 },
-          { "x": "May 3", "y": 30000 },
-          { "x": "May 4", "y": 33000 },
-          { "x": "May 5", "y": 31000 }
-=======
           { "x": "2026-04-20", "y": 15000 },
           { "x": "2026-04-21", "y": 14000 },
           { "x": "2026-04-22", "y": 18000 },
@@ -78,31 +47,12 @@
           { "x": "2026-05-03", "y": 30000 },
           { "x": "2026-05-04", "y": 33000 },
           { "x": "2026-05-05", "y": 31000 }
->>>>>>> feat(product-owner): wire dashboard to Splunk-backed data source
         ]
       },
       {
         "id": "queries",
         "label": "Queries",
         "points": [
-<<<<<<< HEAD
-          { "x": "Apr 20", "y": 12000 },
-          { "x": "Apr 21", "y": 16000 },
-          { "x": "Apr 22", "y": 19000 },
-          { "x": "Apr 23", "y": 20000 },
-          { "x": "Apr 24", "y": 24000 },
-          { "x": "Apr 25", "y": 26000 },
-          { "x": "Apr 26", "y": 28000 },
-          { "x": "Apr 27", "y": 30000 },
-          { "x": "Apr 28", "y": 34000 },
-          { "x": "Apr 29", "y": 36000 },
-          { "x": "Apr 30", "y": 39000 },
-          { "x": "May 1", "y": 42000 },
-          { "x": "May 2", "y": 43000 },
-          { "x": "May 3", "y": 47000 },
-          { "x": "May 4", "y": 50000 },
-          { "x": "May 5", "y": 52000 }
-=======
           { "x": "2026-04-20", "y": 12000 },
           { "x": "2026-04-21", "y": 16000 },
           { "x": "2026-04-22", "y": 19000 },
@@ -119,12 +69,10 @@
           { "x": "2026-05-03", "y": 47000 },
           { "x": "2026-05-04", "y": 50000 },
           { "x": "2026-05-05", "y": 52000 }
->>>>>>> feat(product-owner): wire dashboard to Splunk-backed data source
         ]
       }
     ],
     "supporting": [
-<<<<<<< HEAD
       {
         "id": "queries-per-session",
         "label": "queries/session",
@@ -132,16 +80,12 @@
         "decimals": 1
       },
       {
-        "id": "avg-session",
+        "id": "avg-session-duration-minutes",
         "label": "avg session",
         "amount": 8.2,
         "decimals": 1,
         "unit": " min"
       }
-=======
-      { "id": "queries-per-session", "amount": 4.6 },
-      { "id": "avg-session-duration-minutes", "amount": 8.2 }
->>>>>>> feat(product-owner): wire dashboard to Splunk-backed data source
     ]
   },
   "experienceAndResponseQuality": {
@@ -150,20 +94,6 @@
         "id": "groundedness",
         "label": "Groundedness",
         "points": [
-<<<<<<< HEAD
-          { "x": "Apr 20", "y": 4.1 },
-          { "x": "Apr 22", "y": 4.3 },
-          { "x": "Apr 24", "y": 4.2 },
-          { "x": "Apr 26", "y": 4.4 },
-          { "x": "Apr 28", "y": 4.3 },
-          { "x": "Apr 30", "y": 4.2 },
-          { "x": "May 2", "y": 4.5 },
-          { "x": "May 4", "y": 4.4 },
-          { "x": "May 6", "y": 4.3 },
-          { "x": "May 8", "y": 4.5 },
-          { "x": "May 10", "y": 4.6 },
-          { "x": "May 12", "y": 4.5 }
-=======
           { "x": "2026-04-20", "y": 4.1 },
           { "x": "2026-04-22", "y": 4.3 },
           { "x": "2026-04-24", "y": 4.2 },
@@ -176,27 +106,12 @@
           { "x": "2026-05-08", "y": 4.5 },
           { "x": "2026-05-10", "y": 4.6 },
           { "x": "2026-05-12", "y": 4.5 }
->>>>>>> feat(product-owner): wire dashboard to Splunk-backed data source
         ]
       },
       {
         "id": "relevance-quality",
         "label": "Relevance Quality",
         "points": [
-<<<<<<< HEAD
-          { "x": "Apr 20", "y": 3.8 },
-          { "x": "Apr 22", "y": 3.9 },
-          { "x": "Apr 24", "y": 4.0 },
-          { "x": "Apr 26", "y": 4.1 },
-          { "x": "Apr 28", "y": 4.0 },
-          { "x": "Apr 30", "y": 4.2 },
-          { "x": "May 2", "y": 4.1 },
-          { "x": "May 4", "y": 4.2 },
-          { "x": "May 6", "y": 4.1 },
-          { "x": "May 8", "y": 4.3 },
-          { "x": "May 10", "y": 4.2 },
-          { "x": "May 12", "y": 4.4 }
-=======
           { "x": "2026-04-20", "y": 3.8 },
           { "x": "2026-04-22", "y": 3.9 },
           { "x": "2026-04-24", "y": 4.0 },
@@ -209,27 +124,12 @@
           { "x": "2026-05-08", "y": 4.3 },
           { "x": "2026-05-10", "y": 4.2 },
           { "x": "2026-05-12", "y": 4.4 }
->>>>>>> feat(product-owner): wire dashboard to Splunk-backed data source
         ]
       },
       {
         "id": "intent-resolution",
         "label": "Intent Resolution",
-<<<<<<< HEAD
-        "points": [
-          { "x": "Apr 20", "y": 3.2 },
-          { "x": "Apr 22", "y": 3.4 },
-          { "x": "Apr 24", "y": 3.3 },
-          { "x": "Apr 26", "y": 3.5 },
-          { "x": "Apr 28", "y": 3.4 },
-          { "x": "Apr 30", "y": 3.6 },
-          { "x": "May 2", "y": 3.7 },
-          { "x": "May 4", "y": 3.6 },
-          { "x": "May 6", "y": 3.8 },
-          { "x": "May 8", "y": 3.7 },
-          { "x": "May 10", "y": 3.9 },
-          { "x": "May 12", "y": 3.8 }
-        ]
+        "points": []
       }
     ],
     "supporting": [
@@ -280,14 +180,4 @@
       "pendingState": "test-results"
     }
   ]
-=======
-        "points": []
-      }
-    ],
-    "supporting": [
-      { "id": "retrieval-quality", "amount": 4.0, "max": 5 },
-      { "id": "task-adherence", "amount": 4.2, "max": 5 }
-    ]
-  }
->>>>>>> feat(product-owner): wire dashboard to Splunk-backed data source
 }

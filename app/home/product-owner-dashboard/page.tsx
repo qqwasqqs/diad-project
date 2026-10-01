@@ -5,7 +5,6 @@ import {
   ArrowSync24Regular,
   Clock24Regular,
   DataTrending24Regular,
-  ErrorCircle24Regular,
   Hourglass24Regular,
   LockClosed24Regular,
   Person24Regular,
@@ -16,10 +15,8 @@ import {
 
 import HorizontalBarList from "@/components/shared/charts/HorizontalBarList";
 import DashboardGrid from "@/components/shared/dashboard/DashboardGrid";
-
 import DashboardLineChart, {
   type DashboardLineAxisConfig,
-  type DashboardLineAxisId,
   type DashboardLineSeries,
 } from "@/components/shared/dashboard/DashboardLineChart";
 import DashboardPage from "@/components/shared/dashboard/DashboardPage";
@@ -30,7 +27,9 @@ import DashboardSectionInfo, {
 } from "@/components/shared/dashboard/DashboardSectionInfo";
 import DataPendingCard from "@/components/shared/dashboard/DataPendingCard";
 import { MetricCard } from "@/components/shared/dashboard/MetricCard";
-import PendingStateValue from "@/components/shared/dashboard/PendingStateValue";
+import PendingStateValue, {
+  type PendingState,
+} from "@/components/shared/dashboard/PendingStateValue";
 import ProductOwnerApiErrorRate from "@/components/shared/dashboard/ProductOwnerApiErrorRate";
 import ProductOwnerFeedbackSummary from "@/components/shared/dashboard/ProductOwnerFeedbackSummary/ProductOwnerFeedbackSummary";
 import StatusCallout, {
@@ -52,29 +51,30 @@ import ProductOwnerTrustEvidenceDrawer, {
   type ProductOwnerTrustEvidenceData,
 } from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerTrustEvidenceDrawer";
 import productOwnerSections from "@/content/dashboards/product-owner-sections.json";
-// import { useDashboardProductOwnerMainView } from "@/hooks/useProductOwnerDashboard";
-import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
+import { useDashboardProductOwnerMainView } from "@/hooks/useProductOwnerDashboard";
 import { useProductOwnerMainView } from "@/hooks/useProductOwnerDashboardEndpoints";
 import adoptionAndEngagementData from "@/public/mocks/new-pages/product-owner-adoption-and-engagement.json";
 import channelMixData from "@/public/mocks/new-pages/product-owner-channel-mix.json";
 import experienceQualityData from "@/public/mocks/new-pages/product-owner-experience-quality.json";
 import productExperiencePulseData from "@/public/mocks/new-pages/product-owner-product-experience-pulse.json";
 import trustEvidenceData from "@/public/mocks/new-pages/product-owner-trust-evidence.json";
+import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
 import type { DashboardAvailabilityStatus } from "@/types/dashboardEndpointDtos";
-
-/*
-  Product Owner main view.
-
-  Metric values come from the main-view endpoint through
-  useDashboardProductOwnerMainView. The page only supplies presentation details
-  such as icons, chart colors, axes, and panel layout. Channel is not part of
-  the Product Owner request contract; the existing Channel Mix card remains
-  local until that metric is replaced.
-*/
 import type {
   ProductOwnerChartModel,
   ProductOwnerMetricModel,
 } from "@/types/productOwnerDashboardModels";
+
+/*
+  Product Owner main view.
+
+  Pulse metrics and both charts come from the dashboard endpoints through
+  useProductOwnerMainView. Feedback Summary, Feature Usage Evidence, and Trust
+  and Measurement Readiness are not in that contract yet, so they still come
+  from the main-view endpoint through useDashboardProductOwnerMainView. Channel
+  is not part of the Product Owner request contract; the Channel Mix card
+  remains local until that metric is replaced.
+*/
 
 const sectionInfo = productOwnerSections as Record<
   string,
@@ -100,7 +100,6 @@ const compactNumber = new Intl.NumberFormat("en", {
   notation: "compact",
   maximumFractionDigits: 1,
 });
-const wholeNumber = new Intl.NumberFormat("en", { maximumFractionDigits: 0 });
 
 const adoptionAndEngagementAxes: DashboardLineAxisConfig[] = [
   {
@@ -113,28 +112,6 @@ const adoptionAndEngagementAxes: DashboardLineAxisConfig[] = [
   },
 ];
 
-const adoptionSeriesPresentation: Record<
-  string,
-  { color: string; yAxis: DashboardLineAxisId }
-> = {
-  sessions: { color: "#3b82f6", yAxis: "left" },
-  queries: { color: "#8b5cf6", yAxis: "right" },
-};
-
-const adoptionStatPresentation: Record<
-  string,
-  { icon: React.ReactNode; iconColor: string }
-> = {
-  "queries-per-session": {
-    icon: <Person24Regular aria-hidden="true" />,
-    iconColor: "#4f46e5",
-  },
-  "avg-session": {
-    icon: <Clock24Regular aria-hidden="true" />,
-    iconColor: "#2563eb",
-  },
-};
-
 const experienceQualityAxes: DashboardLineAxisConfig[] = [
   {
     id: "left",
@@ -143,11 +120,6 @@ const experienceQualityAxes: DashboardLineAxisConfig[] = [
   },
 ];
 
-const qualitySeriesColors: Record<string, string> = {
-  groundedness: "#4f46e5",
-  "relevance-quality": "#7c3aed",
-  "intent-resolution": "#0f766e",
-};
 const seriesPresentation: Record<
   string,
   Pick<DashboardLineSeries, "label" | "color" | "yAxis">
@@ -180,12 +152,13 @@ const statusLabels: Record<DashboardAvailabilityStatus, string> = {
   ERROR: "UNAVAILABLE",
 };
 
-const trustReadinessSections = [
-  { id: "safety-evaluators" },
-  { id: "mlflow-safety-score" },
-  { id: "pii-leakage" },
-  { id: "upia" },
-];
+const statusPendingStates: Partial<
+  Record<DashboardAvailabilityStatus, PendingState>
+> = {
+  DATA_PENDING: "data",
+  CALCULATION_PENDING: "calculation",
+  FILTER_BREAKDOWN_UNAVAILABLE: "filter-breakdown",
+};
 
 const trustReadinessPresentation: Record<
   string,
@@ -208,11 +181,6 @@ const trustReadinessPresentation: Record<
     variant: "warning",
   },
 };
-
-const compactNumberFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  maximumFractionDigits: 0,
-});
 
 function requestErrorMessage(error: Error | null): string {
   return error?.message ?? "The endpoint request failed";
@@ -292,12 +260,13 @@ export default function ProductOwnerDashboard() {
   const businessUnit = useDashboardFiltersStore((state) => state.businessUnit);
   const project = useDashboardFiltersStore((state) => state.project);
 
-  // const { mainViewData: data } = useDashboardProductOwnerMainView({
-  //   period,
-  //   businessUnit,
-  //   project,
-  // });
   const { metrics, adoption, quality } = useProductOwnerMainView({
+    period,
+    businessUnit,
+    project,
+  });
+  // Sections not yet covered by the dashboard endpoint contract.
+  const { mainViewData: mainView } = useDashboardProductOwnerMainView({
     period,
     businessUnit,
     project,
@@ -311,6 +280,10 @@ export default function ProductOwnerDashboard() {
   const [experienceQualityOpen, setExperienceQualityOpen] = useState(false);
   const [trustEvidenceOpen, setTrustEvidenceOpen] = useState(false);
 
+  const trustReadinessRows = mainView?.trustAndMeasurementReadiness ?? [];
+  const trustReadinessSections = trustReadinessRows.map((row) => ({
+    id: row.id,
+  }));
 
   const sessionMetric = metrics.data?.metrics.find(
     (metric) => metric.id === "session-query-volume",
@@ -324,6 +297,9 @@ export default function ProductOwnerDashboard() {
   const workflowMetric = metrics.data?.metrics.find(
     (metric) => metric.id === "workflow-completion",
   );
+  const workflowPendingState = workflowMetric
+    ? statusPendingStates[workflowMetric.status]
+    : undefined;
 
   const adoptionSeries = toLineSeries(adoption.data);
   const adoptionStats =
@@ -380,8 +356,8 @@ export default function ProductOwnerDashboard() {
         title="AI Observability — Product Owner Dashboard"
         description="Understand adoption, user experience, and business value"
       >
-        {data?.feedbackSummary && (
-          <ProductOwnerFeedbackSummary data={data.feedbackSummary} />
+        {mainView?.feedbackSummary && (
+          <ProductOwnerFeedbackSummary data={mainView.feedbackSummary} />
         )}
         <DashboardGrid>
           <DashboardPanel
@@ -435,33 +411,35 @@ export default function ProductOwnerDashboard() {
               }
             />
             <MetricCard
-              icon={<ErrorCircle24Regular className="text-amber-700" />}
+              icon={<Warning24Regular className="text-slate-600" />}
               title="API Error Rate"
-              className="h-[170px] metricCard-warning"
+              className="h-[170px]"
+              iconWrapperClassName="h-10 w-10 bg-slate-100"
               primaryContent={
                 metrics.isPending ? (
                   <MetricStateValue>LOADING…</MetricStateValue>
                 ) : metrics.isError ? (
                   <MetricStateValue>REQUEST FAILED</MetricStateValue>
                 ) : apiErrorMetric?.status === "OK" && apiErrorMetric.id === "api-error-rate" ? (
-                  <div className="text-[38px] leading-none font-semibold text-neutral-950">
-                    {apiErrorMetric.errorRatePercent.toFixed(1)}%{" "}
-                    <span className="text-4xl font-normal">errors</span>
-                  </div>
+                  <ProductOwnerApiErrorRate
+                    errorRatePercent={apiErrorMetric.errorRatePercent}
+                    errorRequestCount={apiErrorMetric.errorRequestCount}
+                    eligibleRequestCount={apiErrorMetric.eligibleRequestCount}
+                  />
                 ) : (
                   <MetricStateValue>{metricUnavailable(apiErrorMetric).label}</MetricStateValue>
                 )
               }
               supportingContent={
-                <MetricSupportingState>
-                  {metrics.isPending
-                    ? "Loading metric data"
-                    : metrics.isError
-                      ? requestErrorMessage(metrics.error)
-                      : apiErrorMetric?.status === "OK" && apiErrorMetric.id === "api-error-rate"
-                        ? `${wholeNumber.format(apiErrorMetric.errorRequestCount)} errors • ${wholeNumber.format(apiErrorMetric.eligibleRequestCount)} eligible requests`
+                metrics.isPending || metrics.isError || apiErrorMetric?.status !== "OK" ? (
+                  <MetricSupportingState>
+                    {metrics.isPending
+                      ? "Loading metric data"
+                      : metrics.isError
+                        ? requestErrorMessage(metrics.error)
                         : metricUnavailable(apiErrorMetric).reason}
-                </MetricSupportingState>
+                  </MetricSupportingState>
+                ) : undefined
               }
             />
             <MetricCard
@@ -506,6 +484,11 @@ export default function ProductOwnerDashboard() {
                   <MetricStateValue>LOADING…</MetricStateValue>
                 ) : metrics.isError ? (
                   <MetricStateValue>REQUEST FAILED</MetricStateValue>
+                ) : workflowPendingState ? (
+                  <PendingStateValue
+                    state={workflowPendingState}
+                    className="!text-[30px] !leading-none"
+                  />
                 ) : (
                   <MetricStateValue>{metricUnavailable(workflowMetric).label}</MetricStateValue>
                 )
@@ -577,16 +560,9 @@ export default function ProductOwnerDashboard() {
               />
             }
           >
-            <div className="flex min-h-[300px] flex-col justify-center gap-4">
-              <StatusCallout
-                icon={<DataTrending24Regular aria-hidden="true" />}
-                title="Channel Mix"
-                primaryContent="DATA PENDING"
-                variant="warning"
-              />
-              <p className="text-xs text-neutral-500">
-                Channel Mix is not included in the current dashboard endpoint contract.
-              </p>
+            <HorizontalBarList values={channelMixValues} />
+            <div className="mt-2 text-[11px] font-medium text-neutral-500">
+              Illustrative channel breakdown
             </div>
           </DashboardPanel>
 
@@ -630,6 +606,19 @@ export default function ProductOwnerDashboard() {
           </DashboardPanel>
 
           <DashboardPanel
+            template="single"
+            title="Feature usage evidence"
+            fillHeight
+          >
+            {mainView?.featureUsageEvidence && (
+              <DataPendingCard
+                statusLabel={mainView.featureUsageEvidence.statusLabel}
+                description={mainView.featureUsageEvidence.description}
+              />
+            )}
+          </DashboardPanel>
+
+          <DashboardPanel
             template="segmented"
             title="Trust and measurement readiness"
             sections={trustReadinessSections}
@@ -647,15 +636,28 @@ export default function ProductOwnerDashboard() {
               />
             }
           >
-            {trustReadinessCallouts.map(({ id, icon, title, primaryContent, variant }) => (
-              <StatusCallout
-                key={id}
-                icon={icon}
-                title={title}
-                primaryContent={primaryContent}
-                variant={variant}
-              />
-            ))}
+            {trustReadinessRows.map((row) => {
+              const presentation = trustReadinessPresentation[row.id];
+
+              return (
+                <StatusCallout
+                  key={row.id}
+                  icon={presentation?.icon}
+                  title={row.label}
+                  primaryContent={
+                    row.pendingState ? (
+                      <PendingStateValue
+                        state={row.pendingState}
+                        className="!text-lg !tracking-tight"
+                      />
+                    ) : (
+                      (row.value ?? "")
+                    )
+                  }
+                  variant={presentation?.variant ?? "neutral"}
+                />
+              );
+            })}
           </DashboardPanel>
         </DashboardGrid>
       </DashboardPage>
