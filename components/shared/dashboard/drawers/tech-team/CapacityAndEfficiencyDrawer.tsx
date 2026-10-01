@@ -27,7 +27,13 @@ export default function CapacityAndEfficiencyDrawer({
   rows,
 }: CapacityAndEfficiencyDrawerProps) {
   return (
-    <DetailDrawer open={open} onClose={onClose} content={content} size="wide">
+    <DetailDrawer
+      open={open}
+      onClose={onClose}
+      content={content}
+      size="wide"
+      showScopeFilters
+    >
       <DrawerStatGrid items={rows.filter((row) => !row.pendingState)} />
     </DetailDrawer>
   );

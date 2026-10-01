@@ -315,12 +315,6 @@ export default function OperationsTeamDashboard() {
           template="segmented"
           title="Service-path stability"
           className="xl:col-span-12"
-          footer={
-            <DashboardSectionInfo
-              sectionTitle="Service-path stability"
-              content={sectionInfo["service-path-stability"]}
-            />
-          }
           sections={[
             {
               id: "latency-trend",
@@ -330,6 +324,12 @@ export default function OperationsTeamDashboard() {
                 <DashboardSectionAction
                   onClick={() => setOpenDrawer("servicePathStabilityChart")}
                   label="View service-path stability details"
+                />
+              ),
+              footer: (
+                <DashboardSectionInfo
+                  sectionTitle="Service-path stability"
+                  content={sectionInfo["service-path-stability"]}
                 />
               ),
             },
@@ -342,6 +342,12 @@ export default function OperationsTeamDashboard() {
                   label="View runtime context details"
                 />
               ),
+              footer: (
+                <DashboardSectionInfo
+                  sectionTitle="Service-path runtime context"
+                  content={sectionInfo["service-path-runtime-context"]}
+                />
+              ),
             },
           ]}
         >
@@ -351,7 +357,11 @@ export default function OperationsTeamDashboard() {
               axes={[{ id: "left", label: "Latency (ms)" }]}
               height={260}
             />
-            <PanelFootnote>Component times are not additive</PanelFootnote>
+            {/* No glyph: the region's own info control is the only mark here
+                that a reader can act on. */}
+            <PanelFootnote icon={null}>
+              Component times are not additive
+            </PanelFootnote>
           </div>
 
           <MetricList
@@ -389,7 +399,9 @@ export default function OperationsTeamDashboard() {
             flow="row"
             max={data?.failureSurface.scaleMax ?? 2}
           />
-          <PanelFootnote>Illustrative rates</PanelFootnote>
+          {/* No glyph: the panel's info control is the only mark here that
+              a reader can act on. */}
+          <PanelFootnote icon={null}>Illustrative rates</PanelFootnote>
         </DashboardPanel>
 
         {/* Readiness states only: no numeric aggregation is authorized here. */}

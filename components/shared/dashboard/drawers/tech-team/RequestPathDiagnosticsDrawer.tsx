@@ -31,7 +31,13 @@ export default function RequestPathDiagnosticsDrawer({
   icons,
 }: RequestPathDiagnosticsDrawerProps) {
   return (
-    <DetailDrawer open={open} onClose={onClose} content={content} size="wide">
+    <DetailDrawer
+      open={open}
+      onClose={onClose}
+      content={content}
+      size="wide"
+      showScopeFilters
+    >
       <DrawerStatGrid items={diagnostics} icons={icons} />
     </DetailDrawer>
   );

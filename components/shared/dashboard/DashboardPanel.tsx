@@ -11,6 +11,13 @@ export interface DashboardPanelSection {
   */
   action?: ReactNode;
   /*
+    Supplemental control for this region, anchored at the region's bottom-right
+    edge. A segmented panel holds two separately addressable elements, so each
+    one explains itself: a single panel-level control would have to describe
+    both at once, and a reader could not tell which half it answered for.
+  */
+  footer?: ReactNode;
+  /*
     Relative width of this region. Regions share the panel in proportion to
     their weights, so { 2, 1 } gives a two-thirds / one-third split. Omitted
     weights count as 1, which keeps regions equal by default.
@@ -99,6 +106,7 @@ export default function DashboardPanel({
 
   // that the panel should hide the overall header when any section has its own title
   const shouldUseSectionTitles = sectionList.some((section) => section.title);
+  const hasSectionFooters = sectionList.some((section) => section.footer);
 
   return (
     <div
@@ -140,7 +148,13 @@ export default function DashboardPanel({
           const isLastSection = index === sectionList.length - 1;
 
           return (
-            <div key={section.id} className="min-w-0 bg-white">
+            <div
+              key={section.id}
+              className={[
+                "min-w-0 bg-white",
+                hasSectionFooters ? "flex h-full flex-col" : "",
+              ].join(" ")}
+            >
               {(section.title || section.action) && (
                 <div className="flex min-h-[28px] items-start justify-between gap-3 px-4 pt-3">
                   {section.title ? (
@@ -163,9 +177,19 @@ export default function DashboardPanel({
                   !isLastSection
                     ? "border-b border-slate-200 xl:border-b-0 xl:border-r xl:pr-4"
                     : "",
+                  // The footer sits inside the bordered box so the divider runs
+                  // past it rather than stopping at the content above.
+                  hasSectionFooters ? "flex min-h-0 flex-1 flex-col" : "",
                 ].join(" ")}
               >
-                {regionChild}
+                {hasSectionFooters ? (
+                  <div className="min-h-0 flex-1">{regionChild}</div>
+                ) : (
+                  regionChild
+                )}
+                {section.footer && (
+                  <div className="flex justify-end pt-2">{section.footer}</div>
+                )}
               </div>
             </div>
           );

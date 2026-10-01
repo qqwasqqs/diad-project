@@ -29,7 +29,13 @@ export default function FailureLocalizationDrawer({
   scaleMax,
 }: FailureLocalizationDrawerProps) {
   return (
-    <DetailDrawer open={open} onClose={onClose} content={content} size="wide">
+    <DetailDrawer
+      open={open}
+      onClose={onClose}
+      content={content}
+      size="wide"
+      showScopeFilters
+    >
       <HorizontalBarList values={items} rowsPerColumn={4} max={scaleMax} />
     </DetailDrawer>
   );

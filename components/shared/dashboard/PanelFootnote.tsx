@@ -15,13 +15,28 @@ import { Info16Regular } from "@fluentui/react-icons";
 
 export interface PanelFootnoteProps {
   children: ReactNode;
+  /*
+    Decorative mark beside the note, defaulting to the info glyph. It is
+    hidden from assistive technology because it repeats what the note says.
+  */
   icon?: ReactNode;
+  /*
+    Interactive control in the mark's place, for a panel whose explanation is
+    reached from the note itself. It takes the slot instead of `icon` and stays
+    in the accessibility tree, because here the glyph is the control: a reader
+    who cannot see it still has to be able to reach the explanation it opens.
+
+    A panel offers one of the two, never both. Two identical glyphs where only
+    one responds read as a single broken control.
+  */
+  control?: ReactNode;
   className?: string;
 }
 
 export default function PanelFootnote({
   children,
-  icon,
+  icon = <Info16Regular />,
+  control,
   className = "",
 }: PanelFootnoteProps) {
   return (
@@ -29,9 +44,15 @@ export default function PanelFootnote({
       className={`flex items-center gap-2 pt-3 ${className}`.trim()}
       style={{ color: "var(--color-chart-axis)" }}
     >
-      <span aria-hidden="true" className="flex shrink-0 items-center">
-        {icon ?? <Info16Regular />}
-      </span>
+      {control ? (
+        <span className="flex shrink-0 items-center">{control}</span>
+      ) : (
+        icon && (
+          <span aria-hidden="true" className="flex shrink-0 items-center">
+            {icon}
+          </span>
+        )
+      )}
 
       <Text size={200}>{children}</Text>
     </div>
