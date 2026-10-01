@@ -1,11 +1,17 @@
 {
   "request-path-health": {
-    "description": "Shows how latency moves through the request path alongside independent diagnostic context. Component times are not additive, and the asynchronous pipeline and indexing measures are never added to request latency.",
+    "description": "Shows how end-to-end and component latency move through the request path. Component times are not additive, so the three component series cannot be summed into end-to-end latency.",
     "kpiCategories": [
       "Performance and latency",
+      "Model, retrieval, and tool-call timing"
+    ]
+  },
+  "request-path-diagnostics": {
+    "description": "Reports throughput, inference errors, and pipeline and indexing timing beside the latency trend. Pipeline and Indexing / AI Services are asynchronous and are never added to request-path latency.",
+    "kpiCategories": [
       "Request throughput",
       "Reliability",
-      "Pipeline and service runtime"
+      "Pipeline and indexing runtime"
     ]
   },
   "failure-localization": {

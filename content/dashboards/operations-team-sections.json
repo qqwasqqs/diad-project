@@ -16,10 +16,17 @@
     ]
   },
   "service-path-stability": {
-    "description": "Shows how latency moves through the service path alongside diagnostic context. Component times are not additive.",
+    "description": "Shows how latency moves through the service path. Component times are not additive, so the component series cannot be summed into end-to-end latency.",
     "kpiCategories": [
       "Performance and latency",
+      "Model, retrieval, and tool-call timing"
+    ]
+  },
+  "service-path-runtime-context": {
+    "description": "Reports the runtime context that sits beside the latency trend: throughput, failure signals, and pipeline and service timing. These are independent measures and are not components of request latency.",
+    "kpiCategories": [
       "Request throughput",
+      "Reliability",
       "Pipeline and service runtime"
     ]
   },

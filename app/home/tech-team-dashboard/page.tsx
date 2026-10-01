@@ -24,7 +24,6 @@ import MetricList, {
 } from "@/components/shared/dashboard/MetricList";
 import HorizontalBarList from "@/components/shared/charts/HorizontalBarList";
 import IllustrativeValuesBanner from "@/components/shared/dashboard/IllustrativeValuesBanner";
-import PanelFootnote from "@/components/shared/dashboard/PanelFootnote";
 import PendingStateValue from "@/components/shared/dashboard/PendingStateValue";
 import DashboardSectionAction from "@/components/shared/dashboard/DashboardSectionAction";
 import RequestPathLatencyDrawer from "@/components/shared/dashboard/drawers/tech-team/RequestPathLatencyDrawer";
@@ -179,12 +178,6 @@ export default function TechTeamDashboard() {
           template="segmented"
           title="Request-path health"
           className="xl:col-span-12"
-          footer={
-            <DashboardSectionInfo
-              sectionTitle="Request-path health"
-              content={sectionInfo["request-path-health"]}
-            />
-          }
           sections={[
             {
               id: "latency-trend",
@@ -194,6 +187,12 @@ export default function TechTeamDashboard() {
                 <DashboardSectionAction
                   onClick={() => setOpenDrawer("latencyChart")}
                   label="View request-path latency details"
+                />
+              ),
+              footer: (
+                <DashboardSectionInfo
+                  sectionTitle="Request-path health"
+                  content={sectionInfo["request-path-health"]}
                 />
               ),
             },
@@ -206,17 +205,20 @@ export default function TechTeamDashboard() {
                   label="View request-path diagnostics details"
                 />
               ),
+              footer: (
+                <DashboardSectionInfo
+                  sectionTitle="Request-path diagnostics"
+                  content={sectionInfo["request-path-diagnostics"]}
+                />
+              ),
             },
           ]}
         >
-          <div>
-            <DashboardLineChart
-              series={latencySeries}
-              axes={[{ id: "left", label: "Latency (ms)" }]}
-              height={260}
-            />
-            <PanelFootnote>Component times are not additive</PanelFootnote>
-          </div>
+          <DashboardLineChart
+            series={latencySeries}
+            axes={[{ id: "left", label: "Latency (ms)" }]}
+            height={260}
+          />
 
           <MetricList
             variant="prominent"
