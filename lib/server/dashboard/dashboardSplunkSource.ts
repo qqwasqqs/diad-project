@@ -1,4 +1,25 @@
+/*
+  The deployed source boundary.
+
+  No approved saved-search routing, filter binding, or result-field contract
+  exists yet for either dashboard, so nothing here can produce a measured
+  metric. What it can do — and the only reason the Product Owner metrics path
+  calls Splunk at all — is prove connectivity and print what the saved search
+  actually returns, so the mapper can be written against real fields.
+
+  Two rules govern this file until those contracts arrive:
+
+  1. A request is never answered with numbers it did not ask for. The
+     connectivity probe runs one fixed saved search over a fixed window, so
+     every requested metric comes back `FILTER_BREAKDOWN_UNAVAILABLE` rather
+     than carrying a portfolio-wide figure into a filtered view.
+  2. `meta.appliedFilters` states the scope that was actually applied, not the
+     scope that was requested. Echoing the request back would make an
+     unfiltered result look like a filtered one.
+*/
+
 import type {
+  DashboardAppliedFiltersDto,
   MetricsRequestDto,
   MetricsResponseDto,
   TimeseriesRequestDto,
@@ -7,16 +28,16 @@ import type {
 
 const MISSING_FUNCTION_CONTRACT = [
   "approved saved-search names and routing for each metrics request and chartId",
-  "Azure Function argument names for timeRange, businessUnits, projects, and timezone",
-  "Azure Function encoding rules for array-valued businessUnits and projects",
+  "Azure Function argument names for timeRange, businessUnits, projects, apps, and timezone",
+  "Azure Function encoding rules for array-valued businessUnits, projects, and apps",
   "confirmation that the Function forwards those arguments to saved-search placeholders",
   "approved result fields for the metrics and timeseries response DTOs",
 ].join("; ");
 
 export class DashboardSplunkContractError extends Error {
-  constructor(endpoint: "metrics" | "timeseries") {
+  constructor(endpoint: "metrics" | "timeseries", dashboard: string) {
     super(
-      `Cannot call Splunk for dashboard ${endpoint}: the dashboard saved-search/Function contract is missing ${MISSING_FUNCTION_CONTRACT}.`,
+      `Cannot call Splunk for ${dashboard} ${endpoint}: the dashboard saved-search/Function contract is missing ${MISSING_FUNCTION_CONTRACT}.`,
     );
     this.name = "DashboardSplunkContractError";
   }
@@ -25,10 +46,31 @@ export class DashboardSplunkContractError extends Error {
 const METRICS_SAVED_SEARCH = "| savedsearch consolidated_metric_final";
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
-// Stage 1 connectivity test: logs the raw response and returns no metrics; filters and mapping come in stage 2.
+const UNBOUND_FILTERS_REASON =
+  "The connectivity probe runs one fixed saved search over a fixed 30-day, " +
+  "portfolio-wide window. Requested filters are not yet bound to saved-search " +
+  "arguments, so no scoped value can be reported.";
+
+/*
+  The scope the probe actually applies: the whole portfolio over the last 30
+  days, in UTC. It is stated rather than inferred from the request.
+*/
+const PROBE_APPLIED_FILTERS: DashboardAppliedFiltersDto = {
+  timeRange: "last_30_days",
+  businessUnits: ["all"],
+  projects: ["all"],
+  apps: ["all"],
+  timezone: "UTC",
+};
+
+// Stage 1 connectivity test: logs the raw response and reports every metric as unfiltered.
 export async function loadSplunkMetrics(
   request: MetricsRequestDto,
 ): Promise<MetricsResponseDto> {
+  if (request.dashboard !== "product-owner") {
+    throw new DashboardSplunkContractError("metrics", request.dashboard);
+  }
+
   // Dynamic import: keyvault.ts throws on load without KEY_VAULT_URL, which would break mock mode.
   const { fetchSplunkReport } = await import("@/lib/services/splunkReportService");
 
@@ -45,23 +87,22 @@ export async function loadSplunkMetrics(
 
   return {
     meta: {
-      dashboard: "product-owner",
+      dashboard: request.dashboard,
       requestId: crypto.randomUUID(),
       generatedAt: end.toISOString(),
-      appliedFilters: {
-        timeRange: request.filters.timeRange.value,
-        businessUnits: [...request.filters.businessUnits],
-        projects: [...request.filters.projects],
-        timezone: request.filters.timezone,
-      },
+      appliedFilters: PROBE_APPLIED_FILTERS,
     },
-    metrics: [],
+    metrics: request.metrics.map((metricId) => ({
+      metricId,
+      status: "FILTER_BREAKDOWN_UNAVAILABLE" as const,
+      value: null,
+      reason: UNBOUND_FILTERS_REASON,
+    })),
   };
 }
 
 export async function loadSplunkTimeseries(
   request: TimeseriesRequestDto,
 ): Promise<TimeseriesResponseDto> {
-  void request;
-  throw new DashboardSplunkContractError("timeseries");
+  throw new DashboardSplunkContractError("timeseries", request.dashboard);
 }

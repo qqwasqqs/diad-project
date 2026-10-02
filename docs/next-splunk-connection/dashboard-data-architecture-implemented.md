@@ -13,6 +13,13 @@ five Product Owner drawers or implement a live, filtered Splunk request.
 
 This document reflects the working tree on 2026-09-29.
 
+> **Partly superseded.** Source selection no longer depends on `ENVIRONMENT`; it
+> is chosen by `DASHBOARD_DATA_SOURCE`. The endpoint contract, request
+> validation, and server providers are no longer Product Owner-specific, and the
+> `apps` filter dimension has been added. See
+> [Technical Teams dashboard — data wiring](./tech-team-dashboard-data-plan.md)
+> for the current state of those parts. The rest of this document still applies.
+
 ## How the implementation evolved
 
 The current branch shows four useful snapshots:

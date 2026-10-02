@@ -1,5 +1,7 @@
 import { Text } from "@fluentui/react-components";
 
+import type { PendingState } from "@/types/dashboard";
+
 /*
   Renders an approved unavailable-data state in the position a metric value
   would normally occupy.
@@ -10,16 +12,12 @@ import { Text } from "@fluentui/react-components";
   a number.
 */
 
-export type PendingState =
-  | "data"
-  | "definition"
-  | "formula"
-  | "calculation"
-  | "test-results"
-  | "scale"
-  | "threshold"
-  | "filter-breakdown"
-  | "evaluator-coverage";
+/*
+  Re-exported so a component can take the state without reaching past this
+  module for its type. The vocabulary itself is shared across personas and is
+  defined once in `types/dashboard`.
+*/
+export type { PendingState };
 
 // The label is mapped per state rather than built from a suffix: the
 // filter-breakdown state ends in UNAVAILABLE, not PENDING.
@@ -33,6 +31,8 @@ const stateLabels: Record<PendingState, string> = {
   threshold: "THRESHOLD PENDING",
   "filter-breakdown": "FILTER BREAKDOWN UNAVAILABLE",
   "evaluator-coverage": "EVALUATOR COVERAGE PENDING",
+  "no-data": "NO DATA",
+  unavailable: "UNAVAILABLE",
 };
 
 export interface PendingStateValueProps {

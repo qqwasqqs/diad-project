@@ -3,20 +3,23 @@ import {
   adaptProductOwnerTimeseries,
 } from "@/lib/dashboard/productOwnerEndpointAdapter";
 import { dashboardEndpointService } from "@/lib/services/dashboardEndpointService";
+import { toEndpointFilters } from "@/lib/services/dashboardFilterRequest";
 import type { DashboardFilters } from "@/types/dashboard";
 import type {
-  DashboardEndpointFiltersDto,
-  MetricsRequestDto,
   ProductOwnerChartId,
-  TimeseriesRequestDto,
+  ProductOwnerMetricId,
+  ProductOwnerMetricsRequestDto,
+  ProductOwnerMetricsResponseDto,
+  ProductOwnerTimeseriesRequestDto,
+  ProductOwnerTimeseriesResponseDto,
 } from "@/types/dashboardEndpointDtos";
 
 export type ProductOwnerFilters = Pick<
   DashboardFilters,
-  "period" | "businessUnit" | "project"
+  "period" | "businessUnit" | "project" | "app"
 >;
 
-const METRIC_IDS: MetricsRequestDto["metrics"] = [
+const METRIC_IDS: ProductOwnerMetricId[] = [
   "session-query-volume",
   "api-error-rate",
   "end-to-end-latency-p95",
@@ -32,40 +35,25 @@ const CHART_METRICS: Record<ProductOwnerChartId, string[]> = {
   ],
 };
 
-function toEndpointFilters(filters: ProductOwnerFilters): DashboardEndpointFiltersDto {
-  const periods: Record<string, DashboardEndpointFiltersDto["timeRange"]["value"]> = {
-    "7d": "last_7_days",
-    "30d": "last_30_days",
-    "90d": "last_90_days",
-  };
-  const period = filters.period ?? "30d";
-  if (!(period in periods)) {
-    throw new Error(`Unsupported dashboard period: ${period}`);
-  }
-  return {
-    timeRange: { type: "relative", value: periods[period] },
-    businessUnits: [filters.businessUnit ?? "all"],
-    projects: [filters.project ?? "all"],
-    timezone: "UTC",
-  };
-}
-
 export const productOwnerDashboardEndpointService = {
   async getMetrics(filters: ProductOwnerFilters) {
-    const request: MetricsRequestDto = {
+    const request: ProductOwnerMetricsRequestDto = {
       dashboard: "product-owner",
       sections: ["product-experience-pulse"],
       metrics: METRIC_IDS,
       filters: toEndpointFilters(filters),
       options: { includePending: true, includeCoverage: true },
     };
-    const response = await dashboardEndpointService.getMetrics(request);
+    const response =
+      await dashboardEndpointService.getMetrics<ProductOwnerMetricsResponseDto>(
+        request,
+      );
 
     return adaptProductOwnerMetrics(response);
   },
 
   async getTimeseries(chartId: ProductOwnerChartId, filters: ProductOwnerFilters) {
-    const request: TimeseriesRequestDto = {
+    const request: ProductOwnerTimeseriesRequestDto = {
       dashboard: "product-owner",
       chartId,
       metrics: CHART_METRICS[chartId],
@@ -73,7 +61,10 @@ export const productOwnerDashboardEndpointService = {
       granularity: "day",
       options: { includeSupportingStats: true },
     };
-    const response = await dashboardEndpointService.getTimeseries(request);
+    const response =
+      await dashboardEndpointService.getTimeseries<ProductOwnerTimeseriesResponseDto>(
+        request,
+      );
 
     return adaptProductOwnerTimeseries(response);
   },

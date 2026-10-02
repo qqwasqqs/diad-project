@@ -26,7 +26,17 @@ export type PendingState =
   | "scale"
   | "threshold"
   | "filter-breakdown"
-  | "evaluator-coverage";
+  | "evaluator-coverage"
+  /*
+    The two states that are not "pending" at all, and are here because the slot
+    they occupy is the same one: `no-data` is an approved definition that found
+    no eligible records, and `unavailable` is a measure the source could not
+    return. Neither is a measured zero, and neither may be rendered as one, so
+    they are states rather than values — but they must stay distinguishable
+    from a measure that is merely awaiting approval.
+  */
+  | "no-data"
+  | "unavailable";
 
 export interface SeriesPoint {
   // ISO day key (YYYY-MM-DD). Dashboards format it for display.

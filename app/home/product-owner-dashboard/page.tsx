@@ -259,17 +259,20 @@ export default function ProductOwnerDashboard() {
   const period = useDashboardFiltersStore((state) => state.period);
   const businessUnit = useDashboardFiltersStore((state) => state.businessUnit);
   const project = useDashboardFiltersStore((state) => state.project);
+  const app = useDashboardFiltersStore((state) => state.app);
 
   const { metrics, adoption, quality } = useProductOwnerMainView({
     period,
     businessUnit,
     project,
+    app,
   });
   // Sections not yet covered by the dashboard endpoint contract.
   const { mainViewData: mainView } = useDashboardProductOwnerMainView({
     period,
     businessUnit,
     project,
+    app,
   });
 
   const [adoptionAndEngagementOpen, setAdoptionAndEngagementOpen] =

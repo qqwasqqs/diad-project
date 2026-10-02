@@ -1,5 +1,15 @@
-/* Local provider for the planned endpoints. Replace this provider with an
-   approved Splunk integration; keep the route DTOs and client adapters. */
+/*
+  Local fixture provider for the Product Owner endpoints.
+
+  It exists so the page can be developed and reviewed without Splunk. Its
+  scaling and slicing are illustrative UI behavior, not definitions for the
+  future saved searches: every response it returns carries
+  `meta.illustrative: true`.
+
+  Request validation is not done here. It belongs to the route boundary and
+  lives in `dashboardRequestParsers.ts`, so the rules are the same whichever
+  source answers.
+*/
 
 import { promises as fs } from "fs";
 import path from "path";
@@ -9,49 +19,14 @@ import type { DashboardFilters, Series } from "@/types/dashboard";
 import type {
   DashboardEndpointFiltersDto,
   DashboardEndpointMetaDto,
-  MetricsRequestDto,
-  MetricsResponseDto,
-  // ProductOwnerChartId,
-  // ProductOwnerMetricId,
+  ProductOwnerMetricsRequestDto,
+  ProductOwnerMetricsResponseDto,
+  ProductOwnerTimeseriesRequestDto,
+  ProductOwnerTimeseriesResponseDto,
   SupportingStatDto,
-  TimeseriesRequestDto,
-  TimeseriesResponseDto,
 } from "@/types/dashboardEndpointDtos";
 
 const MOCK_DIRECTORY = path.join(process.cwd(), "public", "mocks", "new-pages");
-
-/*
-  TECH DEBT — request validation is temporarily disabled.
-  Why: this validation was written for the local demo (business units a/b,
-  projects a1/b1, exactly one of each). Both API routes use it for every
-  environment, so real dev/prod filters were rejected with HTTP 400 before
-  reaching dashboardSplunkSource.ts. For now we only want to prove the Splunk
-  connection works, so parseMetricsRequest/parseTimeseriesRequest pass input
-  through unchanged.
-  Later: move this validation out of the mock provider into a shared server
-  module (e.g. dashboardRequestParsers.ts) with real, environment-appropriate
-  allowlists, used by both productOwnerDemoSource.ts and
-  dashboardSplunkSource.ts. Then uncomment/relocate the code marked below.
-*/
-
-/* VALIDATION DISABLED — see TECH DEBT note above.
-const METRIC_IDS: ProductOwnerMetricId[] = [
-  "session-query-volume",
-  "api-error-rate",
-  "end-to-end-latency-p95",
-  "workflow-completion",
-];
-const CHART_METRICS: Record<ProductOwnerChartId, string[]> = {
-  "adoption-and-engagement": ["sessions", "queries"],
-  "experience-and-response-quality": [
-    "groundedness",
-    "relevance-quality",
-    "intent-resolution",
-  ],
-};
-const BUSINESS_UNIT_VALUES = new Set(["all", "a", "b"]);
-const PROJECT_VALUES = new Set(["all", "a1", "b1"]);
-*/
 
 interface MockStat {
   id: string;
@@ -79,124 +54,36 @@ async function readMock<T>(name: string): Promise<T> {
   return JSON.parse(contents) as T;
 }
 
-/* VALIDATION DISABLED — see TECH DEBT note above.
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function parseFilters(value: unknown): DashboardEndpointFiltersDto {
-  if (!isRecord(value) || !isRecord(value.timeRange)) {
-    throw new Error("Invalid dashboard filters");
-  }
-  const timeRange = value.timeRange;
-  if (
-    timeRange.type !== "relative" ||
-    !["last_7_days", "last_30_days", "last_90_days"].includes(
-      String(timeRange.value),
-    ) ||
-    value.timezone !== "UTC" ||
-    !Array.isArray(value.businessUnits) ||
-    !Array.isArray(value.projects) ||
-    value.businessUnits.length !== 1 ||
-    value.projects.length !== 1
-  ) {
-    throw new Error("Unsupported dashboard filters in local demo");
-  }
-  const businessUnit = value.businessUnits[0];
-  const project = value.projects[0];
-  if (
-    typeof businessUnit !== "string" ||
-    typeof project !== "string" ||
-    !BUSINESS_UNIT_VALUES.has(businessUnit) ||
-    !PROJECT_VALUES.has(project)
-  ) {
-    throw new Error("Unknown business unit or project in local demo");
-  }
-  return {
-    timeRange: {
-      type: "relative",
-      value: timeRange.value as DashboardEndpointFiltersDto["timeRange"]["value"],
-    },
-    businessUnits: [businessUnit],
-    projects: [project],
-    timezone: "UTC",
-  };
-}
-*/
-
-export function parseMetricsRequest(value: unknown): MetricsRequestDto {
-  return value as MetricsRequestDto;
-  /* VALIDATION DISABLED — see TECH DEBT note above.
-  if (
-    !isRecord(value) ||
-    value.dashboard !== "product-owner" ||
-    !Array.isArray(value.sections) ||
-    value.sections.length !== 1 ||
-    value.sections[0] !== "product-experience-pulse" ||
-    !Array.isArray(value.metrics) ||
-    value.metrics.length === 0 ||
-    !value.metrics.every((id) => METRIC_IDS.includes(id))
-  ) {
-    throw new Error("Invalid Product Owner metrics request");
-  }
-  return {
-    dashboard: "product-owner",
-    sections: ["product-experience-pulse"],
-    metrics: [...new Set(value.metrics)] as ProductOwnerMetricId[],
-    filters: parseFilters(value.filters),
-    options: { includePending: true, includeCoverage: true },
-  };
-  */
-}
-
-export function parseTimeseriesRequest(value: unknown): TimeseriesRequestDto {
-  return value as TimeseriesRequestDto;
-  /* VALIDATION DISABLED — see TECH DEBT note above.
-  if (
-    !isRecord(value) ||
-    value.dashboard !== "product-owner" ||
-    (value.chartId !== "adoption-and-engagement" &&
-      value.chartId !== "experience-and-response-quality") ||
-    value.granularity !== "day" ||
-    !Array.isArray(value.metrics) ||
-    value.metrics.length === 0 ||
-    !value.metrics.every((id) => CHART_METRICS[value.chartId as ProductOwnerChartId].includes(id))
-  ) {
-    throw new Error("Invalid Product Owner timeseries request");
-  }
-  return {
-    dashboard: "product-owner",
-    chartId: value.chartId as ProductOwnerChartId,
-    metrics: [...new Set(value.metrics)] as string[],
-    filters: parseFilters(value.filters),
-    granularity: "day",
-    options: { includeSupportingStats: true },
-  };
-  */
-}
-
-function toMockFilters(filters: DashboardEndpointFiltersDto): DashboardFilters {
+export function toMockFilters(
+  filters: DashboardEndpointFiltersDto,
+): DashboardFilters {
   const periods = {
     last_7_days: "7d",
     last_30_days: "30d",
     last_90_days: "90d",
   } as const;
+
   return {
     period: periods[filters.timeRange.value],
     businessUnit: filters.businessUnits[0],
     project: filters.projects[0],
+    app: filters.apps[0],
   };
 }
 
-function meta(filters: DashboardEndpointFiltersDto): DashboardEndpointMetaDto {
+export function illustrativeMeta<Dashboard extends DashboardEndpointMetaDto["dashboard"]>(
+  dashboard: Dashboard,
+  filters: DashboardEndpointFiltersDto,
+): DashboardEndpointMetaDto<Dashboard> {
   return {
-    dashboard: "product-owner",
+    dashboard,
     requestId: crypto.randomUUID(),
     generatedAt: new Date().toISOString(),
     appliedFilters: {
       timeRange: filters.timeRange.value,
       businessUnits: [...filters.businessUnits],
       projects: [...filters.projects],
+      apps: [...filters.apps],
       timezone: filters.timezone,
     },
     illustrative: true,
@@ -204,8 +91,8 @@ function meta(filters: DashboardEndpointFiltersDto): DashboardEndpointMetaDto {
 }
 
 export async function loadMockMetrics(
-  request: MetricsRequestDto,
-): Promise<MetricsResponseDto> {
+  request: ProductOwnerMetricsRequestDto,
+): Promise<ProductOwnerMetricsResponseDto> {
   const main = await readMock<MockMain>("product-owner-dashboard.json");
   const factor = scopeFactor(toMockFilters(request.filters));
   const available = {
@@ -238,15 +125,16 @@ export async function loadMockMetrics(
       reason: main.productExperiencePulse.workflowCompletion.reason,
     },
   } as const;
+
   return {
-    meta: meta(request.filters),
+    meta: illustrativeMeta("product-owner", request.filters),
     metrics: request.metrics.map((id) => available[id]),
   };
 }
 
 export async function loadMockTimeseries(
-  request: TimeseriesRequestDto,
-): Promise<TimeseriesResponseDto> {
+  request: ProductOwnerTimeseriesRequestDto,
+): Promise<ProductOwnerTimeseriesResponseDto> {
   const main = await readMock<MockMain>("product-owner-dashboard.json");
   const filters = toMockFilters(request.filters);
   const factor = scopeFactor(filters);
@@ -298,8 +186,13 @@ export async function loadMockTimeseries(
           ),
         },
   );
+
   return {
-    meta: { ...meta(request.filters), chartId: request.chartId, granularity: "day" },
+    meta: {
+      ...illustrativeMeta("product-owner", request.filters),
+      chartId: request.chartId,
+      granularity: "day",
+    },
     series,
     supportingStats,
   };

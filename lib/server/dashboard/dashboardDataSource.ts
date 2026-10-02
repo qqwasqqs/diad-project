@@ -1,7 +1,21 @@
+/*
+  Chooses which source answers a dashboard endpoint request.
+
+  Two independent decisions meet here: which *source* (local fixtures or
+  Splunk), and which *dashboard* asked. The source comes from configuration so
+  a developer can work offline; the dashboard comes from the validated request,
+  so each dashboard can migrate to Splunk on its own schedule without the other
+  changing.
+*/
+
 import {
   loadMockMetrics,
   loadMockTimeseries,
 } from "@/lib/server/dashboard/productOwnerDemoSource";
+import {
+  loadTechTeamMockMetrics,
+  loadTechTeamMockTimeseries,
+} from "@/lib/server/dashboard/techTeamDemoSource";
 import {
   loadSplunkMetrics,
   loadSplunkTimeseries,
@@ -35,15 +49,23 @@ function getDashboardDataSource(): DashboardDataSource {
 export async function loadDashboardMetrics(
   request: MetricsRequestDto,
 ): Promise<MetricsResponseDto> {
-  return getDashboardDataSource() === "mock"
+  if (getDashboardDataSource() === "splunk") {
+    return loadSplunkMetrics(request);
+  }
+
+  return request.dashboard === "product-owner"
     ? loadMockMetrics(request)
-    : loadSplunkMetrics(request);
+    : loadTechTeamMockMetrics(request);
 }
 
 export async function loadDashboardTimeseries(
   request: TimeseriesRequestDto,
 ): Promise<TimeseriesResponseDto> {
-  return getDashboardDataSource() === "mock"
+  if (getDashboardDataSource() === "splunk") {
+    return loadSplunkTimeseries(request);
+  }
+
+  return request.dashboard === "product-owner"
     ? loadMockTimeseries(request)
-    : loadSplunkTimeseries(request);
+    : loadTechTeamMockTimeseries(request);
 }
