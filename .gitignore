@@ -34,6 +34,13 @@ yarn-error.log*
 .env*
 !.env.example
 
+# splunk probe output
+# scripts/splunk-probe.mjs --out writes the raw saved-search response here.
+# Raw rows may carry identifiers and telemetry the data contracts keep inside
+# Splunk, so the response file never belongs in the repository.
+splunk-response.json
+*.splunk-response.json
+
 # vercel
 .vercel
 
