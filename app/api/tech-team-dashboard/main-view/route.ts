@@ -13,9 +13,12 @@
 */
 
 import { promises as fs } from "fs";
+import https from "https";
 import path from "path";
 import { NextRequest, NextResponse } from "next/server";
+import axios from "axios";
 
+import { getSecret } from "@/lib/azure/keyvault";
 import { isLocalDesignModeServer } from "@/lib/localDesignMode";
 import {
   formatAmount,
@@ -174,6 +177,201 @@ async function loadMockPayload(
   return applyFilters(JSON.parse(file) as MockPayload, filters);
 }
 
+/* ----------------------------------------------- direct Splunk access --- */
+
+/*
+  Reads the saved search straight from Splunk's REST API, rather than through
+  the Splunk Azure Function that lib/services/splunkReportService calls.
+
+  This works only from inside the Teva network, by design: the management port
+  8089 on `ilsplunapp03t.il.teva.corp` is reachable over corporate DNS and
+  routing, so whatever runs this has to be on-network — a developer machine on
+  VPN, or a deployment with VNet integration and corporate DNS. Off-network the
+  hostname does not resolve and the request fails before TLS or auth, with
+  ENOTFOUND rather than a Splunk status.
+*/
+
+interface SplunkDirectConfiguration {
+  /** Splunk REST root, including `/servicesNS`. */
+  baseUrl: string;
+
+  /** Splunk authentication token — not an Azure Function key. */
+  token: string;
+}
+
+let cachedSplunkDirectBaseUrl: string | null = null;
+let cachedSplunkDirectToken: string | null = null;
+
+/*
+  The same split the rest of the app uses: .env on a developer machine, Key
+  Vault everywhere else, so a deployed image never carries the Splunk token.
+  Both values are cached for the lifetime of the process because neither
+  changes while it runs.
+
+  The values are never logged. A static Splunk token grants everything its
+  owner can do for as long as it is valid, so a log line is as good as a leak.
+*/
+async function loadSplunkDirectConfiguration(): Promise<SplunkDirectConfiguration> {
+  if (cachedSplunkDirectBaseUrl && cachedSplunkDirectToken) {
+    return {
+      baseUrl: cachedSplunkDirectBaseUrl,
+      token: cachedSplunkDirectToken,
+    };
+  }
+
+  const isLocal = (process.env.ENVIRONMENT ?? "unknown") === "local";
+
+  const baseUrl = isLocal
+    ? process.env.SPLUNK_SERVICE_BASE_URL2?.trim()
+    : await getSecret("kv-data-integrity-splunk-rest-base-url");
+
+  const token = isLocal
+    ? process.env.SPLUNK_BEARER_TOKEN?.trim()
+    : await getSecret("kv-data-integrity-splunk-bearer-token");
+
+  const missing = [
+    !baseUrl && "base URL",
+    !token && "authentication token",
+  ].filter(Boolean);
+
+  if (!baseUrl || !token) {
+    throw new Error(
+      `Missing Splunk ${missing.join(" and ")}. ` +
+        (isLocal
+          ? "Set SPLUNK_SERVICE_BASE_URL2 and SPLUNK_BEARER_TOKEN in .env."
+          : "Check kv-data-integrity-splunk-rest-base-url and " +
+            "kv-data-integrity-splunk-bearer-token in Key Vault."),
+    );
+  }
+
+  cachedSplunkDirectBaseUrl = baseUrl.replace(/\/+$/, "");
+  cachedSplunkDirectToken = token;
+
+  return { baseUrl: cachedSplunkDirectBaseUrl, token: cachedSplunkDirectToken };
+}
+
+/*
+  Splunk's management port serves a certificate from an internal CA that Node
+  does not ship, so verification is switched off for this agent alone — not
+  globally, which would weaken every other outbound call the app makes.
+
+  The better fix is to trust the CA instead: point NODE_EXTRA_CA_CERTS at the
+  Teva root bundle and drop this flag. Until that bundle is available on every
+  host that runs the app, the connection fails closed without it.
+*/
+const splunkDirectAgent = new https.Agent({
+  rejectUnauthorized: false,
+  keepAlive: true,
+});
+
+/*
+  `search/jobs/export` streams newline-delimited JSON — one object per line,
+  each wrapping a row under `result` — so the body is not a JSON document and
+  axios is told not to parse it. Lines are parsed individually and the rows
+  unwrapped; a trailing partial line, which a truncated stream leaves behind,
+  is skipped rather than failing the whole response.
+*/
+function parseExportStream(body: string): unknown[] {
+  const rows: unknown[] = [];
+
+  for (const line of body.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    let parsed: { result?: unknown; preview?: boolean };
+    try {
+      parsed = JSON.parse(trimmed);
+    } catch {
+      continue;
+    }
+
+    // Preview rows are partial results from a search that is still running.
+    if (parsed.preview) continue;
+    if (parsed.result !== undefined) rows.push(parsed.result);
+  }
+
+  return rows;
+}
+
+async function getReport(savedSearchName: string): Promise<unknown[]> {
+  const { baseUrl, token } = await loadSplunkDirectConfiguration();
+
+  try {
+    /*
+      `/-/Observability` is the namespace the token is scoped to: any owner, the
+      Observability app. The saved search has to live in that app for
+      `| savedsearch` to resolve it.
+    */
+    const { data } = await axios.get<string>(
+      `${baseUrl}/-/Observability/search/jobs/export`,
+      {
+        httpsAgent: splunkDirectAgent,
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          output_mode: "json",
+          search: `| savedsearch ${savedSearchName}`,
+        },
+        responseType: "text",
+        transformResponse: [(body: string) => body],
+        timeout: 120_000,
+
+        /*
+          Corporate hosts set HTTPS_PROXY, and axios honours it for every
+          request. Splunk is internal, so proxying the call sends it to a gateway
+          with no route to it — a timeout or a 403 from the proxy, neither of
+          which looks like a Splunk problem. Internal traffic goes direct.
+        */
+        proxy: false,
+      },
+    );
+
+    const rows = parseExportStream(data ?? "");
+
+    if (rows.length === 0) {
+      throw new Error(`Splunk saved search "${savedSearchName}" returned no rows.`);
+    }
+
+    return rows;
+  } catch (error) {
+    /*
+      Splunk puts the useful part of a rejection in the response body, and axios
+      hides it behind a generic "Request failed with status code 401", so it is
+      surfaced here. Without it, a namespace or capability problem is
+      indistinguishable from a bad token.
+    */
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const body =
+        typeof error.response?.data === "string"
+          ? error.response.data.slice(0, 500)
+          : JSON.stringify(error.response?.data ?? {}).slice(0, 500);
+
+      console.error("Error in getReport:", status ?? error.code, body);
+
+      if (status) {
+        throw new Error(`Splunk responded ${status}: ${body}`);
+      }
+
+      /*
+        A DNS failure is the one error with a single likely cause worth naming:
+        the host is internal, so it means this is running off the Teva network.
+        Everything else stays generic rather than guessing.
+      */
+      const offNetwork = error.code === "ENOTFOUND" || error.code === "EAI_AGAIN";
+
+      throw new Error(
+        `Splunk was not reachable (${error.code ?? "unknown"}): ${error.message}.` +
+          (offNetwork
+            ? " The host resolves on Teva's network only — check VPN or VNet DNS."
+            : ""),
+      );
+    }
+
+    console.error("Error in getReport:", error);
+    throw error;
+  }
+}
+
 /*
   Replace this with the approved source call.
 
@@ -205,11 +403,27 @@ export async function GET(request: NextRequest) {
   const filters = readFilters(request);
 
   try {
+    /*
+      The Splunk read comes first on purpose. `loadFromSource` below is still a
+      stub that throws outside local design mode, so running it first would fail
+      the request before the call this wiring exists to exercise ever happened.
+      This way the rows reach the log either way.
+    */
+    const splunkData = await getReport("react_log");
+    console.log("Splunk response:", splunkData);
+
     const payload = isLocalDesignModeServer()
       ? await loadMockPayload(filters)
       : await loadFromSource(filters);
 
-    return NextResponse.json(payload);
+    /*
+      This changes the response shape: the Technical Teams drawers read this
+      endpoint through techTeamDashboardService, which expects a
+      `TechTeamDashboardPayload` at the top level, so they have nothing to read
+      while the Splunk half rides along. Restore `NextResponse.json(payload)`
+      once the rows are mapped in `loadFromSource` and `getReport` has no caller.
+    */
+    return NextResponse.json({ requestPayload: payload, splunkData });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unknown error loading main view.";
