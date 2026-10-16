@@ -1,9 +1,0 @@
-{
-  "chat.tools.terminal.autoApprove": {
-    "/^git fetch origin --prune 2>&1 \\| tail -5 && echo \"--- LOG ---\" && git --no-pager log --oneline origin/main\\.\\.HEAD && echo \"--- BEHIND ---\" && git --no-pager log --oneline HEAD\\.\\.origin/main \\| head -20 && echo \"--- COUNT ---\" && git rev-list --left-right --count origin/main\\.\\.\\.HEAD$/": {
-      "approve": true,
-      "matchCommandLine": true
-    },
-    "git rebase": true
-  }
-}
