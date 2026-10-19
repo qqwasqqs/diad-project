@@ -7,8 +7,10 @@ import type {
 } from "@/types/dashboardEndpointDtos";
 
 export const dashboardEndpointService = {
-  async getMetrics(request: MetricsRequestDto): Promise<MetricsResponseDto> {
-    const { data } = await apiClient.post<MetricsResponseDto>(
+  async getMetrics<Response = MetricsResponseDto>(
+    request: MetricsRequestDto,
+  ): Promise<Response> {
+    const { data } = await apiClient.post<Response>(
       "/api/dashboard/metrics",
       request,
     );

@@ -27,10 +27,7 @@ import DashboardSectionInfo, {
 } from "@/components/shared/dashboard/DashboardSectionInfo";
 import DataPendingCard from "@/components/shared/dashboard/DataPendingCard";
 import { MetricCard } from "@/components/shared/dashboard/MetricCard";
-import PendingStateValue, {
-  type PendingState,
-} from "@/components/shared/dashboard/PendingStateValue";
-import ProductOwnerApiErrorRate from "@/components/shared/dashboard/ProductOwnerApiErrorRate";
+import PendingStateValue from "@/components/shared/dashboard/PendingStateValue";
 import ProductOwnerFeedbackSummary from "@/components/shared/dashboard/ProductOwnerFeedbackSummary/ProductOwnerFeedbackSummary";
 import StatusCallout, {
   type StatusCalloutVariant,
@@ -60,10 +57,7 @@ import productExperiencePulseData from "@/public/mocks/new-pages/product-owner-p
 import trustEvidenceData from "@/public/mocks/new-pages/product-owner-trust-evidence.json";
 import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
 import type { DashboardAvailabilityStatus } from "@/types/dashboardEndpointDtos";
-import type {
-  ProductOwnerChartModel,
-  ProductOwnerMetricModel,
-} from "@/types/productOwnerDashboardModels";
+import type { ProductOwnerChartModel } from "@/types/productOwnerDashboardModels";
 
 /*
   Product Owner main view.
@@ -152,14 +146,6 @@ const statusLabels: Record<DashboardAvailabilityStatus, string> = {
   ERROR: "UNAVAILABLE",
 };
 
-const statusPendingStates: Partial<
-  Record<DashboardAvailabilityStatus, PendingState>
-> = {
-  DATA_PENDING: "data",
-  CALCULATION_PENDING: "calculation",
-  FILTER_BREAKDOWN_UNAVAILABLE: "filter-breakdown",
-};
-
 const trustReadinessPresentation: Record<
   string,
   { icon: React.ReactNode; variant: StatusCalloutVariant }
@@ -196,20 +182,6 @@ function MetricStateValue({ children }: { children: ReactNode }) {
 
 function MetricSupportingState({ children }: { children: ReactNode }) {
   return <span className="text-xs text-neutral-500">{children}</span>;
-}
-
-function metricUnavailable(
-  metric: ProductOwnerMetricModel | undefined,
-): { label: string; reason: string } {
-  if (!metric) {
-    return { label: "DATA PENDING", reason: "Metric was not returned" };
-  }
-
-  if (metric.status === "OK") {
-    return { label: "OK", reason: "" };
-  }
-
-  return { label: statusLabels[metric.status], reason: metric.reason };
 }
 
 function toLineSeries(chart: ProductOwnerChartModel | undefined): DashboardLineSeries[] {
@@ -285,21 +257,11 @@ export default function ProductOwnerDashboard() {
     id: row.id,
   }));
 
-  const sessionMetric = metrics.data?.metrics.find(
-    (metric) => metric.id === "session-query-volume",
-  );
-  const apiErrorMetric = metrics.data?.metrics.find(
-    (metric) => metric.id === "api-error-rate",
-  );
-  const latencyMetric = metrics.data?.metrics.find(
-    (metric) => metric.id === "end-to-end-latency-p95",
-  );
-  const workflowMetric = metrics.data?.metrics.find(
-    (metric) => metric.id === "workflow-completion",
-  );
-  const workflowPendingState = workflowMetric
-    ? statusPendingStates[workflowMetric.status]
-    : undefined;
+  const sessionMetric =
+    metrics.data?.productExperiencePulse.sessionQueryVolume;
+  const latencyMetric = metrics.data?.productExperiencePulse.endToEndLatency;
+  const workflowMetric =
+    metrics.data?.productExperiencePulse.workflowCompletion;
 
   const adoptionSeries = toLineSeries(adoption.data);
   const adoptionStats =
@@ -387,14 +349,13 @@ export default function ProductOwnerDashboard() {
                   <MetricStateValue>LOADING…</MetricStateValue>
                 ) : metrics.isError ? (
                   <MetricStateValue>REQUEST FAILED</MetricStateValue>
-                ) : sessionMetric?.status === "OK" &&
-                  sessionMetric.id === "session-query-volume" ? (
+                ) : sessionMetric ? (
                   <div className="text-[38px] leading-none font-semibold text-neutral-950">
                     {compactNumber.format(sessionMetric.queries)}{" "}
                     <span className="text-4xl font-normal">queries</span>
                   </div>
                 ) : (
-                  <MetricStateValue>{metricUnavailable(sessionMetric).label}</MetricStateValue>
+                  <MetricStateValue>DATA PENDING</MetricStateValue>
                 )
               }
               supportingContent={
@@ -403,10 +364,9 @@ export default function ProductOwnerDashboard() {
                     ? "Loading metric data"
                     : metrics.isError
                       ? requestErrorMessage(metrics.error)
-                      : sessionMetric?.status === "OK" &&
-                          sessionMetric.id === "session-query-volume"
+                      : sessionMetric
                         ? `${compactNumber.format(sessionMetric.sessions)} sessions • ${sessionMetric.queriesPerSession.toFixed(1)} queries/session`
-                        : metricUnavailable(sessionMetric).reason}
+                        : "Metric was not returned"}
                 </MetricSupportingState>
               }
             />
@@ -420,26 +380,21 @@ export default function ProductOwnerDashboard() {
                   <MetricStateValue>LOADING…</MetricStateValue>
                 ) : metrics.isError ? (
                   <MetricStateValue>REQUEST FAILED</MetricStateValue>
-                ) : apiErrorMetric?.status === "OK" && apiErrorMetric.id === "api-error-rate" ? (
-                  <ProductOwnerApiErrorRate
-                    errorRatePercent={apiErrorMetric.errorRatePercent}
-                    errorRequestCount={apiErrorMetric.errorRequestCount}
-                    eligibleRequestCount={apiErrorMetric.eligibleRequestCount}
-                  />
                 ) : (
-                  <MetricStateValue>{metricUnavailable(apiErrorMetric).label}</MetricStateValue>
+                  <PendingStateValue
+                    state="calculation"
+                    className="!text-[30px] !leading-none"
+                  />
                 )
               }
               supportingContent={
-                metrics.isPending || metrics.isError || apiErrorMetric?.status !== "OK" ? (
-                  <MetricSupportingState>
-                    {metrics.isPending
-                      ? "Loading metric data"
-                      : metrics.isError
-                        ? requestErrorMessage(metrics.error)
-                        : metricUnavailable(apiErrorMetric).reason}
-                  </MetricSupportingState>
-                ) : undefined
+                <MetricSupportingState>
+                  {metrics.isPending
+                    ? "Loading metric data"
+                    : metrics.isError
+                      ? requestErrorMessage(metrics.error)
+                      : "Error classification and eligible-request rules are not approved"}
+                </MetricSupportingState>
               }
             />
             <MetricCard
@@ -451,26 +406,25 @@ export default function ProductOwnerDashboard() {
                   <MetricStateValue>LOADING…</MetricStateValue>
                 ) : metrics.isError ? (
                   <MetricStateValue>REQUEST FAILED</MetricStateValue>
-                ) : latencyMetric?.status === "OK" &&
-                  latencyMetric.id === "end-to-end-latency-p95" ? (
+                ) : latencyMetric ? (
                   <div className="text-[38px] leading-none font-semibold text-neutral-950">
-                    P95{" "}
+                    {latencyMetric.percentile}{" "}
                     <span className="text-4xl font-normal">
                       {latencyMetric.seconds.toFixed(2)} s
                     </span>
                   </div>
                 ) : (
-                  <MetricStateValue>{metricUnavailable(latencyMetric).label}</MetricStateValue>
+                  <MetricStateValue>DATA PENDING</MetricStateValue>
                 )
               }
               supportingContent={
-                metrics.isPending || metrics.isError || latencyMetric?.status !== "OK" ? (
+                !latencyMetric || metrics.isPending || metrics.isError ? (
                   <MetricSupportingState>
                     {metrics.isPending
                       ? "Loading metric data"
                       : metrics.isError
                         ? requestErrorMessage(metrics.error)
-                        : metricUnavailable(latencyMetric).reason}
+                        : "Metric was not returned"}
                   </MetricSupportingState>
                 ) : undefined
               }
@@ -484,13 +438,13 @@ export default function ProductOwnerDashboard() {
                   <MetricStateValue>LOADING…</MetricStateValue>
                 ) : metrics.isError ? (
                   <MetricStateValue>REQUEST FAILED</MetricStateValue>
-                ) : workflowPendingState ? (
+                ) : workflowMetric?.pendingState ? (
                   <PendingStateValue
-                    state={workflowPendingState}
+                    state={workflowMetric.pendingState}
                     className="!text-[30px] !leading-none"
                   />
                 ) : (
-                  <MetricStateValue>{metricUnavailable(workflowMetric).label}</MetricStateValue>
+                  <MetricStateValue>DATA PENDING</MetricStateValue>
                 )
               }
               supportingContent={
@@ -499,7 +453,7 @@ export default function ProductOwnerDashboard() {
                     ? "Loading metric data"
                     : metrics.isError
                       ? requestErrorMessage(metrics.error)
-                      : metricUnavailable(workflowMetric).reason}
+                      : workflowMetric?.reason ?? "Metric was not returned"}
                 </MetricSupportingState>
               }
             />

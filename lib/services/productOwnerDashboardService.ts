@@ -10,6 +10,7 @@ import type {
   ProductOwnerChartId,
   TimeseriesRequestDto,
 } from "@/types/dashboardEndpointDtos";
+import type { ProductOwnerDashboardMetricsPayload } from "@/types/productOwnerDashboard";
 
 export type ProductOwnerFilters = Pick<
   DashboardFilters,
@@ -59,7 +60,10 @@ export const productOwnerDashboardService = {
       filters: toEndpointFilters(filters),
       options: { includePending: true, includeCoverage: true },
     };
-    const response = await dashboardEndpointService.getMetrics(request);
+    const response =
+      await dashboardEndpointService.getMetrics<ProductOwnerDashboardMetricsPayload>(
+        request,
+      );
 
     return adaptProductOwnerMetrics(response);
   },

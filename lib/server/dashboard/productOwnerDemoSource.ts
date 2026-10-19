@@ -5,18 +5,18 @@ import { promises as fs } from "fs";
 import path from "path";
 
 import { periodDays, scopeFactor, shiftBounded } from "@/lib/dashboard/mockSource";
-import type { DashboardFilters, Series } from "@/types/dashboard";
+import type { DashboardFilters } from "@/types/dashboard";
 import type {
   DashboardEndpointFiltersDto,
   DashboardEndpointMetaDto,
   MetricsRequestDto,
-  MetricsResponseDto,
   // ProductOwnerChartId,
   // ProductOwnerMetricId,
   SupportingStatDto,
   TimeseriesRequestDto,
   TimeseriesResponseDto,
 } from "@/types/dashboardEndpointDtos";
+import type { ProductOwnerDashboardMetricsPayload } from "@/types/productOwnerDashboard";
 
 const MOCK_DIRECTORY = path.join(process.cwd(), "public", "mocks", "new-pages");
 
@@ -52,27 +52,6 @@ const CHART_METRICS: Record<ProductOwnerChartId, string[]> = {
 const BUSINESS_UNIT_VALUES = new Set(["all", "a", "b"]);
 const PROJECT_VALUES = new Set(["all", "a1", "b1"]);
 */
-
-interface MockStat {
-  id: string;
-  amount?: number;
-  max?: number;
-  pendingState?: string;
-}
-
-interface MockMain {
-  productExperiencePulse: {
-    sessionQueryVolume: {
-      queries: number;
-      sessions: number;
-      queriesPerSession: number;
-    };
-    endToEndLatency: { seconds: number };
-    workflowCompletion: { reason: string };
-  };
-  adoptionAndEngagement: { series: Series[]; supporting: MockStat[] };
-  experienceAndResponseQuality: { series: Series[]; supporting: MockStat[] };
-}
 
 async function readMock<T>(name: string): Promise<T> {
   const contents = await fs.readFile(path.join(MOCK_DIRECTORY, name), "utf8");
@@ -205,49 +184,19 @@ function meta(filters: DashboardEndpointFiltersDto): DashboardEndpointMetaDto {
 
 export async function loadMockMetrics(
   request: MetricsRequestDto,
-): Promise<MetricsResponseDto> {
-  const main = await readMock<MockMain>("product-owner-dashboard.json");
-  const factor = scopeFactor(toMockFilters(request.filters));
-  const available = {
-    "session-query-volume": {
-      metricId: "session-query-volume",
-      status: "OK",
-      value: {
-        queries: Math.round(main.productExperiencePulse.sessionQueryVolume.queries * factor),
-        sessions: Math.round(main.productExperiencePulse.sessionQueryVolume.sessions * factor),
-        queriesPerSession: main.productExperiencePulse.sessionQueryVolume.queriesPerSession,
-      },
-    },
-    "api-error-rate": {
-      metricId: "api-error-rate",
-      status: "CALCULATION_PENDING",
-      value: null,
-      reason: "Error classification and eligible-request rules are not approved",
-    },
-    "end-to-end-latency-p95": {
-      metricId: "end-to-end-latency-p95",
-      status: "OK",
-      value: {
-        latencyMs: Math.round(main.productExperiencePulse.endToEndLatency.seconds * factor * 1000),
-      },
-    },
-    "workflow-completion": {
-      metricId: "workflow-completion",
-      status: "DATA_PENDING",
-      value: null,
-      reason: main.productExperiencePulse.workflowCompletion.reason,
-    },
-  } as const;
-  return {
-    meta: meta(request.filters),
-    metrics: request.metrics.map((id) => available[id]),
-  };
+): Promise<ProductOwnerDashboardMetricsPayload> {
+  void request;
+  return readMock<ProductOwnerDashboardMetricsPayload>(
+    "product-owner-dashboard.json",
+  );
 }
 
 export async function loadMockTimeseries(
   request: TimeseriesRequestDto,
 ): Promise<TimeseriesResponseDto> {
-  const main = await readMock<MockMain>("product-owner-dashboard.json");
+  const main = await readMock<ProductOwnerDashboardMetricsPayload>(
+    "product-owner-dashboard.json",
+  );
   const filters = toMockFilters(request.filters);
   const factor = scopeFactor(filters);
   const days = periodDays(filters);

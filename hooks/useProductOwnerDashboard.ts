@@ -8,7 +8,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { productOwnerDashboardService } from "@/lib/services/productOwnerDashboardService";
+import { productOwnerDashboardService } from "@/lib/services/_productOwnerDashboardService";
 import type { DashboardFilters } from "@/types/dashboard";
 
 export function useDashboardProductOwnerMainView(
