@@ -48,7 +48,6 @@ import ProductOwnerTrustEvidenceDrawer, {
   type ProductOwnerTrustEvidenceData,
 } from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerTrustEvidenceDrawer";
 import productOwnerSections from "@/content/dashboards/product-owner-sections.json";
-import { useDashboardProductOwnerMainView } from "@/hooks/useProductOwnerDashboard";
 import { useProductOwnerMainView } from "@/hooks/useProductOwnerDashboardEndpoints";
 import adoptionAndEngagementData from "@/public/mocks/new-pages/product-owner-adoption-and-engagement.json";
 import channelMixData from "@/public/mocks/new-pages/product-owner-channel-mix.json";
@@ -62,12 +61,9 @@ import type { ProductOwnerChartModel } from "@/types/productOwnerDashboardModels
 /*
   Product Owner main view.
 
-  Pulse metrics and both charts come from the dashboard endpoints through
-  useProductOwnerMainView. Feedback Summary, Feature Usage Evidence, and Trust
-  and Measurement Readiness are not in that contract yet, so they still come
-  from the main-view endpoint through useDashboardProductOwnerMainView. Channel
-  is not part of the Product Owner request contract; the Channel Mix card
-  remains local until that metric is replaced.
+  Dashboard metrics and both charts come from the dashboard endpoints through
+  useProductOwnerMainView. Channel is not part of the Product Owner request
+  contract; the Channel Mix card remains local until that metric is replaced.
 */
 
 const sectionInfo = productOwnerSections as Record<
@@ -184,6 +180,14 @@ function MetricSupportingState({ children }: { children: ReactNode }) {
   return <span className="text-xs text-neutral-500">{children}</span>;
 }
 
+function formatMetricRow(
+  amount: number | undefined,
+  decimals = 0,
+  unit = "",
+): string {
+  return amount === undefined ? "" : `${amount.toFixed(decimals)}${unit}`;
+}
+
 function toLineSeries(chart: ProductOwnerChartModel | undefined): DashboardLineSeries[] {
   if (!chart) {
     return [];
@@ -237,12 +241,6 @@ export default function ProductOwnerDashboard() {
     businessUnit,
     project,
   });
-  // Sections not yet covered by the dashboard endpoint contract.
-  const { mainViewData: mainView } = useDashboardProductOwnerMainView({
-    period,
-    businessUnit,
-    project,
-  });
 
   const [adoptionAndEngagementOpen, setAdoptionAndEngagementOpen] =
     useState(false);
@@ -252,7 +250,8 @@ export default function ProductOwnerDashboard() {
   const [experienceQualityOpen, setExperienceQualityOpen] = useState(false);
   const [trustEvidenceOpen, setTrustEvidenceOpen] = useState(false);
 
-  const trustReadinessRows = mainView?.trustAndMeasurementReadiness ?? [];
+  const trustReadinessRows =
+    metrics.data?.trustAndMeasurementReadiness ?? [];
   const trustReadinessSections = trustReadinessRows.map((row) => ({
     id: row.id,
   }));
@@ -318,8 +317,8 @@ export default function ProductOwnerDashboard() {
         title="AI Observability — Product Owner Dashboard"
         description="Understand adoption, user experience, and business value"
       >
-        {mainView?.feedbackSummary && (
-          <ProductOwnerFeedbackSummary data={mainView.feedbackSummary} />
+        {metrics.data?.feedbackSummary && (
+          <ProductOwnerFeedbackSummary data={metrics.data.feedbackSummary} />
         )}
         <DashboardGrid>
           <DashboardPanel
@@ -564,10 +563,10 @@ export default function ProductOwnerDashboard() {
             title="Feature usage evidence"
             fillHeight
           >
-            {mainView?.featureUsageEvidence && (
+            {metrics.data?.featureUsageEvidence && (
               <DataPendingCard
-                statusLabel={mainView.featureUsageEvidence.statusLabel}
-                description={mainView.featureUsageEvidence.description}
+                statusLabel={metrics.data.featureUsageEvidence.statusLabel}
+                description={metrics.data.featureUsageEvidence.description}
               />
             )}
           </DashboardPanel>
@@ -605,7 +604,7 @@ export default function ProductOwnerDashboard() {
                         className="!text-lg !tracking-tight"
                       />
                     ) : (
-                      (row.value ?? "")
+                      formatMetricRow(row.amount, row.decimals, row.unit)
                     )
                   }
                   variant={presentation?.variant ?? "neutral"}
