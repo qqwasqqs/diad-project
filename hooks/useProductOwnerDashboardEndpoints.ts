@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 
 import {
-  productOwnerDashboardEndpointService,
+  productOwnerDashboardService,
   type ProductOwnerFilters,
-} from "@/lib/services/productOwnerDashboardEndpointService";
+} from "@/lib/services/productOwnerDashboardService";
 import type { ProductOwnerChartId } from "@/types/dashboardEndpointDtos";
 
 export function useProductOwnerMetrics(filters: ProductOwnerFilters) {
   return useQuery({
     queryKey: ["product-owner", "metrics", filters],
-    queryFn: () => productOwnerDashboardEndpointService.getMetrics(filters),
+    queryFn: () => productOwnerDashboardService.getMetrics(filters),
     refetchOnWindowFocus: false,
   });
 }
@@ -20,7 +20,7 @@ export function useProductOwnerTimeseries(
 ) {
   return useQuery({
     queryKey: ["product-owner", "timeseries", chartId, filters],
-    queryFn: () => productOwnerDashboardEndpointService.getTimeseries(chartId, filters),
+    queryFn: () => productOwnerDashboardService.getTimeseries(chartId, filters),
     refetchOnWindowFocus: false,
   });
 }
