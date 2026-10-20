@@ -509,6 +509,7 @@ export default function ProductOwnerDashboard() {
           </DashboardPanel>
 
           <DashboardPanel
+            className="self-start !h-auto"
             footer={
               <DashboardSectionInfo
                 sectionTitle="Channel mix"
