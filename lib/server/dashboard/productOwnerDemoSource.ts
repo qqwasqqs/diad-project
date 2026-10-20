@@ -4,8 +4,6 @@
 import { promises as fs } from "fs";
 import path from "path";
 
-import { periodDays, scopeFactor, shiftBounded } from "@/lib/dashboard/mockSource";
-import type { DashboardFilters } from "@/types/dashboard";
 import type {
   DashboardEndpointFiltersDto,
   DashboardEndpointMetaDto,
@@ -154,19 +152,6 @@ export function parseTimeseriesRequest(value: unknown): TimeseriesRequestDto {
   */
 }
 
-function toMockFilters(filters: DashboardEndpointFiltersDto): DashboardFilters {
-  const periods = {
-    last_7_days: "7d",
-    last_30_days: "30d",
-    last_90_days: "90d",
-  } as const;
-  return {
-    period: periods[filters.timeRange.value],
-    businessUnit: filters.businessUnits[0],
-    project: filters.projects[0],
-  };
-}
-
 function meta(filters: DashboardEndpointFiltersDto): DashboardEndpointMetaDto {
   return {
     dashboard: "product-owner",
@@ -197,35 +182,24 @@ export async function loadMockTimeseries(
   const main = await readMock<ProductOwnerDashboardMetricsPayload>(
     "product-owner-dashboard.json",
   );
-  const filters = toMockFilters(request.filters);
-  const factor = scopeFactor(filters);
-  const days = periodDays(filters);
   const source =
     request.chartId === "adoption-and-engagement"
       ? main.adoptionAndEngagement
       : main.experienceAndResponseQuality;
-  const bounded = request.chartId === "experience-and-response-quality";
-  const series = source.series
-    .filter((item) => request.metrics.includes(item.id))
-    .map((item) =>
-      item.id === "intent-resolution"
-        ? {
-            metricId: item.id,
-            status: "CALCULATION_PENDING" as const,
-            points: [] as [],
-            reason: "Score scale and direction are not approved",
-          }
-        : {
-            metricId: item.id,
-            status: "OK" as const,
-            points: item.points.slice(-days).map((point) => ({
-              x: point.x,
-              y: Number(
-                (bounded ? shiftBounded(point.y, 5, factor) : point.y * factor).toFixed(2),
-              ),
-            })),
-          },
-    );
+  const series = source.series.map((item) =>
+    item.points.length === 0
+      ? {
+          metricId: item.id,
+          status: "CALCULATION_PENDING" as const,
+          points: [] as [],
+          reason: "Score scale and direction are not approved",
+        }
+      : {
+          metricId: item.id,
+          status: "OK" as const,
+          points: item.points.map((point) => ({ x: point.x, y: point.y })),
+        },
+  );
   const supportingStats: SupportingStatDto[] = source.supporting.map((item) =>
     item.amount === undefined || item.pendingState
       ? {
@@ -237,14 +211,7 @@ export async function loadMockTimeseries(
       : {
           metricId: item.id,
           status: "OK",
-          value: Number(
-            (item.id === "queries-per-session"
-              ? item.amount
-              : item.max !== undefined
-                ? shiftBounded(item.amount, item.max, factor)
-                : item.amount * factor
-            ).toFixed(2),
-          ),
+          value: item.amount,
         },
   );
   return {
