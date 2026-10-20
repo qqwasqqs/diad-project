@@ -11,7 +11,7 @@ import type { ProductOwnerChannelMixData } from "@/components/shared/dashboard/d
 import type { ProductOwnerExperienceQualityData } from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerExperienceQualityDrawer";
 import type { ProductExperiencePulseData } from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerProductExperiencePulseDrawer";
 import type { ProductOwnerTrustEvidenceData } from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerTrustEvidenceDrawer";
-import type { MetricRow, Series } from "./dashboard";
+import type { MetricRow, PendingState, Series } from "./dashboard";
 
 export interface ProductOwnerApiErrorRateValue {
   errorRatePercent: number;
@@ -46,6 +46,96 @@ export type ProductOwnerFeedbackSummaryData =
         | "NO_DATA";
       reason?: string;
     };
+
+export interface ProductOwnerDashboardMetricRow {
+  id: string;
+  label: string;
+  amount?: number;
+  decimals?: number;
+  unit?: string;
+  max?: number;
+  pendingState?: PendingState;
+}
+
+export interface ProductOwnerDashboardMetricsPayload {
+  generatedAt: string;
+  note: string;
+  feedbackSummary: ProductOwnerFeedbackSummaryData;
+  productExperiencePulse: {
+    sessionQueryVolume: {
+      queries: number;
+      sessions: number;
+      queriesPerSession: number;
+    };
+    endToEndLatency: {
+      percentile: string;
+      seconds: number;
+    };
+    workflowCompletion: ProductOwnerDashboardMetricRow & { reason: string };
+  };
+  adoptionAndEngagement: {
+    series: Series[];
+    supporting: ProductOwnerDashboardMetricRow[];
+  };
+  experienceAndResponseQuality: {
+    series: Series[];
+    supporting: ProductOwnerDashboardMetricRow[];
+  };
+  featureUsageEvidence: {
+    statusLabel: "DATA PENDING";
+    description: string;
+  };
+  trustAndMeasurementReadiness: ProductOwnerDashboardMetricRow[];
+}
+
+export type ProductOwnerDashboardAvailabilityStatus =
+  | "OK"
+  | "DATA_PENDING"
+  | "CALCULATION_PENDING"
+  | "FILTER_BREAKDOWN_UNAVAILABLE"
+  | "NO_DATA"
+  | "ERROR";
+
+export type ProductOwnerDashboardSeriesResult =
+  | {
+      metricId: string;
+      status: "OK";
+      points: { x: string; y: number }[];
+    }
+  | {
+      metricId: string;
+      status: Exclude<ProductOwnerDashboardAvailabilityStatus, "OK">;
+      points: [];
+      reason: string;
+    };
+
+export type ProductOwnerDashboardSupportingStat =
+  | { metricId: string; status: "OK"; value: number }
+  | {
+      metricId: string;
+      status: Exclude<ProductOwnerDashboardAvailabilityStatus, "OK">;
+      value: null;
+      reason: string;
+    };
+
+export interface ProductOwnerDashboardTimeseriesPayload {
+  meta: {
+    dashboard: "product-owner";
+    requestId: string;
+    generatedAt: string;
+    appliedFilters: {
+      timeRange: string;
+      businessUnits: string[];
+      projects: string[];
+      timezone: "UTC";
+    };
+    illustrative?: true;
+    chartId: "adoption-and-engagement" | "experience-and-response-quality";
+    granularity: "day";
+  };
+  series: ProductOwnerDashboardSeriesResult[];
+  supportingStats: ProductOwnerDashboardSupportingStat[];
+}
 
 export interface ProductOwnerDashboardPayload {
   feedbackSummary: ProductOwnerFeedbackSummaryData;

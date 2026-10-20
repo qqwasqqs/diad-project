@@ -4,19 +4,17 @@
 import { promises as fs } from "fs";
 import path from "path";
 
-import { periodDays, scopeFactor, shiftBounded } from "@/lib/dashboard/mockSource";
-import type { DashboardFilters, Series } from "@/types/dashboard";
 import type {
   DashboardEndpointFiltersDto,
   DashboardEndpointMetaDto,
   MetricsRequestDto,
-  MetricsResponseDto,
   // ProductOwnerChartId,
   // ProductOwnerMetricId,
   SupportingStatDto,
   TimeseriesRequestDto,
   TimeseriesResponseDto,
 } from "@/types/dashboardEndpointDtos";
+import type { ProductOwnerDashboardMetricsPayload } from "@/types/productOwnerDashboard";
 
 const MOCK_DIRECTORY = path.join(process.cwd(), "public", "mocks", "new-pages");
 
@@ -52,27 +50,6 @@ const CHART_METRICS: Record<ProductOwnerChartId, string[]> = {
 const BUSINESS_UNIT_VALUES = new Set(["all", "a", "b"]);
 const PROJECT_VALUES = new Set(["all", "a1", "b1"]);
 */
-
-interface MockStat {
-  id: string;
-  amount?: number;
-  max?: number;
-  pendingState?: string;
-}
-
-interface MockMain {
-  productExperiencePulse: {
-    sessionQueryVolume: {
-      queries: number;
-      sessions: number;
-      queriesPerSession: number;
-    };
-    endToEndLatency: { seconds: number };
-    workflowCompletion: { reason: string };
-  };
-  adoptionAndEngagement: { series: Series[]; supporting: MockStat[] };
-  experienceAndResponseQuality: { series: Series[]; supporting: MockStat[] };
-}
 
 async function readMock<T>(name: string): Promise<T> {
   const contents = await fs.readFile(path.join(MOCK_DIRECTORY, name), "utf8");
@@ -175,19 +152,6 @@ export function parseTimeseriesRequest(value: unknown): TimeseriesRequestDto {
   */
 }
 
-function toMockFilters(filters: DashboardEndpointFiltersDto): DashboardFilters {
-  const periods = {
-    last_7_days: "7d",
-    last_30_days: "30d",
-    last_90_days: "90d",
-  } as const;
-  return {
-    period: periods[filters.timeRange.value],
-    businessUnit: filters.businessUnits[0],
-    project: filters.projects[0],
-  };
-}
-
 function meta(filters: DashboardEndpointFiltersDto): DashboardEndpointMetaDto {
   return {
     dashboard: "product-owner",
@@ -205,78 +169,37 @@ function meta(filters: DashboardEndpointFiltersDto): DashboardEndpointMetaDto {
 
 export async function loadMockMetrics(
   request: MetricsRequestDto,
-): Promise<MetricsResponseDto> {
-  const main = await readMock<MockMain>("product-owner-dashboard.json");
-  const factor = scopeFactor(toMockFilters(request.filters));
-  const available = {
-    "session-query-volume": {
-      metricId: "session-query-volume",
-      status: "OK",
-      value: {
-        queries: Math.round(main.productExperiencePulse.sessionQueryVolume.queries * factor),
-        sessions: Math.round(main.productExperiencePulse.sessionQueryVolume.sessions * factor),
-        queriesPerSession: main.productExperiencePulse.sessionQueryVolume.queriesPerSession,
-      },
-    },
-    "api-error-rate": {
-      metricId: "api-error-rate",
-      status: "CALCULATION_PENDING",
-      value: null,
-      reason: "Error classification and eligible-request rules are not approved",
-    },
-    "end-to-end-latency-p95": {
-      metricId: "end-to-end-latency-p95",
-      status: "OK",
-      value: {
-        latencyMs: Math.round(main.productExperiencePulse.endToEndLatency.seconds * factor * 1000),
-      },
-    },
-    "workflow-completion": {
-      metricId: "workflow-completion",
-      status: "DATA_PENDING",
-      value: null,
-      reason: main.productExperiencePulse.workflowCompletion.reason,
-    },
-  } as const;
-  return {
-    meta: meta(request.filters),
-    metrics: request.metrics.map((id) => available[id]),
-  };
+): Promise<ProductOwnerDashboardMetricsPayload> {
+  void request;
+  return readMock<ProductOwnerDashboardMetricsPayload>(
+    "product-owner-dashboard.json",
+  );
 }
 
 export async function loadMockTimeseries(
   request: TimeseriesRequestDto,
 ): Promise<TimeseriesResponseDto> {
-  const main = await readMock<MockMain>("product-owner-dashboard.json");
-  const filters = toMockFilters(request.filters);
-  const factor = scopeFactor(filters);
-  const days = periodDays(filters);
+  const main = await readMock<ProductOwnerDashboardMetricsPayload>(
+    "product-owner-dashboard.json",
+  );
   const source =
     request.chartId === "adoption-and-engagement"
       ? main.adoptionAndEngagement
       : main.experienceAndResponseQuality;
-  const bounded = request.chartId === "experience-and-response-quality";
-  const series = source.series
-    .filter((item) => request.metrics.includes(item.id))
-    .map((item) =>
-      item.id === "intent-resolution"
-        ? {
-            metricId: item.id,
-            status: "CALCULATION_PENDING" as const,
-            points: [] as [],
-            reason: "Score scale and direction are not approved",
-          }
-        : {
-            metricId: item.id,
-            status: "OK" as const,
-            points: item.points.slice(-days).map((point) => ({
-              x: point.x,
-              y: Number(
-                (bounded ? shiftBounded(point.y, 5, factor) : point.y * factor).toFixed(2),
-              ),
-            })),
-          },
-    );
+  const series = source.series.map((item) =>
+    item.points.length === 0
+      ? {
+          metricId: item.id,
+          status: "CALCULATION_PENDING" as const,
+          points: [] as [],
+          reason: "Score scale and direction are not approved",
+        }
+      : {
+          metricId: item.id,
+          status: "OK" as const,
+          points: item.points.map((point) => ({ x: point.x, y: point.y })),
+        },
+  );
   const supportingStats: SupportingStatDto[] = source.supporting.map((item) =>
     item.amount === undefined || item.pendingState
       ? {
@@ -288,14 +211,7 @@ export async function loadMockTimeseries(
       : {
           metricId: item.id,
           status: "OK",
-          value: Number(
-            (item.id === "queries-per-session"
-              ? item.amount
-              : item.max !== undefined
-                ? shiftBounded(item.amount, item.max, factor)
-                : item.amount * factor
-            ).toFixed(2),
-          ),
+          value: item.amount,
         },
   );
   return {

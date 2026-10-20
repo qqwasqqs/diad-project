@@ -7,8 +7,10 @@ import type {
 } from "@/types/dashboardEndpointDtos";
 
 export const dashboardEndpointService = {
-  async getMetrics(request: MetricsRequestDto): Promise<MetricsResponseDto> {
-    const { data } = await apiClient.post<MetricsResponseDto>(
+  async getMetrics<Response = MetricsResponseDto>(
+    request: MetricsRequestDto,
+  ): Promise<Response> {
+    const { data } = await apiClient.post<Response>(
       "/api/dashboard/metrics",
       request,
     );
@@ -16,10 +18,10 @@ export const dashboardEndpointService = {
     return data;
   },
 
-  async getTimeseries(
+  async getTimeseries<Response = TimeseriesResponseDto>(
     request: TimeseriesRequestDto,
-  ): Promise<TimeseriesResponseDto> {
-    const { data } = await apiClient.post<TimeseriesResponseDto>(
+  ): Promise<Response> {
+    const { data } = await apiClient.post<Response>(
       "/api/dashboard/timeseries",
       request,
     );
