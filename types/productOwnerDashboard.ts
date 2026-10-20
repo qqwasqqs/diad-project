@@ -88,6 +88,55 @@ export interface ProductOwnerDashboardMetricsPayload {
   trustAndMeasurementReadiness: ProductOwnerDashboardMetricRow[];
 }
 
+export type ProductOwnerDashboardAvailabilityStatus =
+  | "OK"
+  | "DATA_PENDING"
+  | "CALCULATION_PENDING"
+  | "FILTER_BREAKDOWN_UNAVAILABLE"
+  | "NO_DATA"
+  | "ERROR";
+
+export type ProductOwnerDashboardSeriesResult =
+  | {
+      metricId: string;
+      status: "OK";
+      points: { x: string; y: number }[];
+    }
+  | {
+      metricId: string;
+      status: Exclude<ProductOwnerDashboardAvailabilityStatus, "OK">;
+      points: [];
+      reason: string;
+    };
+
+export type ProductOwnerDashboardSupportingStat =
+  | { metricId: string; status: "OK"; value: number }
+  | {
+      metricId: string;
+      status: Exclude<ProductOwnerDashboardAvailabilityStatus, "OK">;
+      value: null;
+      reason: string;
+    };
+
+export interface ProductOwnerDashboardTimeseriesPayload {
+  meta: {
+    dashboard: "product-owner";
+    requestId: string;
+    generatedAt: string;
+    appliedFilters: {
+      timeRange: string;
+      businessUnits: string[];
+      projects: string[];
+      timezone: "UTC";
+    };
+    illustrative?: true;
+    chartId: "adoption-and-engagement" | "experience-and-response-quality";
+    granularity: "day";
+  };
+  series: ProductOwnerDashboardSeriesResult[];
+  supportingStats: ProductOwnerDashboardSupportingStat[];
+}
+
 export interface ProductOwnerDashboardPayload {
   feedbackSummary: ProductOwnerFeedbackSummaryData;
   productExperiencePulse: {

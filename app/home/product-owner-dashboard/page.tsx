@@ -55,8 +55,10 @@ import experienceQualityData from "@/public/mocks/new-pages/product-owner-experi
 import productExperiencePulseData from "@/public/mocks/new-pages/product-owner-product-experience-pulse.json";
 import trustEvidenceData from "@/public/mocks/new-pages/product-owner-trust-evidence.json";
 import { useDashboardFiltersStore } from "@/store/dashboardFiltersStore";
-import type { DashboardAvailabilityStatus } from "@/types/dashboardEndpointDtos";
-import type { ProductOwnerChartModel } from "@/types/productOwnerDashboardModels";
+import type {
+  ProductOwnerDashboardAvailabilityStatus,
+  ProductOwnerDashboardTimeseriesPayload,
+} from "@/types/productOwnerDashboard";
 
 /*
   Product Owner main view.
@@ -133,7 +135,7 @@ const itemLabels: Record<string, string> = {
   "task-adherence": "Task Adherence",
 };
 
-const statusLabels: Record<DashboardAvailabilityStatus, string> = {
+const statusLabels: Record<ProductOwnerDashboardAvailabilityStatus, string> = {
   OK: "OK",
   DATA_PENDING: "DATA PENDING",
   CALCULATION_PENDING: "CALCULATION PENDING",
@@ -188,16 +190,18 @@ function formatMetricRow(
   return amount === undefined ? "" : `${amount.toFixed(decimals)}${unit}`;
 }
 
-function toLineSeries(chart: ProductOwnerChartModel | undefined): DashboardLineSeries[] {
+function toLineSeries(
+  chart: ProductOwnerDashboardTimeseriesPayload | undefined,
+): DashboardLineSeries[] {
   if (!chart) {
     return [];
   }
 
   return chart.series.flatMap((item) => {
-    const presentation = seriesPresentation[item.id];
+    const presentation = seriesPresentation[item.metricId];
 
     return item.status === "OK" && presentation
-      ? [{ id: item.id, ...presentation, points: item.points }]
+      ? [{ id: item.metricId, ...presentation, points: item.points }]
       : [];
   });
 }
@@ -210,7 +214,11 @@ function ChartRequestState({ children }: { children: ReactNode }) {
   );
 }
 
-function ChartAvailabilityNotes({ chart }: { chart: ProductOwnerChartModel }) {
+function ChartAvailabilityNotes({
+  chart,
+}: {
+  chart: ProductOwnerDashboardTimeseriesPayload;
+}) {
   const unavailable = [...chart.series, ...chart.supportingStats].filter(
     (item) => item.status !== "OK",
   );
@@ -222,8 +230,10 @@ function ChartAvailabilityNotes({ chart }: { chart: ProductOwnerChartModel }) {
   return (
     <div className="mt-3 space-y-1 text-xs text-neutral-600">
       {unavailable.map((item) => (
-        <div key={item.id}>
-          <span className="font-semibold">{itemLabels[item.id] ?? item.id}:</span>{" "}
+        <div key={item.metricId}>
+          <span className="font-semibold">
+            {itemLabels[item.metricId] ?? item.metricId}:
+          </span>{" "}
           {statusLabels[item.status]} — {item.reason}
         </div>
       ))}
@@ -269,10 +279,10 @@ export default function ProductOwnerDashboard() {
         return [];
       }
 
-      if (stat.id === "queries-per-session") {
+      if (stat.metricId === "queries-per-session") {
         return [
           {
-            id: stat.id,
+            id: stat.metricId,
             icon: <Person24Regular key="queries-per-session" aria-hidden="true" />,
             value: stat.value.toFixed(1),
             text: "queries/session",
@@ -281,10 +291,10 @@ export default function ProductOwnerDashboard() {
         ];
       }
 
-      if (stat.id === "avg-session-duration-minutes") {
+      if (stat.metricId === "avg-session-duration-minutes") {
         return [
           {
-            id: stat.id,
+            id: stat.metricId,
             icon: <Clock24Regular key="avg-session" aria-hidden="true" />,
             value: `${stat.value.toFixed(1)} min`,
             text: "avg session",
@@ -300,12 +310,13 @@ export default function ProductOwnerDashboard() {
   const qualityStats =
     quality.data?.supportingStats.flatMap((stat) =>
       stat.status === "OK" &&
-      (stat.id === "retrieval-quality" || stat.id === "task-adherence")
+      (stat.metricId === "retrieval-quality" ||
+        stat.metricId === "task-adherence")
         ? [
             {
-              id: stat.id,
+              id: stat.metricId,
               value: `${stat.value.toFixed(1)} / 5`,
-              text: itemLabels[stat.id],
+              text: itemLabels[stat.metricId],
             },
           ]
         : [],

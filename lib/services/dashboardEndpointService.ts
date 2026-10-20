@@ -18,10 +18,10 @@ export const dashboardEndpointService = {
     return data;
   },
 
-  async getTimeseries(
+  async getTimeseries<Response = TimeseriesResponseDto>(
     request: TimeseriesRequestDto,
-  ): Promise<TimeseriesResponseDto> {
-    const { data } = await apiClient.post<TimeseriesResponseDto>(
+  ): Promise<Response> {
+    const { data } = await apiClient.post<Response>(
       "/api/dashboard/timeseries",
       request,
     );

@@ -10,7 +10,10 @@ import type {
   ProductOwnerChartId,
   TimeseriesRequestDto,
 } from "@/types/dashboardEndpointDtos";
-import type { ProductOwnerDashboardMetricsPayload } from "@/types/productOwnerDashboard";
+import type {
+  ProductOwnerDashboardMetricsPayload,
+  ProductOwnerDashboardTimeseriesPayload,
+} from "@/types/productOwnerDashboard";
 
 export type ProductOwnerFilters = Pick<
   DashboardFilters,
@@ -77,7 +80,10 @@ export const productOwnerDashboardService = {
       granularity: "day",
       options: { includeSupportingStats: true },
     };
-    const response = await dashboardEndpointService.getTimeseries(request);
+    const response =
+      await dashboardEndpointService.getTimeseries<ProductOwnerDashboardTimeseriesPayload>(
+        request,
+      );
 
     return adaptProductOwnerTimeseries(response);
   },
