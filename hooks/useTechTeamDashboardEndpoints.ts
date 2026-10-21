@@ -45,7 +45,7 @@ export function useTechTeamTimeseries(
 }
 
 /** Main-view composition: three independent requests, no combined API payload. */
-export function useTechTeamMainViewEndpoints(filters: TechTeamFilters) {
+export function useTechTeamMainView(filters: TechTeamFilters) {
   const metrics = useTechTeamMetrics(filters);
   const latency = useTechTeamTimeseries("request-path-health", filters);
   const quality = useTechTeamTimeseries("ai-model-quality", filters);
