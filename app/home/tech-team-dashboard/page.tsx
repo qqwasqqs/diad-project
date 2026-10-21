@@ -15,7 +15,9 @@ import {
 import DashboardPage from "@/components/shared/dashboard/DashboardPage";
 import DashboardGrid from "@/components/shared/dashboard/DashboardGrid";
 import DashboardPanel from "@/components/shared/dashboard/DashboardPanel";
-import DashboardLineChart from "@/components/shared/dashboard/DashboardLineChart";
+import DashboardLineChart, {
+  type DashboardLineSeries,
+} from "@/components/shared/dashboard/DashboardLineChart";
 import DashboardSectionInfo, {
   type DashboardSectionInfoContent,
 } from "@/components/shared/dashboard/DashboardSectionInfo";
@@ -35,8 +37,12 @@ import EvaluatorReadinessDrawer from "@/components/shared/dashboard/drawers/tech
 import { useTechTeamMainView as useLegacyTechTeamMainView } from "@/hooks/useTechTeamDashboard";
 import { useTechTeamMainView } from "@/hooks/useTechTeamDashboardEndpoints";
 import { useSelectedDashboardFilters } from "@/hooks/useSelectedDashboardFilters";
-import type { MetricRow, Series } from "@/types/dashboard";
-import type { TechTeamDashboardMetricRow } from "@/types/techTeamDashboard";
+import type { MetricRow } from "@/types/dashboard";
+import type {
+  TechTeamDashboardAvailabilityStatus,
+  TechTeamDashboardMetricRow,
+  TechTeamDashboardTimeseriesPayload,
+} from "@/types/techTeamDashboard";
 import techTeamSections from "@/content/dashboards/tech-team-sections.json";
 
 const sectionInfo = techTeamSections as Record<
@@ -47,20 +53,72 @@ const sectionInfo = techTeamSections as Record<
 /*
   Technical Teams main view.
 
-  Presentation only. The metric panels read the metrics payload from the
-  dashboard endpoints through useTechTeamMainView and only format it.
+  Presentation only. The metric panels and both charts read the raw payloads
+  from the dashboard endpoints through useTechTeamMainView and only format
+  them.
   The dashboard displays already aggregated results; it performs no metric
   calculation of its own. Metrics without an approved definition render an
   explicit pending state and are never shown as zero.
 */
 
-// A metric keeps the same series color everywhere it appears.
-const SERIES_COLORS = [
-  "var(--color-chart-series-1)",
-  "var(--color-chart-series-2)",
-  "var(--color-chart-series-3)",
-  "var(--color-chart-series-4)",
-];
+/*
+  Chart presentation, keyed by the metricId a series arrives with, so a
+  series keeps its colour even when another one is unavailable.
+*/
+const seriesPresentation: Record<
+  string,
+  Pick<DashboardLineSeries, "label" | "color">
+> = {
+  "end-to-end-p95": {
+    label: "End-to-End P95",
+    color: "var(--color-chart-series-1)",
+  },
+  "model-response-average": {
+    label: "Model Response avg",
+    color: "var(--color-chart-series-2)",
+  },
+  "retrieval-average": {
+    label: "Retrieval avg",
+    color: "var(--color-chart-series-3)",
+  },
+  "tool-call-average": {
+    label: "Tool Call avg",
+    color: "var(--color-chart-series-4)",
+  },
+  groundedness: {
+    label: "Groundedness",
+    color: "var(--color-chart-series-1)",
+  },
+  "response-coherence": {
+    label: "Response Coherence",
+    color: "var(--color-chart-series-2)",
+  },
+  "relevance-quality": {
+    label: "Relevance Quality",
+    color: "var(--color-chart-series-3)",
+  },
+};
+
+/*
+  Retrieval Quality is a 1-5 value and MLflow Correctness a 0-1 one. Both print
+  their scale, so neither is read against the other or the 1-5 chart.
+*/
+const supportingPresentation: Record<
+  string,
+  { label: string; decimals: number; scale: number }
+> = {
+  "retrieval-quality": { label: "Retrieval Quality", decimals: 1, scale: 5 },
+  "mlflow-correctness": { label: "MLflow Correctness", decimals: 2, scale: 1 },
+};
+
+const statusLabels: Record<TechTeamDashboardAvailabilityStatus, string> = {
+  OK: "OK",
+  DATA_PENDING: "DATA PENDING",
+  CALCULATION_PENDING: "CALCULATION PENDING",
+  FILTER_BREAKDOWN_UNAVAILABLE: "FILTER BREAKDOWN UNAVAILABLE",
+  NO_DATA: "NO DATA",
+  ERROR: "UNAVAILABLE",
+};
 
 const DIAGNOSTIC_ICONS: Record<string, React.ReactNode> = {
   "request-throughput": (
@@ -171,6 +229,120 @@ function MetricsRequestState({
   );
 }
 
+function toLineSeries(
+  chart: TechTeamDashboardTimeseriesPayload | undefined,
+): DashboardLineSeries[] {
+  if (!chart) {
+    return [];
+  }
+
+  return chart.series.flatMap((item) => {
+    const presentation = seriesPresentation[item.metricId];
+
+    return item.status === "OK" && presentation
+      ? [
+          {
+            id: item.metricId,
+            ...presentation,
+            points: item.points.map((point) => ({
+              x: formatDay(point.x),
+              y: point.y,
+            })),
+          },
+        ]
+      : [];
+  });
+}
+
+function toSupportingStats(
+  chart: TechTeamDashboardTimeseriesPayload | undefined,
+) {
+  return (chart?.supportingStats ?? []).flatMap((stat) => {
+    const presentation = supportingPresentation[stat.metricId];
+
+    return stat.status === "OK" && presentation
+      ? [
+          {
+            id: stat.metricId,
+            label: presentation.label,
+            value: `${stat.value.toFixed(presentation.decimals)} / ${
+              presentation.scale
+            }`,
+          },
+        ]
+      : [];
+  });
+}
+
+/*
+  Names every series or supporting value the chart could not plot, with its
+  status and reason, rather than letting it drop out silently.
+*/
+function ChartAvailabilityNotes({
+  chart,
+}: {
+  chart: TechTeamDashboardTimeseriesPayload;
+}) {
+  const unavailable = [...chart.series, ...chart.supportingStats].filter(
+    (item) => item.status !== "OK",
+  );
+
+  if (unavailable.length === 0) {
+    return null;
+  }
+
+  return (
+    <div
+      className="mt-3 space-y-1 text-xs"
+      style={{ color: "var(--color-chart-axis)" }}
+    >
+      {unavailable.map((item) => (
+        <div key={item.metricId}>
+          <span className="font-semibold">
+            {seriesPresentation[item.metricId]?.label ??
+              supportingPresentation[item.metricId]?.label ??
+              item.metricId}
+            :
+          </span>{" "}
+          {statusLabels[item.status]}
+          {"reason" in item ? ` — ${item.reason}` : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/*
+  One chart's loading, failure, data, or no-data state. Each chart is its own
+  request, so one failing does not blank the other.
+*/
+function ChartRequestState({
+  query,
+  children,
+}: {
+  query: {
+    isPending: boolean;
+    isError: boolean;
+    data: TechTeamDashboardTimeseriesPayload | undefined;
+  };
+  children: ReactNode;
+}) {
+  return query.isPending ? (
+    <MetricStateValue>LOADING…</MetricStateValue>
+  ) : query.isError ? (
+    <MetricStateValue>REQUEST FAILED</MetricStateValue>
+  ) : query.data ? (
+    <>
+      {children}
+      <ChartAvailabilityNotes chart={query.data} />
+    </>
+  ) : (
+    <MetricStateValue>
+      <PendingStateValue state="data" />
+    </MetricStateValue>
+  );
+}
+
 const toRows = (
   rows: MetricRow[],
   icons?: Record<string, React.ReactNode>,
@@ -194,8 +366,8 @@ export default function TechTeamDashboard() {
   */
   const filters = useSelectedDashboardFilters();
 
-  const { metrics } = useTechTeamMainView(filters);
-  // Charts and drawer provenance until they move off the legacy route.
+  const { metrics, latency, quality } = useTechTeamMainView(filters);
+  // Drawer provenance until it moves off the legacy route.
   const { mainViewData: data } = useLegacyTechTeamMainView(filters);
 
   /*
@@ -221,27 +393,9 @@ export default function TechTeamDashboard() {
   const closeDrawer = () => setOpenDrawer(null);
   const drawers = data?.drawers;
 
-  const latencySeries =
-    data?.requestPathHealth.latencySeries.map((series: Series, index: number) => ({
-      id: series.id,
-      label: series.label,
-      color: SERIES_COLORS[index],
-      points: series.points.map((point) => ({
-        x: formatDay(point.x),
-        y: point.y,
-      })),
-    })) ?? [];
-
-  const qualitySeries =
-    data?.aiModelQuality.series.map((series: Series, index: number) => ({
-      id: series.id,
-      label: series.label,
-      color: SERIES_COLORS[index],
-      points: series.points.map((point) => ({
-        x: formatDay(point.x),
-        y: point.y,
-      })),
-    })) ?? [];
+  const latencySeries = toLineSeries(latency.data);
+  const qualitySeries = toLineSeries(quality.data);
+  const qualitySupporting = toSupportingStats(quality.data);
 
   return (
     <DashboardPage
@@ -292,11 +446,13 @@ export default function TechTeamDashboard() {
             },
           ]}
         >
-          <DashboardLineChart
-            series={latencySeries}
-            axes={[{ id: "left", label: "Latency (ms)" }]}
-            height={260}
-          />
+          <ChartRequestState query={latency}>
+            <DashboardLineChart
+              series={latencySeries}
+              axes={[{ id: "left", label: "Latency (ms)" }]}
+              height={260}
+            />
+          </ChartRequestState>
 
           <MetricsRequestState query={metrics} hasData={diagnosticRows.length > 0}>
             <MetricList
@@ -375,19 +531,19 @@ export default function TechTeamDashboard() {
             />
           }
         >
-          <DashboardLineChart
-            series={qualitySeries}
-            axes={[{ id: "left", domain: [1, 5] }]}
-            height={220}
-            supportingStatsTemplate="right"
-            supportingStats={(data?.aiModelQuality.supporting ?? []).map(
-              (stat) => ({
+          <ChartRequestState query={quality}>
+            <DashboardLineChart
+              series={qualitySeries}
+              axes={[{ id: "left", domain: [1, 5] }]}
+              height={220}
+              supportingStatsTemplate="right"
+              supportingStats={qualitySupporting.map((stat) => ({
                 id: stat.id,
                 value: stat.value,
                 text: stat.label,
-              }),
-            )}
-          />
+              }))}
+            />
+          </ChartRequestState>
 
           {/*
             Shown because the approved design includes it, and deliberately not
@@ -465,7 +621,7 @@ export default function TechTeamDashboard() {
         onClose={closeDrawer}
         content={drawers?.aiModelQuality}
         series={qualitySeries}
-        supporting={data?.aiModelQuality.supporting ?? []}
+        supporting={qualitySupporting}
       />
 
       <EvaluatorReadinessDrawer
