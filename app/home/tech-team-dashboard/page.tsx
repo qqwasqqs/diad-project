@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
   ArrowTrendingLines24Regular,
   Warning24Regular,
@@ -32,9 +32,11 @@ import FailureLocalizationDrawer from "@/components/shared/dashboard/drawers/tec
 import CapacityAndEfficiencyDrawer from "@/components/shared/dashboard/drawers/tech-team/CapacityAndEfficiencyDrawer";
 import AiModelQualityDrawer from "@/components/shared/dashboard/drawers/tech-team/AiModelQualityDrawer";
 import EvaluatorReadinessDrawer from "@/components/shared/dashboard/drawers/tech-team/EvaluatorReadinessDrawer";
-import { useTechTeamMainView } from "@/hooks/useTechTeamDashboard";
+import { useTechTeamMainView as useLegacyTechTeamMainView } from "@/hooks/useTechTeamDashboard";
+import { useTechTeamMainView } from "@/hooks/useTechTeamDashboardEndpoints";
 import { useSelectedDashboardFilters } from "@/hooks/useSelectedDashboardFilters";
 import type { MetricRow, Series } from "@/types/dashboard";
+import type { TechTeamDashboardMetricRow } from "@/types/techTeamDashboard";
 import techTeamSections from "@/content/dashboards/tech-team-sections.json";
 
 const sectionInfo = techTeamSections as Record<
@@ -45,8 +47,8 @@ const sectionInfo = techTeamSections as Record<
 /*
   Technical Teams main view.
 
-  Presentation only. The payload comes from the main-view endpoint through
-  useTechTeamMainView, so this file is unaffected by where the data originates.
+  Presentation only. The metric panels read the metrics payload from the
+  dashboard endpoints through useTechTeamMainView and only format it.
   The dashboard displays already aggregated results; it performs no metric
   calculation of its own. Metrics without an approved definition render an
   explicit pending state and are never shown as zero.
@@ -109,6 +111,66 @@ const formatDay = (value: string) =>
     timeZone: "UTC",
   });
 
+/* The display value for one fixture row: its prefix, amount, and unit. */
+const formatAmount = (
+  row: Omit<TechTeamDashboardMetricRow, "id" | "label" | "pendingState">,
+) =>
+  `${row.prefix ?? ""}${(row.amount ?? 0).toFixed(row.decimals ?? 0)}${row.unit ?? ""}`;
+
+/*
+  A pending state is never replaced by a number, and a row without an amount is
+  pending data, not zero.
+*/
+function toMetricRow(row: TechTeamDashboardMetricRow): MetricRow {
+  if (row.pendingState || row.amount === undefined) {
+    return {
+      id: row.id,
+      label: row.label,
+      pendingState: row.pendingState ?? "data",
+    };
+  }
+
+  return { id: row.id, label: row.label, value: formatAmount(row) };
+}
+
+function MetricStateValue({ children }: { children: ReactNode }) {
+  return (
+    <div
+      className="flex min-h-[120px] items-center justify-center px-4 text-center text-sm font-semibold"
+      style={{ color: "var(--color-chart-axis)" }}
+      role="status"
+    >
+      {children}
+    </div>
+  );
+}
+
+/*
+  Renders the metrics request's loading, failure, or no-data state in place of
+  a panel's content.
+*/
+function MetricsRequestState({
+  query,
+  hasData,
+  children,
+}: {
+  query: { isPending: boolean; isError: boolean };
+  hasData: boolean;
+  children: ReactNode;
+}) {
+  return query.isPending ? (
+    <MetricStateValue>LOADING…</MetricStateValue>
+  ) : query.isError ? (
+    <MetricStateValue>REQUEST FAILED</MetricStateValue>
+  ) : hasData ? (
+    <>{children}</>
+  ) : (
+    <MetricStateValue>
+      <PendingStateValue state="data" />
+    </MetricStateValue>
+  );
+}
+
 const toRows = (
   rows: MetricRow[],
   icons?: Record<string, React.ReactNode>,
@@ -132,7 +194,23 @@ export default function TechTeamDashboard() {
   */
   const filters = useSelectedDashboardFilters();
 
-  const { mainViewData: data } = useTechTeamMainView(filters);
+  const { metrics } = useTechTeamMainView(filters);
+  // Charts and drawer provenance until they move off the legacy route.
+  const { mainViewData: data } = useLegacyTechTeamMainView(filters);
+
+  /*
+    Sections are read optionally: a source that has not mapped its rows onto
+    this payload answers without them, and each panel then says its data is
+    pending instead of the page failing.
+  */
+  const payload = metrics.data;
+  const diagnosticRows = (payload?.requestPathHealth?.diagnostics ?? []).map(
+    toMetricRow,
+  );
+  const capacityRows = (payload?.capacityAndEfficiency ?? []).map(toMetricRow);
+  const readinessRows = (payload?.evaluatorReadiness ?? []).map(toMetricRow);
+  const failureItems = payload?.failureLocalization?.items ?? [];
+  const failureScaleMax = payload?.failureLocalization?.scaleMax ?? 0;
 
   /*
     One drawer at a time. The six keys match the six clickable elements in the
@@ -220,13 +298,12 @@ export default function TechTeamDashboard() {
             height={260}
           />
 
-          <MetricList
-            variant="prominent"
-            items={toRows(
-              data?.requestPathHealth.diagnostics ?? [],
-              DIAGNOSTIC_ICONS,
-            )}
-          />
+          <MetricsRequestState query={metrics} hasData={diagnosticRows.length > 0}>
+            <MetricList
+              variant="prominent"
+              items={toRows(diagnosticRows, DIAGNOSTIC_ICONS)}
+            />
+          </MetricsRequestState>
         </DashboardPanel>
 
         {/* Eight workload-specific rates. Each has its own denominator; they
@@ -248,11 +325,13 @@ export default function TechTeamDashboard() {
             />
           }
         >
-          <HorizontalBarList
-            values={data?.failureLocalization.items ?? []}
-            rowsPerColumn={4}
-            max={data?.failureLocalization.scaleMax ?? 2}
-          />
+          <MetricsRequestState query={metrics} hasData={failureItems.length > 0}>
+            <HorizontalBarList
+              values={failureItems}
+              rowsPerColumn={4}
+              max={failureScaleMax}
+            />
+          </MetricsRequestState>
         </DashboardPanel>
 
         <DashboardPanel
@@ -272,7 +351,9 @@ export default function TechTeamDashboard() {
             />
           }
         >
-          <MetricList items={toRows(data?.capacityAndEfficiency ?? [])} />
+          <MetricsRequestState query={metrics} hasData={capacityRows.length > 0}>
+            <MetricList items={toRows(capacityRows)} />
+          </MetricsRequestState>
         </DashboardPanel>
 
         {/* Three compatible 1-5 evaluator series. The 0-1 MLflow measure stays
@@ -338,10 +419,12 @@ export default function TechTeamDashboard() {
             />
           }
         >
-          <MetricList
-            variant="prominent"
-            items={toRows(data?.evaluatorReadiness ?? [], READINESS_ICONS)}
-          />
+          <MetricsRequestState query={metrics} hasData={readinessRows.length > 0}>
+            <MetricList
+              variant="prominent"
+              items={toRows(readinessRows, READINESS_ICONS)}
+            />
+          </MetricsRequestState>
         </DashboardPanel>
       </DashboardGrid>
 
@@ -358,7 +441,7 @@ export default function TechTeamDashboard() {
         open={openDrawer === "diagnostics"}
         onClose={closeDrawer}
         content={drawers?.diagnostics}
-        diagnostics={data?.requestPathHealth.diagnostics ?? []}
+        diagnostics={diagnosticRows}
         icons={DIAGNOSTIC_ICONS}
       />
 
@@ -366,15 +449,15 @@ export default function TechTeamDashboard() {
         open={openDrawer === "failureLocalization"}
         onClose={closeDrawer}
         content={drawers?.failureLocalization}
-        items={data?.failureLocalization.items ?? []}
-        scaleMax={data?.failureLocalization.scaleMax ?? 2}
+        items={failureItems}
+        scaleMax={failureScaleMax}
       />
 
       <CapacityAndEfficiencyDrawer
         open={openDrawer === "capacityAndEfficiency"}
         onClose={closeDrawer}
         content={drawers?.capacityAndEfficiency}
-        rows={data?.capacityAndEfficiency ?? []}
+        rows={capacityRows}
       />
 
       <AiModelQualityDrawer
@@ -389,7 +472,7 @@ export default function TechTeamDashboard() {
         open={openDrawer === "evaluatorReadiness"}
         onClose={closeDrawer}
         content={drawers?.evaluatorReadiness}
-        rows={data?.evaluatorReadiness ?? []}
+        rows={readinessRows}
         icons={READINESS_ICONS}
       />
     </DashboardPage>
