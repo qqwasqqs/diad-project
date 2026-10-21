@@ -8,7 +8,7 @@
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import { techTeamDashboardService } from "@/lib/services/techTeamDashboardService";
+import { techTeamDashboardService } from "@/lib/services/_techTeamDashboardService";
 import type { DashboardFilters } from "@/types/dashboard";
 
 export function useTechTeamMainView(filters: DashboardFilters = {}) {
