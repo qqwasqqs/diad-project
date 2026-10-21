@@ -1,4 +1,5 @@
 import type {
+  DashboardId,
   MetricsRequestDto,
   MetricsResponseDto,
   TimeseriesRequestDto,
@@ -22,7 +23,15 @@ export class DashboardSplunkContractError extends Error {
   }
 }
 
-const METRICS_SAVED_SEARCH = "| savedsearch consolidated_metric_final";
+/*
+  The saved search each dashboard's connectivity test runs. No Technical Teams
+  search is approved yet, so it runs the Product Owner one: the test proves the
+  Function call and logs the rows; it does not map them.
+*/
+const METRICS_SAVED_SEARCH: Record<DashboardId, string> = {
+  "product-owner": "| savedsearch consolidated_metric_final",
+  "tech-team": "| savedsearch consolidated_metric_final",
+};
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 // Stage 1 connectivity test: logs the raw response and returns no metrics; filters and mapping come in stage 2.
@@ -36,16 +45,19 @@ export async function loadSplunkMetrics(
   const start = new Date(end.getTime() - THIRTY_DAYS_MS);
 
   const raw = await fetchSplunkReport.postSplunkQuery(
-    METRICS_SAVED_SEARCH,
+    METRICS_SAVED_SEARCH[request.dashboard],
     start.toISOString(),
     end.toISOString(),
   );
 
-  console.log("[dashboard] Splunk metrics raw response:", JSON.stringify(raw, null, 2));
+  console.log(
+    `[dashboard] Splunk ${request.dashboard} metrics raw response:`,
+    JSON.stringify(raw, null, 2),
+  );
 
   return {
     meta: {
-      dashboard: "product-owner",
+      dashboard: request.dashboard,
       requestId: crypto.randomUUID(),
       generatedAt: end.toISOString(),
       appliedFilters: {
