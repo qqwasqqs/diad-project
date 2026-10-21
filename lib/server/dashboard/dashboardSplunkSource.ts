@@ -3,9 +3,9 @@
 
   No approved saved-search routing, filter binding, or result-field contract
   exists yet for either dashboard, so nothing here can produce a measured
-  metric. What it can do — and the only reason the Product Owner metrics path
-  calls Splunk at all — is prove connectivity and print what the saved search
-  actually returns, so the mapper can be written against real fields.
+  metric. What it can do — and the only reason the metrics path calls Splunk
+  at all — is prove connectivity and print what the saved search actually
+  returns, so each dashboard's mapper can be written against real fields.
 
   Two rules govern this file until those contracts arrive:
 
@@ -20,6 +20,7 @@
 
 import type {
   DashboardAppliedFiltersDto,
+  DashboardId,
   MetricsRequestDto,
   MetricsResponseDto,
   TimeseriesRequestDto,
@@ -43,7 +44,15 @@ export class DashboardSplunkContractError extends Error {
   }
 }
 
-const METRICS_SAVED_SEARCH = "| savedsearch consolidated_metric_final";
+/*
+  The saved search each dashboard's connectivity probe runs. No Technical Teams
+  search is approved yet, so it runs the Product Owner one: the point of the
+  probe is to prove the Function call and print the rows, not to map them.
+*/
+const METRICS_SAVED_SEARCH: Record<DashboardId, string> = {
+  "product-owner": "| savedsearch consolidated_metric_final",
+  "tech-team": "| savedsearch consolidated_metric_final",
+};
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 const UNBOUND_FILTERS_REASON =
@@ -67,10 +76,6 @@ const PROBE_APPLIED_FILTERS: DashboardAppliedFiltersDto = {
 export async function loadSplunkMetrics(
   request: MetricsRequestDto,
 ): Promise<MetricsResponseDto> {
-  if (request.dashboard !== "product-owner") {
-    throw new DashboardSplunkContractError("metrics", request.dashboard);
-  }
-
   // Dynamic import: keyvault.ts throws on load without KEY_VAULT_URL, which would break mock mode.
   const { fetchSplunkReport } = await import("@/lib/services/splunkReportService");
 
@@ -78,12 +83,15 @@ export async function loadSplunkMetrics(
   const start = new Date(end.getTime() - THIRTY_DAYS_MS);
 
   const raw = await fetchSplunkReport.postSplunkQuery(
-    METRICS_SAVED_SEARCH,
+    METRICS_SAVED_SEARCH[request.dashboard],
     start.toISOString(),
     end.toISOString(),
   );
 
-  console.log("[dashboard] Splunk metrics raw response:", JSON.stringify(raw, null, 2));
+  console.log(
+    `[dashboard] Splunk ${request.dashboard} metrics raw response:`,
+    JSON.stringify(raw, null, 2),
+  );
 
   return {
     meta: {

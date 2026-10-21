@@ -14,6 +14,33 @@ It supersedes the source-selection and Product-Owner-only sections of
 [the earlier implemented-architecture note](./dashboard-data-architecture-implemented.md).
 Written against the working tree on 2026-10-01.
 
+## Update — 2026-10-21: raw payloads, as the Product Owner page now does
+
+The Technical Teams page was re-migrated following
+[the dashboard endpoint migration guide](./dashboard-endpoint-migration-guide.md),
+the same way the Product Owner page was on `main`. What that supersedes below:
+
+- **No view models.** The page renders the raw payloads.
+  `TechTeamDashboardMetricsPayload` in `types/techTeamDashboard.ts` mirrors
+  `tech-team-dashboard.json` exactly; `TechTeamDashboardTimeseriesPayload` is the
+  `{ metricId, status, ... }` timeseries shape. The adapter is a pass-through.
+  `types/techTeamDashboardModels.ts`, `lib/dashboard/endpointAdapterGuards.ts`,
+  and `lib/dashboard/availabilityState.ts` were removed.
+- **The local provider returns the fixture.** No metric-ID translation, scope
+  factor, period slice, or unit conversion. Changing a filter in mock mode does
+  not change the numbers; change the fixture instead.
+- **Drawers stay on their mock file.** The page imports the fixture's `drawers`
+  and no longer calls `GET /api/tech-team-dashboard/main-view`.
+- **Splunk.** Technical Teams metrics now run the same stage-1 connectivity probe
+  as Product Owner instead of returning 501. Timeseries still return 501.
+- **Names.** `techTeamDashboardEndpointService.ts` is now
+  `techTeamDashboardService.ts`; the legacy service is parked as
+  `_techTeamDashboardService.ts`; `useTechTeamMainViewEndpoints` is now
+  `useTechTeamMainView`, and the legacy `hooks/useTechTeamDashboard.ts` is gone.
+
+The shared contract work below — `DashboardId`, the Technical Teams identifiers,
+the contract-level request parsers, and the `apps` dimension — is unchanged.
+
 ## Part 1 — How a dashboard's data arrives
 
 Both dashboards now take the same path. Only the request they build and the
@@ -25,7 +52,7 @@ app/home/<dashboard>/page.tsx
   -> hooks/use<Dashboard>DashboardEndpoints.ts
        one composition hook -> three independent React Query resources
          metrics, and one timeseries resource per chart family
-  -> lib/services/<dashboard>DashboardEndpointService.ts
+  -> lib/services/<dashboard>DashboardService.ts
        picks this dashboard's metric IDs and chart metrics, builds the request DTO
   -> lib/services/dashboardFilterRequest.ts      (shared scope -> filter DTO)
   -> lib/services/dashboardEndpointService.ts    (shared transport, POST only)
@@ -35,9 +62,9 @@ app/home/<dashboard>/page.tsx
        DASHBOARD_DATA_SOURCE=mock  -> <dashboard>DemoSource.ts
        unset or "splunk"           -> dashboardSplunkSource.ts
   -> back through the transport
-  -> lib/dashboard/<dashboard>EndpointAdapter.ts  (pure DTO -> view model)
-  -> page renders OK / DATA_PENDING / CALCULATION_PENDING /
-     FILTER_BREAKDOWN_UNAVAILABLE / NO_DATA / ERROR per metric
+  -> lib/dashboard/<dashboard>EndpointAdapter.ts  (pass-through)
+  -> page renders the raw payload; charts report anything not OK as
+     STATUS — reason
 ```
 
 ### What each environment does today
@@ -47,8 +74,7 @@ app/home/<dashboard>/page.tsx
 | Setting | Metrics | Timeseries |
 | --- | --- | --- |
 | `mock` | Local fixtures, every response marked `illustrative` | Local fixtures, same |
-| unset or `splunk` — Product Owner | The stage-1 connectivity probe runs `\| savedsearch consolidated_metric_final` over a fixed 30-day portfolio-wide window, logs the raw response, and returns every requested metric as `FILTER_BREAKDOWN_UNAVAILABLE` | HTTP 501 |
-| unset or `splunk` — Technical Teams | HTTP 501; no saved search is approved for it | HTTP 501 |
+| unset or `splunk` — both dashboards | The stage-1 connectivity probe runs `\| savedsearch consolidated_metric_final` over a fixed 30-day portfolio-wide window, logs the raw response, and returns every requested metric as `FILTER_BREAKDOWN_UNAVAILABLE`. No Technical Teams saved search is approved yet, so it runs the Product Owner one | HTTP 501 |
 
 Local development therefore needs `DASHBOARD_DATA_SOURCE=mock` in `.env`. It is
 documented in `.env.example`. Without it both dashboards show their explicit
@@ -56,7 +82,9 @@ unavailable states rather than fixtures — which is the intended deployed
 behavior, and not what you want while designing a page.
 
 `NEXT_PUBLIC_LOCAL_DESIGN_MODE` is unrelated to this choice. It still controls
-the older combined main-view routes, which now serve drawer provenance only.
+the older combined main-view routes. The Technical Teams page no longer calls
+its route: drawer provenance is read from the fixture file, as the Product
+Owner drawers are.
 
 ### Sections still outside the endpoint contract
 
@@ -65,12 +93,11 @@ the older combined main-view routes, which now serve drawer provenance only.
 | Product Owner | Feedback Summary, Feature Usage Evidence, Trust and Measurement Readiness | `GET /api/product-owner-dashboard/main-view` |
 | Product Owner | Channel Mix | A local array in the page |
 | Product Owner | All five drawers | Mock JSON imported by the page |
-| Technical Teams | All six drawers' provenance (prose, context rows, decisions) | `GET /api/tech-team-dashboard/main-view` |
+| Technical Teams | All six drawers' provenance (prose, context rows, decisions) | Mock JSON imported by the page |
 
-The Technical Teams drawers take their *numbers* from the endpoint models the
-panels use, so a metric shown in a panel and in its drawer cannot read
-differently. Only the provenance around those numbers still comes from the
-combined route.
+The Technical Teams drawers take the rows and series they repeat from the panels
+behind them. Only the provenance around those values comes from the fixture
+file.
 
 ## Part 2 — What changed
 
@@ -126,14 +153,12 @@ holds the one mapping from status to state.
 
 | Concern | File |
 | --- | --- |
-| View models | [types/techTeamDashboardModels.ts](../../types/techTeamDashboardModels.ts) |
-| DTO to model | [lib/dashboard/techTeamEndpointAdapter.ts](../../lib/dashboard/techTeamEndpointAdapter.ts) |
-| Request construction | [lib/services/techTeamDashboardEndpointService.ts](../../lib/services/techTeamDashboardEndpointService.ts) |
+| Payload types | [types/techTeamDashboard.ts](../../types/techTeamDashboard.ts) |
+| Pass-through adapter | [lib/dashboard/techTeamEndpointAdapter.ts](../../lib/dashboard/techTeamEndpointAdapter.ts) |
+| Request construction | [lib/services/techTeamDashboardService.ts](../../lib/services/techTeamDashboardService.ts) |
 | Resource and composition hooks | [hooks/useTechTeamDashboardEndpoints.ts](../../hooks/useTechTeamDashboardEndpoints.ts) |
 | Local provider | [lib/server/dashboard/techTeamDemoSource.ts](../../lib/server/dashboard/techTeamDemoSource.ts) |
-| Shared adapter guards | [lib/dashboard/endpointAdapterGuards.ts](../../lib/dashboard/endpointAdapterGuards.ts) |
 | Shared scope conversion | [lib/services/dashboardFilterRequest.ts](../../lib/services/dashboardFilterRequest.ts) |
-| Status to display state | [lib/dashboard/availabilityState.ts](../../lib/dashboard/availabilityState.ts) |
 
 ### Technical Teams page
 
