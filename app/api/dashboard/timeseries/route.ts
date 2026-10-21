@@ -4,6 +4,7 @@ import { parseDashboardTimeseriesRequest } from "@/lib/server/dashboard/dashboar
 import { loadDashboardTimeseries } from "@/lib/server/dashboard/dashboardDataSource";
 import { DashboardSplunkContractError } from "@/lib/server/dashboard/dashboardSplunkSource";
 import { UnsupportedDashboardEnvironmentError } from "@/lib/localDesignMode";
+import { getAuthenticatedPrincipal, getPrincipalAuditId } from "@/lib/rbac/identity";
 import type { TimeseriesRequestDto } from "@/types/dashboardEndpointDtos";
 
 export const runtime = "nodejs";
@@ -23,7 +24,11 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    return NextResponse.json(await loadDashboardTimeseries(input));
+    // Scopes the response cache to this user; no identity means no caching.
+    const principal = getAuthenticatedPrincipal(request);
+    const user = principal ? getPrincipalAuditId(principal) : undefined;
+
+    return NextResponse.json(await loadDashboardTimeseries(input, user));
   } catch (error) {
     const status =
       error instanceof DashboardSplunkContractError

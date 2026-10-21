@@ -1,3 +1,7 @@
+/* Splunk responses are cached per user and request; see dashboardResponseCache.
+   Local fixtures are not, so an edited fixture shows on the next request. */
+
+import { cachedDashboardResponse } from "@/lib/server/dashboard/dashboardResponseCache";
 import {
   loadMockMetrics,
   loadMockTimeseries,
@@ -38,15 +42,22 @@ function getDashboardDataSource(): DashboardDataSource {
   );
 }
 
+/*
+  `user` is the authenticated user's identifier. Without one the response is
+  not cached, because an anonymous entry could be served to anyone.
+*/
 export async function loadDashboardMetrics(
   request: MetricsRequestDto,
+  user?: string,
 ): Promise<
   | MetricsResponseDto
   | ProductOwnerDashboardMetricsPayload
   | TechTeamDashboardMetricsPayload
 > {
   if (getDashboardDataSource() === "splunk") {
-    return loadSplunkMetrics(request);
+    return user
+      ? cachedDashboardResponse(user, "metrics", request, () => loadSplunkMetrics(request))
+      : loadSplunkMetrics(request);
   }
 
   return request.dashboard === "product-owner"
@@ -56,9 +67,14 @@ export async function loadDashboardMetrics(
 
 export async function loadDashboardTimeseries(
   request: TimeseriesRequestDto,
+  user?: string,
 ): Promise<TimeseriesResponseDto> {
   if (getDashboardDataSource() === "splunk") {
-    return loadSplunkTimeseries(request);
+    return user
+      ? cachedDashboardResponse(user, "timeseries", request, () =>
+          loadSplunkTimeseries(request),
+        )
+      : loadSplunkTimeseries(request);
   }
 
   return request.dashboard === "product-owner"
