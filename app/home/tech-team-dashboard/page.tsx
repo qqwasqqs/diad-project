@@ -34,16 +34,18 @@ import FailureLocalizationDrawer from "@/components/shared/dashboard/drawers/tec
 import CapacityAndEfficiencyDrawer from "@/components/shared/dashboard/drawers/tech-team/CapacityAndEfficiencyDrawer";
 import AiModelQualityDrawer from "@/components/shared/dashboard/drawers/tech-team/AiModelQualityDrawer";
 import EvaluatorReadinessDrawer from "@/components/shared/dashboard/drawers/tech-team/EvaluatorReadinessDrawer";
-import { useTechTeamMainView as useLegacyTechTeamMainView } from "@/hooks/useTechTeamDashboard";
 import { useTechTeamMainView } from "@/hooks/useTechTeamDashboardEndpoints";
 import { useSelectedDashboardFilters } from "@/hooks/useSelectedDashboardFilters";
-import type { MetricRow } from "@/types/dashboard";
+import type { DrawerContent, MetricRow } from "@/types/dashboard";
 import type {
   TechTeamDashboardAvailabilityStatus,
+  TechTeamDashboardDrawerContent,
   TechTeamDashboardMetricRow,
+  TechTeamDashboardMetricsPayload,
   TechTeamDashboardTimeseriesPayload,
 } from "@/types/techTeamDashboard";
 import techTeamSections from "@/content/dashboards/tech-team-sections.json";
+import techTeamDashboardData from "@/public/mocks/new-pages/tech-team-dashboard.json";
 
 const sectionInfo = techTeamSections as Record<
   string,
@@ -55,7 +57,8 @@ const sectionInfo = techTeamSections as Record<
 
   Presentation only. The metric panels and both charts read the raw payloads
   from the dashboard endpoints through useTechTeamMainView and only format
-  them.
+  them. Drawer provenance is not in the endpoint contract yet, so it stays on
+  its mock file, as the Product Owner drawers do.
   The dashboard displays already aggregated results; it performs no metric
   calculation of its own. Metrics without an approved definition render an
   explicit pending state and are never shown as zero.
@@ -190,6 +193,34 @@ function toMetricRow(row: TechTeamDashboardMetricRow): MetricRow {
 
   return { id: row.id, label: row.label, value: formatAmount(row) };
 }
+
+/* A drawer's provenance rows quote their latest amount, formatted like a row. */
+function toDrawerContent(drawer: TechTeamDashboardDrawerContent): DrawerContent {
+  return {
+    ...drawer,
+    contextRows: drawer.contextRows.map(
+      ({ amount, unit, prefix, decimals, max, ...row }) => ({
+        ...row,
+        latest:
+          amount === undefined
+            ? undefined
+            : formatAmount({ amount, unit, prefix, decimals, max }),
+      }),
+    ),
+  };
+}
+
+const fixtureDrawers = (techTeamDashboardData as TechTeamDashboardMetricsPayload)
+  .drawers;
+
+const drawers: Record<DrawerKey, DrawerContent> = {
+  latencyChart: toDrawerContent(fixtureDrawers.latencyChart),
+  diagnostics: toDrawerContent(fixtureDrawers.diagnostics),
+  failureLocalization: toDrawerContent(fixtureDrawers.failureLocalization),
+  capacityAndEfficiency: toDrawerContent(fixtureDrawers.capacityAndEfficiency),
+  aiModelQuality: toDrawerContent(fixtureDrawers.aiModelQuality),
+  evaluatorReadiness: toDrawerContent(fixtureDrawers.evaluatorReadiness),
+};
 
 function MetricStateValue({ children }: { children: ReactNode }) {
   return (
@@ -367,8 +398,6 @@ export default function TechTeamDashboard() {
   const filters = useSelectedDashboardFilters();
 
   const { metrics, latency, quality } = useTechTeamMainView(filters);
-  // Drawer provenance until it moves off the legacy route.
-  const { mainViewData: data } = useLegacyTechTeamMainView(filters);
 
   /*
     Sections are read optionally: a source that has not mapped its rows onto
@@ -391,7 +420,6 @@ export default function TechTeamDashboard() {
   */
   const [openDrawer, setOpenDrawer] = useState<DrawerKey | null>(null);
   const closeDrawer = () => setOpenDrawer(null);
-  const drawers = data?.drawers;
 
   const latencySeries = toLineSeries(latency.data);
   const qualitySeries = toLineSeries(quality.data);
@@ -589,14 +617,14 @@ export default function TechTeamDashboard() {
       <RequestPathLatencyDrawer
         open={openDrawer === "latencyChart"}
         onClose={closeDrawer}
-        content={drawers?.latencyChart}
+        content={drawers.latencyChart}
         series={latencySeries}
       />
 
       <RequestPathDiagnosticsDrawer
         open={openDrawer === "diagnostics"}
         onClose={closeDrawer}
-        content={drawers?.diagnostics}
+        content={drawers.diagnostics}
         diagnostics={diagnosticRows}
         icons={DIAGNOSTIC_ICONS}
       />
@@ -604,7 +632,7 @@ export default function TechTeamDashboard() {
       <FailureLocalizationDrawer
         open={openDrawer === "failureLocalization"}
         onClose={closeDrawer}
-        content={drawers?.failureLocalization}
+        content={drawers.failureLocalization}
         items={failureItems}
         scaleMax={failureScaleMax}
       />
@@ -612,14 +640,14 @@ export default function TechTeamDashboard() {
       <CapacityAndEfficiencyDrawer
         open={openDrawer === "capacityAndEfficiency"}
         onClose={closeDrawer}
-        content={drawers?.capacityAndEfficiency}
+        content={drawers.capacityAndEfficiency}
         rows={capacityRows}
       />
 
       <AiModelQualityDrawer
         open={openDrawer === "aiModelQuality"}
         onClose={closeDrawer}
-        content={drawers?.aiModelQuality}
+        content={drawers.aiModelQuality}
         series={qualitySeries}
         supporting={qualitySupporting}
       />
@@ -627,7 +655,7 @@ export default function TechTeamDashboard() {
       <EvaluatorReadinessDrawer
         open={openDrawer === "evaluatorReadiness"}
         onClose={closeDrawer}
-        content={drawers?.evaluatorReadiness}
+        content={drawers.evaluatorReadiness}
         rows={readinessRows}
         icons={READINESS_ICONS}
       />
