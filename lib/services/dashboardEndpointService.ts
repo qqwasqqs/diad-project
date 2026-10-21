@@ -2,12 +2,11 @@
   Shared browser-to-Next.js transport for the dashboard endpoints.
 
   It owns the two HTTP calls and nothing else: no filter conversion, no metric
-  selection, no model adaptation. Those are per-dashboard concerns and live in
+  selection, no response shaping. Those are per-dashboard concerns and live in
   each dashboard's own endpoint service.
 
-  The response type parameter lets a caller name the response it expects. It is
-  a convenience for the call site, not a guarantee: what actually arrives is
-  unverified until that dashboard's adapter has checked it.
+  The response type parameter lets each dashboard name its own payload type
+  without the transport knowing anything about it.
 */
 
 import apiClient from "@/lib/apiClient";
@@ -19,7 +18,7 @@ import type {
 } from "@/types/dashboardEndpointDtos";
 
 export const dashboardEndpointService = {
-  async getMetrics<Response extends MetricsResponseDto = MetricsResponseDto>(
+  async getMetrics<Response = MetricsResponseDto>(
     request: MetricsRequestDto,
   ): Promise<Response> {
     const { data } = await apiClient.post<Response>(
@@ -30,9 +29,9 @@ export const dashboardEndpointService = {
     return data;
   },
 
-  async getTimeseries<
-    Response extends TimeseriesResponseDto = TimeseriesResponseDto,
-  >(request: TimeseriesRequestDto): Promise<Response> {
+  async getTimeseries<Response = TimeseriesResponseDto>(
+    request: TimeseriesRequestDto,
+  ): Promise<Response> {
     const { data } = await apiClient.post<Response>(
       "/api/dashboard/timeseries",
       request,

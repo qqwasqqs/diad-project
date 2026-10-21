@@ -24,13 +24,11 @@ import { promises as fs } from "fs";
 import path from "path";
 
 import { periodDays, scopeFactor, shiftBounded } from "@/lib/dashboard/mockSource";
-import {
-  illustrativeMeta,
-  toMockFilters,
-} from "@/lib/server/dashboard/productOwnerDemoSource";
-import type { PendingState, Series } from "@/types/dashboard";
+import type { DashboardFilters, PendingState, Series } from "@/types/dashboard";
 import type {
   DashboardAvailabilityStatus,
+  DashboardEndpointFiltersDto,
+  DashboardEndpointMetaDto,
   MetricResultDto,
   SeriesResultDto,
   SupportingStatDto,
@@ -142,6 +140,40 @@ const SERIES_ID_BY_MOCK_ID: Record<string, string> = {
   "response-coherence": "response-coherence",
   "relevance-quality": "relevance-quality",
 };
+
+function toMockFilters(filters: DashboardEndpointFiltersDto): DashboardFilters {
+  const periods = {
+    last_7_days: "7d",
+    last_30_days: "30d",
+    last_90_days: "90d",
+  } as const;
+
+  return {
+    period: periods[filters.timeRange.value],
+    businessUnit: filters.businessUnits[0],
+    project: filters.projects[0],
+    app: filters.apps[0],
+  };
+}
+
+function illustrativeMeta(
+  dashboard: "tech-team",
+  filters: DashboardEndpointFiltersDto,
+): DashboardEndpointMetaDto<"tech-team"> {
+  return {
+    dashboard,
+    requestId: crypto.randomUUID(),
+    generatedAt: new Date().toISOString(),
+    appliedFilters: {
+      timeRange: filters.timeRange.value,
+      businessUnits: [...filters.businessUnits],
+      projects: [...filters.projects],
+      apps: [...filters.apps],
+      timezone: filters.timezone,
+    },
+    illustrative: true,
+  };
+}
 
 async function readMock(): Promise<MockPayload> {
   return JSON.parse(await fs.readFile(MOCK_PATH, "utf8")) as MockPayload;
