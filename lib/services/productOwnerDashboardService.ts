@@ -3,9 +3,9 @@ import {
   adaptProductOwnerTimeseries,
 } from "@/lib/dashboard/productOwnerEndpointAdapter";
 import { dashboardEndpointService } from "@/lib/services/dashboardEndpointService";
+import { toEndpointFilters } from "@/lib/services/dashboardFilterRequest";
 import type { DashboardFilters } from "@/types/dashboard";
 import type {
-  DashboardEndpointFiltersDto,
   MetricsRequestDto,
   ProductOwnerChartId,
   TimeseriesRequestDto,
@@ -35,24 +35,6 @@ const CHART_METRICS: Record<ProductOwnerChartId, string[]> = {
     "intent-resolution",
   ],
 };
-
-function toEndpointFilters(filters: ProductOwnerFilters): DashboardEndpointFiltersDto {
-  const periods: Record<string, DashboardEndpointFiltersDto["timeRange"]["value"]> = {
-    "7d": "last_7_days",
-    "30d": "last_30_days",
-    "90d": "last_90_days",
-  };
-  const period = filters.period ?? "30d";
-  if (!(period in periods)) {
-    throw new Error(`Unsupported dashboard period: ${period}`);
-  }
-  return {
-    timeRange: { type: "relative", value: periods[period] },
-    businessUnits: [filters.businessUnit ?? "all"],
-    projects: [filters.project ?? "all"],
-    timezone: "UTC",
-  };
-}
 
 export const productOwnerDashboardService = {
   async getMetrics(filters: ProductOwnerFilters) {

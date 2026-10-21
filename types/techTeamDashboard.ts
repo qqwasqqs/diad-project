@@ -15,8 +15,10 @@
 */
 
 import type {
+  ContextRow,
   DrawerContent,
   MetricRow,
+  PendingState,
   Series,
 } from "./dashboard";
 
@@ -50,4 +52,103 @@ export interface TechTeamDashboardPayload {
     aiModelQuality: DrawerContent;
     evaluatorReadiness: DrawerContent;
   };
+}
+
+/*
+  A fixture row: an amount with its display parts, or a pending state. The page
+  formats it; nothing upstream rounds, scales, or relabels it.
+*/
+export interface TechTeamDashboardMetricRow {
+  id: string;
+  label: string;
+  amount?: number;
+  unit?: string;
+  prefix?: string;
+  decimals?: number;
+  max?: number;
+  pendingState?: PendingState;
+}
+
+export type TechTeamDashboardContextRow = Omit<ContextRow, "latest"> &
+  Omit<TechTeamDashboardMetricRow, "id" | "label" | "pendingState">;
+
+export interface TechTeamDashboardDrawerContent
+  extends Omit<DrawerContent, "contextRows"> {
+  contextRows: TechTeamDashboardContextRow[];
+}
+
+/*
+  The metrics payload the page renders. It mirrors
+  public/mocks/new-pages/tech-team-dashboard.json exactly.
+*/
+export interface TechTeamDashboardMetricsPayload {
+  generatedAt: string;
+  note: string;
+  requestPathHealth: {
+    latencySeries: Series[];
+    diagnostics: TechTeamDashboardMetricRow[];
+  };
+  failureLocalization: {
+    scaleMax: number;
+    items: { label: string; value: number }[];
+  };
+  capacityAndEfficiency: TechTeamDashboardMetricRow[];
+  aiModelQuality: {
+    series: Series[];
+    supporting: TechTeamDashboardMetricRow[];
+  };
+  evaluatorReadiness: TechTeamDashboardMetricRow[];
+  drawers: Record<
+    keyof TechTeamDashboardPayload["drawers"],
+    TechTeamDashboardDrawerContent
+  >;
+}
+
+export type TechTeamDashboardAvailabilityStatus =
+  | "OK"
+  | "DATA_PENDING"
+  | "CALCULATION_PENDING"
+  | "FILTER_BREAKDOWN_UNAVAILABLE"
+  | "NO_DATA"
+  | "ERROR";
+
+export type TechTeamDashboardSeriesResult =
+  | {
+      metricId: string;
+      status: "OK";
+      points: { x: string; y: number }[];
+    }
+  | {
+      metricId: string;
+      status: Exclude<TechTeamDashboardAvailabilityStatus, "OK">;
+      points: [];
+      reason: string;
+    };
+
+export type TechTeamDashboardSupportingStat =
+  | { metricId: string; status: "OK"; value: number }
+  | {
+      metricId: string;
+      status: Exclude<TechTeamDashboardAvailabilityStatus, "OK">;
+      value: null;
+      reason: string;
+    };
+
+export interface TechTeamDashboardTimeseriesPayload {
+  meta: {
+    dashboard: "tech-team";
+    requestId: string;
+    generatedAt: string;
+    appliedFilters: {
+      timeRange: string;
+      businessUnits: string[];
+      projects: string[];
+      timezone: "UTC";
+    };
+    illustrative?: true;
+    chartId: "request-path-health" | "ai-model-quality";
+    granularity: "day";
+  };
+  series: TechTeamDashboardSeriesResult[];
+  supportingStats: TechTeamDashboardSupportingStat[];
 }

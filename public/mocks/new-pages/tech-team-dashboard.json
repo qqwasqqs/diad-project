@@ -370,7 +370,7 @@
         ]
       },
       {
-        "id": "model-response-avg",
+        "id": "model-response-average",
         "label": "Model Response avg",
         "points": [
           {
@@ -736,7 +736,7 @@
         ]
       },
       {
-        "id": "retrieval-avg",
+        "id": "retrieval-average",
         "label": "Retrieval avg",
         "points": [
           {
@@ -1102,7 +1102,7 @@
         ]
       },
       {
-        "id": "tool-call-avg",
+        "id": "tool-call-average",
         "label": "Tool Call avg",
         "points": [
           {
