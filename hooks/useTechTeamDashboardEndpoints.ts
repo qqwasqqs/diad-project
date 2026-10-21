@@ -10,9 +10,9 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import {
-  techTeamDashboardEndpointService,
+  techTeamDashboardService,
   type TechTeamFilters,
-} from "@/lib/services/techTeamDashboardEndpointService";
+} from "@/lib/services/techTeamDashboardService";
 import type { TechTeamChartId } from "@/types/dashboardEndpointDtos";
 
 /*
@@ -28,7 +28,7 @@ const SHARED_OPTIONS = {
 export function useTechTeamMetrics(filters: TechTeamFilters) {
   return useQuery({
     queryKey: ["tech-team", "metrics", filters],
-    queryFn: () => techTeamDashboardEndpointService.getMetrics(filters),
+    queryFn: () => techTeamDashboardService.getMetrics(filters),
     ...SHARED_OPTIONS,
   });
 }
@@ -39,7 +39,7 @@ export function useTechTeamTimeseries(
 ) {
   return useQuery({
     queryKey: ["tech-team", "timeseries", chartId, filters],
-    queryFn: () => techTeamDashboardEndpointService.getTimeseries(chartId, filters),
+    queryFn: () => techTeamDashboardService.getTimeseries(chartId, filters),
     ...SHARED_OPTIONS,
   });
 }
