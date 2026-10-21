@@ -23,9 +23,11 @@ import type {
   TechTeamMetricsRequestDto,
   TechTeamSectionId,
   TechTeamTimeseriesRequestDto,
-  TechTeamTimeseriesResponseDto,
 } from "@/types/dashboardEndpointDtos";
-import type { TechTeamDashboardMetricsPayload } from "@/types/techTeamDashboard";
+import type {
+  TechTeamDashboardMetricsPayload,
+  TechTeamDashboardTimeseriesPayload,
+} from "@/types/techTeamDashboard";
 
 export type TechTeamFilters = Pick<
   DashboardFilters,
@@ -115,7 +117,7 @@ export const techTeamDashboardService = {
       options: { includeSupportingStats: true },
     };
     const response =
-      await dashboardEndpointService.getTimeseries<TechTeamTimeseriesResponseDto>(
+      await dashboardEndpointService.getTimeseries<TechTeamDashboardTimeseriesPayload>(
         request,
       );
 

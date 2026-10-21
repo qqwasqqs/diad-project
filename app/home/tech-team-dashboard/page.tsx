@@ -38,11 +38,12 @@ import { useTechTeamMainView } from "@/hooks/useTechTeamDashboardEndpoints";
 import { useSelectedDashboardFilters } from "@/hooks/useSelectedDashboardFilters";
 import type { DrawerContent, MetricRow } from "@/types/dashboard";
 import type {
+  TechTeamDashboardAvailabilityStatus,
   TechTeamDashboardDrawerContent,
   TechTeamDashboardMetricRow,
   TechTeamDashboardMetricsPayload,
+  TechTeamDashboardTimeseriesPayload,
 } from "@/types/techTeamDashboard";
-import type { TechTeamChartModel } from "@/types/techTeamDashboardModels";
 import techTeamSections from "@/content/dashboards/tech-team-sections.json";
 import techTeamDashboardData from "@/public/mocks/new-pages/tech-team-dashboard.json";
 
@@ -70,30 +71,50 @@ const sectionInfo = techTeamSections as Record<
 */
 
 /*
-  A metric keeps the same series colour everywhere it appears, so colours are
-  assigned per series ID rather than by position: a series that is unavailable
-  must not shift the colour of the ones that are.
+  Chart presentation, keyed by the metricId a series arrives with. A metric
+  keeps the same series colour everywhere it appears, so colours are assigned
+  per series rather than by position: a series that is unavailable must not
+  shift the colour of the ones that are.
 */
-const SERIES_COLORS: Record<string, string> = {
-  "end-to-end-p95": "var(--color-chart-series-1)",
-  "model-response-average": "var(--color-chart-series-2)",
-  "retrieval-average": "var(--color-chart-series-3)",
-  "tool-call-average": "var(--color-chart-series-4)",
-  groundedness: "var(--color-chart-series-1)",
-  "response-coherence": "var(--color-chart-series-2)",
-  "relevance-quality": "var(--color-chart-series-3)",
+const seriesPresentation: Record<
+  string,
+  Pick<DashboardLineSeries, "label" | "color">
+> = {
+  "end-to-end-p95": { label: "End-to-End P95", color: "var(--color-chart-series-1)" },
+  "model-response-average": {
+    label: "Model Response avg",
+    color: "var(--color-chart-series-2)",
+  },
+  "retrieval-average": { label: "Retrieval avg", color: "var(--color-chart-series-3)" },
+  "tool-call-average": { label: "Tool Call avg", color: "var(--color-chart-series-4)" },
+  groundedness: { label: "Groundedness", color: "var(--color-chart-series-1)" },
+  "response-coherence": {
+    label: "Response Coherence",
+    color: "var(--color-chart-series-2)",
+  },
+  "relevance-quality": { label: "Relevance Quality", color: "var(--color-chart-series-3)" },
 };
 
-const SERIES_LABELS: Record<string, string> = {
-  "end-to-end-p95": "End-to-End P95",
-  "model-response-average": "Model Response avg",
-  "retrieval-average": "Retrieval avg",
-  "tool-call-average": "Tool Call avg",
-  groundedness: "Groundedness",
-  "response-coherence": "Response Coherence",
-  "relevance-quality": "Relevance Quality",
-  "retrieval-quality": "Retrieval Quality",
-  "mlflow-correctness": "MLflow Correctness",
+/*
+  Retrieval Quality is a 1-5 period value and MLflow Correctness a 0-1 one.
+  Both print their scale, because they sit beside a 1-5 chart and neither may
+  be read against the other.
+*/
+const supportingPresentation: Record<
+  string,
+  { label: string; decimals: number; scale: number }
+> = {
+  "retrieval-quality": { label: "Retrieval Quality", decimals: 1, scale: 5 },
+  "mlflow-correctness": { label: "MLflow Correctness", decimals: 2, scale: 1 },
+};
+
+const statusLabels: Record<TechTeamDashboardAvailabilityStatus, string> = {
+  OK: "OK",
+  DATA_PENDING: "DATA PENDING",
+  CALCULATION_PENDING: "CALCULATION PENDING",
+  FILTER_BREAKDOWN_UNAVAILABLE: "FILTER BREAKDOWN UNAVAILABLE",
+  NO_DATA: "NO DATA",
+  ERROR: "UNAVAILABLE",
 };
 
 const DIAGNOSTIC_ICONS: Record<string, ReactNode> = {
@@ -213,25 +234,79 @@ function toListItems(
   }));
 }
 
-function toLineSeries(chart?: TechTeamChartModel): DashboardLineSeries[] {
+function toLineSeries(
+  chart: TechTeamDashboardTimeseriesPayload | undefined,
+): DashboardLineSeries[] {
   if (!chart) {
     return [];
   }
 
-  return chart.series.flatMap((item) =>
-    item.status === "OK"
+  return chart.series.flatMap((item) => {
+    const presentation = seriesPresentation[item.metricId];
+
+    return item.status === "OK" && presentation
       ? [
           {
-            id: item.id,
-            label: SERIES_LABELS[item.id] ?? item.id,
-            color: SERIES_COLORS[item.id] ?? "var(--color-chart-series-1)",
+            id: item.metricId,
+            ...presentation,
             points: item.points.map((point) => ({
               x: formatDay(point.x),
               y: point.y,
             })),
           },
         ]
-      : [],
+      : [];
+  });
+}
+
+function toSupporting(chart: TechTeamDashboardTimeseriesPayload | undefined) {
+  return (chart?.supportingStats ?? []).flatMap((stat) => {
+    const presentation = supportingPresentation[stat.metricId];
+
+    return stat.status === "OK" && presentation
+      ? [
+          {
+            id: stat.metricId,
+            label: presentation.label,
+            value: `${decimal(stat.value, presentation.decimals)} / ${presentation.scale}`,
+          },
+        ]
+      : [];
+  });
+}
+
+/*
+  Names every series or supporting value the chart could not plot, with its
+  status and reason, rather than letting it silently drop out.
+*/
+function ChartAvailabilityNotes({
+  chart,
+}: {
+  chart: TechTeamDashboardTimeseriesPayload;
+}) {
+  const unavailable = [...chart.series, ...chart.supportingStats].filter(
+    (item) => item.status !== "OK",
+  );
+
+  if (unavailable.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-3 space-y-1 text-xs" style={{ color: "var(--color-chart-axis)" }}>
+      {unavailable.map((item) => (
+        <div key={item.metricId}>
+          <span className="font-semibold">
+            {seriesPresentation[item.metricId]?.label ??
+              supportingPresentation[item.metricId]?.label ??
+              item.metricId}
+            :
+          </span>{" "}
+          {statusLabels[item.status]}
+          {"reason" in item ? ` — ${item.reason}` : null}
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -307,25 +382,7 @@ export default function TechTeamDashboard() {
   const latencySeries = toLineSeries(latency.data);
   const qualitySeries = toLineSeries(quality.data);
 
-  /*
-    Retrieval Quality is a 1-5 period value and MLflow Correctness a 0-1 one.
-    Both print their scale, because they sit beside a 1-5 chart and neither may
-    be read against the other.
-  */
-  const qualitySupporting = (quality.data?.supportingStats ?? []).flatMap((stat) =>
-    stat.status === "OK"
-      ? [
-          {
-            id: stat.id,
-            label: SERIES_LABELS[stat.id] ?? stat.id,
-            value:
-              stat.id === "mlflow-correctness"
-                ? `${decimal(stat.value, 2)} / 1`
-                : `${decimal(stat.value, 1)} / 5`,
-          },
-        ]
-      : [],
-  );
+  const qualitySupporting = toSupporting(quality.data);
 
   return (
     <DashboardPage
@@ -379,12 +436,13 @@ export default function TechTeamDashboard() {
           ]}
         >
           <div>
-            <RequestState query={latency}>
+            <RequestState query={latency} hasData={Boolean(latency.data)}>
               <DashboardLineChart
                 series={latencySeries}
                 axes={[{ id: "left", label: "Latency (ms)" }]}
                 height={260}
               />
+              {latency.data && <ChartAvailabilityNotes chart={latency.data} />}
             </RequestState>
           </div>
 
@@ -467,7 +525,7 @@ export default function TechTeamDashboard() {
             />
           }
         >
-          <RequestState query={quality}>
+          <RequestState query={quality} hasData={Boolean(quality.data)}>
             <DashboardLineChart
               series={qualitySeries}
               axes={[{ id: "left", domain: [1, 5] }]}
@@ -479,6 +537,7 @@ export default function TechTeamDashboard() {
                 text: stat.label,
               }))}
             />
+            {quality.data && <ChartAvailabilityNotes chart={quality.data} />}
           </RequestState>
 
           {/*

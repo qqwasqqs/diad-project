@@ -103,3 +103,53 @@ export interface TechTeamDashboardMetricsPayload {
     TechTeamDashboardDrawerContent
   >;
 }
+
+export type TechTeamDashboardAvailabilityStatus =
+  | "OK"
+  | "DATA_PENDING"
+  | "CALCULATION_PENDING"
+  | "FILTER_BREAKDOWN_UNAVAILABLE"
+  | "NO_DATA"
+  | "ERROR";
+
+export type TechTeamDashboardSeriesResult =
+  | {
+      metricId: string;
+      status: "OK";
+      points: { x: string; y: number }[];
+    }
+  | {
+      metricId: string;
+      status: Exclude<TechTeamDashboardAvailabilityStatus, "OK">;
+      points: [];
+      reason: string;
+    };
+
+export type TechTeamDashboardSupportingStat =
+  | { metricId: string; status: "OK"; value: number }
+  | {
+      metricId: string;
+      status: Exclude<TechTeamDashboardAvailabilityStatus, "OK">;
+      value: null;
+      reason: string;
+    };
+
+export interface TechTeamDashboardTimeseriesPayload {
+  meta: {
+    dashboard: "tech-team";
+    requestId: string;
+    generatedAt: string;
+    appliedFilters: {
+      timeRange: string;
+      businessUnits: string[];
+      projects: string[];
+      apps: string[];
+      timezone: "UTC";
+    };
+    illustrative?: true;
+    chartId: "request-path-health" | "ai-model-quality";
+    granularity: "day";
+  };
+  series: TechTeamDashboardSeriesResult[];
+  supportingStats: TechTeamDashboardSupportingStat[];
+}
