@@ -15,8 +15,10 @@
 */
 
 import type {
+  ContextRow,
   DrawerContent,
   MetricRow,
+  PendingState,
   Series,
 } from "./dashboard";
 
@@ -50,4 +52,54 @@ export interface TechTeamDashboardPayload {
     aiModelQuality: DrawerContent;
     evaluatorReadiness: DrawerContent;
   };
+}
+
+/*
+  A fixture row: an amount with its display parts, or a pending state. The page
+  formats it; nothing upstream rounds, scales, or relabels it.
+*/
+export interface TechTeamDashboardMetricRow {
+  id: string;
+  label: string;
+  amount?: number;
+  unit?: string;
+  prefix?: string;
+  decimals?: number;
+  max?: number;
+  pendingState?: PendingState;
+}
+
+export type TechTeamDashboardContextRow = Omit<ContextRow, "latest"> &
+  Omit<TechTeamDashboardMetricRow, "id" | "label" | "pendingState">;
+
+export interface TechTeamDashboardDrawerContent
+  extends Omit<DrawerContent, "contextRows"> {
+  contextRows: TechTeamDashboardContextRow[];
+}
+
+/*
+  The metrics payload the page renders. It mirrors
+  public/mocks/new-pages/tech-team-dashboard.json exactly.
+*/
+export interface TechTeamDashboardMetricsPayload {
+  generatedAt: string;
+  note: string;
+  requestPathHealth: {
+    latencySeries: Series[];
+    diagnostics: TechTeamDashboardMetricRow[];
+  };
+  failureLocalization: {
+    scaleMax: number;
+    items: { label: string; value: number }[];
+  };
+  capacityAndEfficiency: TechTeamDashboardMetricRow[];
+  aiModelQuality: {
+    series: Series[];
+    supporting: TechTeamDashboardMetricRow[];
+  };
+  evaluatorReadiness: TechTeamDashboardMetricRow[];
+  drawers: Record<
+    keyof TechTeamDashboardPayload["drawers"],
+    TechTeamDashboardDrawerContent
+  >;
 }

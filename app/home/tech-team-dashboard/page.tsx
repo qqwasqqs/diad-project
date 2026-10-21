@@ -34,16 +34,12 @@ import FailureLocalizationDrawer from "@/components/shared/dashboard/drawers/tec
 import CapacityAndEfficiencyDrawer from "@/components/shared/dashboard/drawers/tech-team/CapacityAndEfficiencyDrawer";
 import AiModelQualityDrawer from "@/components/shared/dashboard/drawers/tech-team/AiModelQualityDrawer";
 import EvaluatorReadinessDrawer from "@/components/shared/dashboard/drawers/tech-team/EvaluatorReadinessDrawer";
-import { pendingStateForStatus } from "@/lib/dashboard/availabilityState";
 import { useTechTeamMainViewEndpoints } from "@/hooks/useTechTeamDashboardEndpoints";
 import { useTechTeamMainView } from "@/hooks/useTechTeamDashboard";
 import { useSelectedDashboardFilters } from "@/hooks/useSelectedDashboardFilters";
-import type { MetricRow, PendingState } from "@/types/dashboard";
-import type { TechTeamMetricId } from "@/types/dashboardEndpointDtos";
-import type {
-  TechTeamChartModel,
-  TechTeamMetricModel,
-} from "@/types/techTeamDashboardModels";
+import type { MetricRow } from "@/types/dashboard";
+import type { TechTeamDashboardMetricRow } from "@/types/techTeamDashboard";
+import type { TechTeamChartModel } from "@/types/techTeamDashboardModels";
 import techTeamSections from "@/content/dashboards/tech-team-sections.json";
 
 const sectionInfo = techTeamSections as Record<
@@ -56,7 +52,8 @@ const sectionInfo = techTeamSections as Record<
 
   Presentation only. Every number on the page comes from the shared dashboard
   endpoints through useTechTeamMainViewEndpoints: one metrics request and one
-  request per chart family, each with its own loading and error state.
+  request per chart family, each with its own loading and error state. The
+  metric panels read the metrics payload as returned and only format it.
 
   Drawer provenance — how a metric is produced and whether the selected scope
   applies to it — is not in that contract yet, so it still comes from the
@@ -96,68 +93,6 @@ const SERIES_LABELS: Record<string, string> = {
   "mlflow-correctness": "MLflow Correctness",
 };
 
-/*
-  The approved label for each metric. These live here rather than travelling
-  with the values: a label is presentation, and the endpoint returns identifiers
-  and numbers.
-*/
-const METRIC_LABELS: Record<TechTeamMetricId, string> = {
-  "request-throughput": "Request Throughput",
-  "inference-error-rate": "Inference Error Rate",
-  "pipeline-duration-average": "Pipeline Duration avg",
-  "indexing-ai-services-latency-average": "Indexing / AI Services avg",
-  "failure-rate-pipeline": "Pipeline",
-  "failure-rate-job": "Job",
-  "failure-rate-inference": "Inference",
-  "failure-rate-api-service": "API Service",
-  "failure-rate-training": "Training",
-  "failure-rate-indexing": "Indexing",
-  "failure-rate-transcription": "Transcription",
-  "failure-rate-translation": "Translation",
-  "cost-per-request": "Cost per Request",
-  "token-usage-per-request": "Token Usage / Request",
-  "token-throughput": "Token Throughput",
-  "available-token-limit": "Available Token Limit",
-  "cache-hit-ratio": "Cache Hit Ratio",
-  "safety-evaluation-score": "Safety Evaluation Score",
-  "mlflow-safety-score": "MLflow Safety Score",
-  "pii-leakage-agent-only": "PII Leakage (Agent Only)",
-  upia: "UPIA",
-};
-
-const DIAGNOSTIC_IDS: TechTeamMetricId[] = [
-  "request-throughput",
-  "inference-error-rate",
-  "pipeline-duration-average",
-  "indexing-ai-services-latency-average",
-];
-
-const FAILURE_RATE_IDS: TechTeamMetricId[] = [
-  "failure-rate-pipeline",
-  "failure-rate-job",
-  "failure-rate-inference",
-  "failure-rate-api-service",
-  "failure-rate-training",
-  "failure-rate-indexing",
-  "failure-rate-transcription",
-  "failure-rate-translation",
-];
-
-const CAPACITY_IDS: TechTeamMetricId[] = [
-  "cost-per-request",
-  "token-usage-per-request",
-  "token-throughput",
-  "available-token-limit",
-  "cache-hit-ratio",
-];
-
-const READINESS_IDS: TechTeamMetricId[] = [
-  "safety-evaluation-score",
-  "mlflow-safety-score",
-  "pii-leakage-agent-only",
-  "upia",
-];
-
 const DIAGNOSTIC_ICONS: Record<string, ReactNode> = {
   "request-throughput": (
     <ArrowTrendingLines24Regular style={{ color: "var(--color-chart-series-1)" }} />
@@ -165,10 +100,10 @@ const DIAGNOSTIC_ICONS: Record<string, ReactNode> = {
   "inference-error-rate": (
     <Warning24Regular style={{ color: "var(--color-warning-content)" }} />
   ),
-  "pipeline-duration-average": (
+  "pipeline-duration": (
     <Clock24Regular style={{ color: "var(--color-chart-series-4)" }} />
   ),
-  "indexing-ai-services-latency-average": (
+  "indexing-ai-services": (
     <DatabaseSearch24Regular style={{ color: "var(--color-chart-series-3)" }} />
   ),
 };
@@ -180,40 +115,11 @@ const READINESS_ICONS: Record<string, ReactNode> = {
   "mlflow-safety-score": (
     <Scales24Regular style={{ color: "var(--color-success-icon)" }} />
   ),
-  "pii-leakage-agent-only": (
+  "pii-leakage": (
     <LockClosed24Regular style={{ color: "var(--color-danger-icon)" }} />
   ),
   upia: <ShieldTask24Regular style={{ color: "var(--color-chart-series-2)" }} />,
 };
-
-/*
-  The approved display label for a measure the endpoint can only report as
-  CALCULATION_PENDING.
-
-  The shared status vocabulary has no DEFINITION_PENDING, FORMULA_PENDING, or
-  TEST_RESULTS_PENDING code, and the Technical Teams data contract says so
-  explicitly: the source returns CALCULATION_PENDING with a precise reason, and
-  the UI maps it back to the label the approved design specifies. Each entry
-  below is the Display value recorded in that metric's calculation document.
-
-  It applies only to CALCULATION_PENDING. A metric that comes back NO_DATA, in
-  error, or unattributable to the selected scope says that instead — those are
-  different facts and must not be relabelled as a pending definition.
-*/
-const APPROVED_CALCULATION_LABEL: Partial<Record<TechTeamMetricId, PendingState>> = {
-  "token-throughput": "definition",
-  "available-token-limit": "definition",
-  "cache-hit-ratio": "formula",
-  upia: "test-results",
-};
-
-/*
-  Upper bound of the failure-rate track. The bars compare small rates against
-  each other, so the bound is a presentation choice rather than a measurement:
-  the data contract defines no scale for them. It widens if a measured rate
-  would otherwise overflow it.
-*/
-const FAILURE_RATE_TRACK_MIN = 2;
 
 /*
   The six clickable elements from the approved clickability map. The latency
@@ -227,15 +133,6 @@ type DrawerKey =
   | "capacityAndEfficiency"
   | "aiModelQuality"
   | "evaluatorReadiness";
-
-/*
-  A row ready to render. `reason` is why a state was returned; it is announced
-  to screen readers beside the state, because the state alone says that a value
-  is missing but not what is missing.
-*/
-interface TechTeamRow extends MetricRow {
-  reason?: string;
-}
 
 // Formats a day key as the short axis label used in the approved design.
 const formatDay = (value: string) =>
@@ -251,82 +148,24 @@ const decimal = (value: number, digits: number) =>
     maximumFractionDigits: digits,
   });
 
+/* The display value for one fixture row: its prefix, amount, and unit. */
+const formatAmount = (row: TechTeamDashboardMetricRow) =>
+  `${row.prefix ?? ""}${decimal(row.amount ?? 0, row.decimals ?? 0)}${row.unit ?? ""}`;
+
 /*
-  Durations arrive in milliseconds, which is the contract's common unit but not
-  always the readable one: a pipeline run is read in seconds, a retrieval call
-  in milliseconds.
+  A pending state is never replaced by a number, and a row with no amount is
+  pending data rather than zero.
 */
-const formatDuration = (milliseconds: number) =>
-  milliseconds >= 1000
-    ? `${decimal(milliseconds / 1000, 0)} s`
-    : `${decimal(milliseconds, 0)} ms`;
-
-const formatTokens = (tokens: number) =>
-  tokens >= 1000 ? `${decimal(tokens / 1000, 1)}K tokens` : `${decimal(tokens, 0)} tokens`;
-
-const formatCost = (amount: number, currencyCode: string) =>
-  amount.toLocaleString("en-US", {
-    style: "currency",
-    currency: currencyCode,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-
-/* The display value for one measured metric. */
-function formatMetric(metric: Extract<TechTeamMetricModel, { status: "OK" }>): string {
-  switch (metric.id) {
-    case "request-throughput":
-      return `${decimal(metric.throughputRequestsPerSecond, 1)} req/s`;
-    case "inference-error-rate":
-      return `${decimal(metric.errorRatePercent, 2)}%`;
-    case "pipeline-duration-average":
-      return formatDuration(metric.averageDurationMs);
-    case "indexing-ai-services-latency-average":
-      return formatDuration(metric.averageLatencyMs);
-    case "cost-per-request":
-      return formatCost(metric.averageCostPerRequest, metric.currencyCode);
-    case "token-usage-per-request":
-      return formatTokens(metric.averageTokensPerRequest);
-    case "mlflow-safety-score":
-      // The 0-1 scale is printed with the value so it cannot be read as a percentage.
-      return `${decimal(metric.mlflowSafetyScore, 2)} / ${metric.scaleMax}`;
-    default:
-      // A failure rate, which is compared against the other seven, not read alone.
-      return `${decimal(metric.failureRatePercent, 2)}%`;
-  }
-}
-
-function toRow(id: TechTeamMetricId, metric?: TechTeamMetricModel): TechTeamRow {
-  const label = METRIC_LABELS[id];
-
-  if (!metric) {
-    return {
-      id,
-      label,
-      pendingState: "unavailable",
-      reason: "The metric was not returned by the endpoint",
-    };
+function toRow(row: TechTeamDashboardMetricRow): MetricRow {
+  if (row.pendingState || row.amount === undefined) {
+    return { id: row.id, label: row.label, pendingState: row.pendingState ?? "data" };
   }
 
-  if (metric.status === "OK") {
-    return { id, label, value: formatMetric(metric) };
-  }
-
-  const approved =
-    metric.status === "CALCULATION_PENDING"
-      ? APPROVED_CALCULATION_LABEL[id]
-      : undefined;
-
-  return {
-    id,
-    label,
-    pendingState: approved ?? pendingStateForStatus(metric.status),
-    reason: metric.reason,
-  };
+  return { id: row.id, label: row.label, value: formatAmount(row) };
 }
 
 function toListItems(
-  rows: TechTeamRow[],
+  rows: MetricRow[],
   icons?: Record<string, ReactNode>,
 ): MetricListItem[] {
   return rows.map((row) => ({
@@ -334,7 +173,7 @@ function toListItems(
     icon: icons?.[row.id],
     label: row.label,
     value: row.pendingState ? (
-      <PendingStateValue state={row.pendingState} srDescription={row.reason} />
+      <PendingStateValue state={row.pendingState} />
     ) : (
       (row.value ?? "")
     ),
@@ -363,16 +202,28 @@ function toLineSeries(chart?: TechTeamChartModel): DashboardLineSeries[] {
   );
 }
 
-/* Renders a request's own loading or failure state in place of its content. */
+/*
+  Renders a request's own loading, failure, or no-data state in place of its
+  content. A response that arrived without this panel's section is pending
+  data, not an empty panel.
+*/
 function RequestState({
   query,
+  hasData = true,
   children,
 }: {
   query: { isPending: boolean; isError: boolean; error: Error | null };
+  hasData?: boolean;
   children: ReactNode;
 }) {
   if (!query.isPending && !query.isError) {
-    return <>{children}</>;
+    return hasData ? (
+      <>{children}</>
+    ) : (
+      <div className="flex min-h-[120px] items-center justify-center px-4 text-center">
+        <PendingStateValue state="data" />
+      </div>
+    );
   }
 
   return (
@@ -384,31 +235,6 @@ function RequestState({
       {query.isPending
         ? "Loading…"
         : (query.error?.message ?? "The endpoint request failed")}
-    </div>
-  );
-}
-
-/*
-  Lists the measures a panel could not plot. A bar chart can only draw a number,
-  so a rate that is unavailable would otherwise simply be absent from the
-  comparison without saying so.
-*/
-function UnavailableNotes({ rows }: { rows: TechTeamRow[] }) {
-  const unavailable = rows.filter((row) => row.pendingState);
-
-  if (unavailable.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="mt-3 space-y-1 text-xs" style={{ color: "var(--color-chart-axis)" }}>
-      {unavailable.map((row) => (
-        <div key={row.id}>
-          <span className="font-semibold">{row.label}:</span>{" "}
-          <PendingStateValue state={row.pendingState!} />
-          {row.reason ? ` — ${row.reason}` : null}
-        </div>
-      ))}
     </div>
   );
 }
@@ -439,34 +265,19 @@ export default function TechTeamDashboard() {
   const [openDrawer, setOpenDrawer] = useState<DrawerKey | null>(null);
   const closeDrawer = () => setOpenDrawer(null);
 
-  const metricById = new Map<TechTeamMetricId, TechTeamMetricModel>(
-    (metrics.data?.metrics ?? []).map((metric) => [metric.id, metric]),
-  );
-  const rowsFor = (ids: TechTeamMetricId[]) =>
-    ids.map((id) => toRow(id, metricById.get(id)));
-
-  const diagnosticRows = rowsFor(DIAGNOSTIC_IDS);
-  const failureRows = rowsFor(FAILURE_RATE_IDS);
-  const capacityRows = rowsFor(CAPACITY_IDS);
-  const readinessRows = rowsFor(READINESS_IDS);
-
   /*
-    Only the rates that were measured can be drawn. Each carries its own
-    denominator, so the bound comes from the rates themselves rather than being
-    assumed, and the ones that could not be measured are named underneath.
+    The sections are read optionally: a source that has not mapped its rows onto
+    this payload yet answers without them, and each panel then says its data is
+    pending instead of the page failing.
   */
-  const failureMetrics = FAILURE_RATE_IDS.map((id) => metricById.get(id)).filter(
-    (metric): metric is Extract<TechTeamMetricModel, { failureRatePercent: number }> =>
-      metric?.status === "OK" && "failureRatePercent" in metric,
-  );
-  const failureItems = failureMetrics.map((metric) => ({
-    label: METRIC_LABELS[metric.id],
-    value: metric.failureRatePercent,
-  }));
-  const failureScaleMax = Math.max(
-    FAILURE_RATE_TRACK_MIN,
-    ...failureItems.map((item) => item.value),
-  );
+  const payload = metrics.data;
+  const diagnosticRows = (payload?.requestPathHealth?.diagnostics ?? []).map(toRow);
+  const capacityRows = (payload?.capacityAndEfficiency ?? []).map(toRow);
+  const readinessRows = (payload?.evaluatorReadiness ?? []).map(toRow);
+
+  // Eight independent rates, each with its own denominator; compared, never summed.
+  const failureItems = payload?.failureLocalization?.items ?? [];
+  const failureScaleMax = payload?.failureLocalization?.scaleMax ?? 0;
 
   const latencySeries = toLineSeries(latency.data);
   const qualitySeries = toLineSeries(quality.data);
@@ -496,8 +307,9 @@ export default function TechTeamDashboard() {
       title="AI Observability — Technical Teams Dashboard"
       description="Diagnose request paths, failures, evaluator quality, and capacity"
     >
-      {/* Shown while any response is still a local fixture rather than measured. */}
-      {(metrics.data?.illustrative ?? true) && <IllustrativeValuesBanner />}
+      {/* No value on this page is measured yet: the fixture is illustrative and
+          the Splunk source returns no mapped values. */}
+      <IllustrativeValuesBanner />
 
       <DashboardGrid columns={12}>
         {/* Request-path health: latency trend beside independent diagnostics. */}
@@ -552,7 +364,7 @@ export default function TechTeamDashboard() {
           </div>
 
           <div>
-            <RequestState query={metrics}>
+            <RequestState query={metrics} hasData={diagnosticRows.length > 0}>
               <MetricList
                 variant="prominent"
                 items={toListItems(diagnosticRows, DIAGNOSTIC_ICONS)}
@@ -580,15 +392,12 @@ export default function TechTeamDashboard() {
             />
           }
         >
-          <RequestState query={metrics}>
-            <div>
-              <HorizontalBarList
-                values={failureItems}
-                rowsPerColumn={4}
-                max={failureScaleMax}
-              />
-              <UnavailableNotes rows={failureRows} />
-            </div>
+          <RequestState query={metrics} hasData={failureItems.length > 0}>
+            <HorizontalBarList
+              values={failureItems}
+              rowsPerColumn={4}
+              max={failureScaleMax}
+            />
           </RequestState>
         </DashboardPanel>
 
@@ -609,7 +418,7 @@ export default function TechTeamDashboard() {
             />
           }
         >
-          <RequestState query={metrics}>
+          <RequestState query={metrics} hasData={capacityRows.length > 0}>
             <MetricList items={toListItems(capacityRows)} />
           </RequestState>
         </DashboardPanel>
@@ -677,7 +486,7 @@ export default function TechTeamDashboard() {
             />
           }
         >
-          <RequestState query={metrics}>
+          <RequestState query={metrics} hasData={readinessRows.length > 0}>
             <MetricList
               variant="prominent"
               items={toListItems(readinessRows, READINESS_ICONS)}

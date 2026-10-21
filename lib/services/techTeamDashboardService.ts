@@ -21,11 +21,11 @@ import type {
   TechTeamChartId,
   TechTeamMetricId,
   TechTeamMetricsRequestDto,
-  TechTeamMetricsResponseDto,
   TechTeamSectionId,
   TechTeamTimeseriesRequestDto,
   TechTeamTimeseriesResponseDto,
 } from "@/types/dashboardEndpointDtos";
+import type { TechTeamDashboardMetricsPayload } from "@/types/techTeamDashboard";
 
 export type TechTeamFilters = Pick<
   DashboardFilters,
@@ -98,7 +98,7 @@ export const techTeamDashboardService = {
       options: { includePending: true, includeCoverage: true },
     };
     const response =
-      await dashboardEndpointService.getMetrics<TechTeamMetricsResponseDto>(
+      await dashboardEndpointService.getMetrics<TechTeamDashboardMetricsPayload>(
         request,
       );
 

@@ -1,21 +1,9 @@
 /*
   Local fixture provider for the Technical Teams endpoints.
 
-  It reads the same fixture the legacy combined main-view route reads, so local
-  development keeps the numbers it already had, and maps it onto the shared
-  endpoint DTOs.
-
-  Two translations happen here, and both belong to a source rather than to the
-  page:
-
-  1. The fixture's own identifiers are mapped to the approved metric IDs from
-     the Technical Teams Splunk data contract. The contract is the authority on
-     what a metric is called on the wire; the fixture predates it.
-  2. The fixture's `pendingState` vocabulary (`definition`, `formula`,
-     `calculation`, `data`, `test-results`) is mapped to the endpoint
-     availability statuses, with the specific reason preserved as text. The
-     endpoint vocabulary is deliberately smaller, so the reason carries what the
-     status cannot.
+  Metrics are the fixture itself, returned unchanged: the page renders the
+  fixture's shape, so there is nothing to map, filter, or recalculate. If a
+  reviewer needs different numbers, change the fixture.
 
   Everything returned here is illustrative and says so in `meta`.
 */
@@ -24,20 +12,21 @@ import { promises as fs } from "fs";
 import path from "path";
 
 import { periodDays, scopeFactor, shiftBounded } from "@/lib/dashboard/mockSource";
-import type { DashboardFilters, PendingState, Series } from "@/types/dashboard";
+import type { DashboardFilters, PendingState } from "@/types/dashboard";
 import type {
   DashboardAvailabilityStatus,
   DashboardEndpointFiltersDto,
   DashboardEndpointMetaDto,
-  MetricResultDto,
   SeriesResultDto,
   SupportingStatDto,
-  TechTeamMetricId,
   TechTeamMetricsRequestDto,
-  TechTeamMetricsResponseDto,
   TechTeamTimeseriesRequestDto,
   TechTeamTimeseriesResponseDto,
 } from "@/types/dashboardEndpointDtos";
+import type {
+  TechTeamDashboardMetricRow,
+  TechTeamDashboardMetricsPayload,
+} from "@/types/techTeamDashboard";
 
 const MOCK_PATH = path.join(
   process.cwd(),
@@ -46,62 +35,6 @@ const MOCK_PATH = path.join(
   "new-pages",
   "tech-team-dashboard.json",
 );
-
-interface MockRow {
-  id: string;
-  label: string;
-  amount?: number;
-  unit?: string;
-  prefix?: string;
-  decimals?: number;
-  max?: number;
-  pendingState?: PendingState;
-}
-
-interface MockPayload {
-  requestPathHealth: { latencySeries: Series[]; diagnostics: MockRow[] };
-  failureLocalization: { scaleMax: number; items: { label: string; value: number }[] };
-  capacityAndEfficiency: MockRow[];
-  aiModelQuality: { series: Series[]; supporting: MockRow[] };
-  evaluatorReadiness: MockRow[];
-}
-
-/*
-  Fixture row ID to approved metric ID. The fixture's abbreviations
-  (`pipeline-duration`, `pii-leakage`) are not the contract's names, and the
-  wire uses the contract's.
-*/
-const METRIC_ID_BY_MOCK_ID: Record<string, TechTeamMetricId> = {
-  "request-throughput": "request-throughput",
-  "inference-error-rate": "inference-error-rate",
-  "pipeline-duration": "pipeline-duration-average",
-  "indexing-ai-services": "indexing-ai-services-latency-average",
-  "cost-per-request": "cost-per-request",
-  "token-usage-request": "token-usage-per-request",
-  "token-throughput": "token-throughput",
-  "available-token-limit": "available-token-limit",
-  "cache-hit-ratio": "cache-hit-ratio",
-  "safety-evaluation-score": "safety-evaluation-score",
-  "mlflow-safety-score": "mlflow-safety-score",
-  "pii-leakage": "pii-leakage-agent-only",
-  upia: "upia",
-};
-
-/*
-  The eight Failure Localization bars in fixture order. The fixture carries only
-  labels, because the chart compares them visually; the wire needs the metric ID
-  that owns each denominator.
-*/
-const FAILURE_RATE_IDS: TechTeamMetricId[] = [
-  "failure-rate-pipeline",
-  "failure-rate-job",
-  "failure-rate-inference",
-  "failure-rate-api-service",
-  "failure-rate-training",
-  "failure-rate-indexing",
-  "failure-rate-transcription",
-  "failure-rate-translation",
-];
 
 const PENDING_STATUS: Record<PendingState, Exclude<DashboardAvailabilityStatus, "OK">> = {
   data: "DATA_PENDING",
@@ -175,20 +108,10 @@ function illustrativeMeta(
   };
 }
 
-async function readMock(): Promise<MockPayload> {
-  return JSON.parse(await fs.readFile(MOCK_PATH, "utf8")) as MockPayload;
-}
-
-function pending(
-  metricId: TechTeamMetricId,
-  state: PendingState,
-): MetricResultDto<TechTeamMetricId> {
-  return {
-    metricId,
-    status: PENDING_STATUS[state],
-    value: null,
-    reason: PENDING_REASON[state],
-  };
+async function readMock(): Promise<TechTeamDashboardMetricsPayload> {
+  return JSON.parse(
+    await fs.readFile(MOCK_PATH, "utf8"),
+  ) as TechTeamDashboardMetricsPayload;
 }
 
 /*
@@ -196,7 +119,7 @@ function pending(
   its scale rather than multiplying, so an illustrative scope cannot drive a
   quality or safety rating to a perfect one.
 */
-function scaled(row: MockRow, factor: number): number {
+function scaled(row: TechTeamDashboardMetricRow, factor: number): number {
   const amount = row.amount ?? 0;
   const value =
     row.max !== undefined ? shiftBounded(amount, row.max, factor) : amount * factor;
@@ -204,102 +127,11 @@ function scaled(row: MockRow, factor: number): number {
   return Number(value.toFixed(row.decimals ?? 2));
 }
 
-/* The value object each metric ID carries when it is `OK`. */
-function metricValue(
-  metricId: TechTeamMetricId,
-  row: MockRow,
-  factor: number,
-): Record<string, unknown> {
-  const amount = scaled(row, factor);
-
-  switch (metricId) {
-    case "request-throughput":
-      return { throughputRequestsPerSecond: amount };
-    case "inference-error-rate":
-      return { errorRatePercent: amount };
-    case "pipeline-duration-average":
-      // The fixture states seconds; the contract normalizes durations to ms.
-      return { averageDurationMs: Math.round(amount * 1000) };
-    case "indexing-ai-services-latency-average":
-      return { averageLatencyMs: Math.round(amount) };
-    case "cost-per-request":
-      return { averageCostPerRequest: amount, currencyCode: "USD" };
-    case "token-usage-per-request":
-      // The fixture states thousands of tokens.
-      return { averageTokensPerRequest: Math.round(amount * 1000) };
-    case "mlflow-safety-score":
-      return { mlflowSafetyScore: amount, scaleMax: row.max ?? 1 };
-    default:
-      return { value: amount };
-  }
-}
-
-function adaptRow(row: MockRow, factor: number): MetricResultDto<TechTeamMetricId> {
-  const metricId = METRIC_ID_BY_MOCK_ID[row.id];
-
-  if (!metricId) {
-    throw new Error(`Fixture row has no approved metric ID: ${row.id}`);
-  }
-
-  if (row.pendingState || row.amount === undefined) {
-    return pending(metricId, row.pendingState ?? "data");
-  }
-
-  return { metricId, status: "OK", value: metricValue(metricId, row, factor) };
-}
-
 export async function loadTechTeamMockMetrics(
   request: TechTeamMetricsRequestDto,
-): Promise<TechTeamMetricsResponseDto> {
-  const mock = await readMock();
-  const factor = scopeFactor(toMockFilters(request.filters));
-
-  const rows = [
-    ...mock.requestPathHealth.diagnostics,
-    ...mock.capacityAndEfficiency,
-    ...mock.evaluatorReadiness,
-  ];
-
-  const byMetricId = new Map<TechTeamMetricId, MetricResultDto<TechTeamMetricId>>(
-    rows.map((row) => {
-      const result = adaptRow(row, factor);
-      return [result.metricId, result];
-    }),
-  );
-
-  /*
-    Each failure rate is its own metric with its own denominator, so the bars
-    become eight independent results rather than one grouped value.
-  */
-  mock.failureLocalization.items.forEach((item, index) => {
-    const metricId = FAILURE_RATE_IDS[index];
-
-    if (metricId) {
-      /*
-        The rate only. The fixture's `scaleMax` is the bar track's bound, which
-        is a presentation choice the chart makes; it is not an aggregate the
-        source reports, so it does not travel on the wire.
-      */
-      byMetricId.set(metricId, {
-        metricId,
-        status: "OK",
-        value: { failureRatePercent: Number((item.value * factor).toFixed(2)) },
-      });
-    }
-  });
-
-  return {
-    meta: illustrativeMeta("tech-team", request.filters),
-    metrics: request.metrics.map(
-      (metricId) =>
-        byMetricId.get(metricId) ?? {
-          metricId,
-          status: "NO_DATA" as const,
-          value: null,
-          reason: "The local fixture has no row for this metric",
-        },
-    ),
-  };
+): Promise<TechTeamDashboardMetricsPayload> {
+  void request;
+  return readMock();
 }
 
 export async function loadTechTeamMockTimeseries(

@@ -27,6 +27,7 @@ import type {
   TimeseriesResponseDto,
 } from "@/types/dashboardEndpointDtos";
 import type { ProductOwnerDashboardMetricsPayload } from "@/types/productOwnerDashboard";
+import type { TechTeamDashboardMetricsPayload } from "@/types/techTeamDashboard";
 
 type DashboardDataSource = "mock" | "splunk";
 
@@ -49,7 +50,11 @@ function getDashboardDataSource(): DashboardDataSource {
 
 export async function loadDashboardMetrics(
   request: MetricsRequestDto,
-): Promise<MetricsResponseDto | ProductOwnerDashboardMetricsPayload> {
+): Promise<
+  | MetricsResponseDto
+  | ProductOwnerDashboardMetricsPayload
+  | TechTeamDashboardMetricsPayload
+> {
   if (getDashboardDataSource() === "splunk") {
     return loadSplunkMetrics(request);
   }
