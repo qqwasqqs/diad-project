@@ -16,7 +16,7 @@ const MISSING_FUNCTION_CONTRACT = [
 export class DashboardSplunkContractError extends Error {
   constructor(endpoint: "metrics" | "timeseries") {
     super(
-      `Cannot call Splunk for dashboard ${endpoint}: the dashboard saved-search/Function contract is missing ${MISSING_FUNCTION_CONTRACT}.`,
+      `Cannot use the Splunk response for dashboard ${endpoint}: the dashboard saved-search/Function contract is missing ${MISSING_FUNCTION_CONTRACT}.`,
     );
     this.name = "DashboardSplunkContractError";
   }
@@ -25,10 +25,14 @@ export class DashboardSplunkContractError extends Error {
 const METRICS_SAVED_SEARCH = "| savedsearch consolidated_metric_final";
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
-// Stage 1 connectivity test: logs the raw response and returns no metrics; filters and mapping come in stage 2.
+// Stage 1 connectivity test: log the raw response, then fail until mapping is implemented.
+// TECH DEBT — both loaders throw instead of returning an empty envelope, which crashed the page.
+// Removed return statements and revert steps: docs/next-splunk-connection/splunk-response-failure-tech-debt.md
 export async function loadSplunkMetrics(
   request: MetricsRequestDto,
 ): Promise<MetricsResponseDto> {
+  void request;
+
   // Dynamic import: keyvault.ts throws on load without KEY_VAULT_URL, which would break mock mode.
   const { fetchSplunkReport } = await import("@/lib/services/splunkReportService");
 
@@ -43,25 +47,14 @@ export async function loadSplunkMetrics(
 
   console.log("[dashboard] Splunk metrics raw response:", JSON.stringify(raw, null, 2));
 
-  return {
-    meta: {
-      dashboard: "product-owner",
-      requestId: crypto.randomUUID(),
-      generatedAt: end.toISOString(),
-      appliedFilters: {
-        timeRange: request.filters.timeRange.value,
-        businessUnits: [...request.filters.businessUnits],
-        projects: [...request.filters.projects],
-        timezone: request.filters.timezone,
-      },
-    },
-    metrics: [],
-  };
+  throw new DashboardSplunkContractError("metrics");
 }
 
 export async function loadSplunkTimeseries(
   request: TimeseriesRequestDto,
 ): Promise<TimeseriesResponseDto> {
+  void request;
+
   // Dynamic import: keyvault.ts throws on load without KEY_VAULT_URL, which would break mock mode.
   const { fetchSplunkReport } = await import("@/lib/services/splunkReportService");
 
@@ -76,21 +69,5 @@ export async function loadSplunkTimeseries(
 
   console.log("[dashboard] Splunk timeseries raw response:", JSON.stringify(raw, null, 2));
 
-  return {
-    meta: {
-      dashboard: "product-owner",
-      requestId: crypto.randomUUID(),
-      generatedAt: end.toISOString(),
-      appliedFilters: {
-        timeRange: request.filters.timeRange.value,
-        businessUnits: [...request.filters.businessUnits],
-        projects: [...request.filters.projects],
-        timezone: request.filters.timezone,
-      },
-      chartId: request.chartId,
-      granularity: request.granularity,
-    },
-    series: [],
-    supportingStats: [],
-  };
+  throw new DashboardSplunkContractError("timeseries");
 }
