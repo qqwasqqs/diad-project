@@ -3,6 +3,10 @@ import {
   loadMockTimeseries,
 } from "@/lib/server/dashboard/productOwnerDemoSource";
 import {
+  loadTechTeamMockMetrics,
+  loadTechTeamMockTimeseries,
+} from "@/lib/server/dashboard/techTeamDemoSource";
+import {
   loadSplunkMetrics,
   loadSplunkTimeseries,
 } from "@/lib/server/dashboard/dashboardSplunkSource";
@@ -13,6 +17,7 @@ import type {
   TimeseriesResponseDto,
 } from "@/types/dashboardEndpointDtos";
 import type { ProductOwnerDashboardMetricsPayload } from "@/types/productOwnerDashboard";
+import type { TechTeamDashboardMetricsPayload } from "@/types/techTeamDashboard";
 
 type DashboardDataSource = "mock" | "splunk";
 
@@ -35,16 +40,28 @@ function getDashboardDataSource(): DashboardDataSource {
 
 export async function loadDashboardMetrics(
   request: MetricsRequestDto,
-): Promise<MetricsResponseDto | ProductOwnerDashboardMetricsPayload> {
-  return getDashboardDataSource() === "mock"
+): Promise<
+  | MetricsResponseDto
+  | ProductOwnerDashboardMetricsPayload
+  | TechTeamDashboardMetricsPayload
+> {
+  if (getDashboardDataSource() === "splunk") {
+    return loadSplunkMetrics(request);
+  }
+
+  return request.dashboard === "product-owner"
     ? loadMockMetrics(request)
-    : loadSplunkMetrics(request);
+    : loadTechTeamMockMetrics(request);
 }
 
 export async function loadDashboardTimeseries(
   request: TimeseriesRequestDto,
 ): Promise<TimeseriesResponseDto> {
-  return getDashboardDataSource() === "mock"
+  if (getDashboardDataSource() === "splunk") {
+    return loadSplunkTimeseries(request);
+  }
+
+  return request.dashboard === "product-owner"
     ? loadMockTimeseries(request)
-    : loadSplunkTimeseries(request);
+    : loadTechTeamMockTimeseries(request);
 }

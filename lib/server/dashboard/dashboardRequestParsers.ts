@@ -1,16 +1,22 @@
-import { parseMetricsRequest, parseTimeseriesRequest } from "@/lib/server/dashboard/productOwnerDemoSource";
 import type {
   MetricsRequestDto,
   TimeseriesRequestDto,
 } from "@/types/dashboardEndpointDtos";
 
+/*
+  TECH DEBT — request validation is temporarily disabled for every dashboard.
+  The parsers pass input through unchanged. The earlier validation, still
+  commented out in productOwnerDemoSource.ts, allow-listed the local demo's
+  filters and rejected real ones with HTTP 400. It belongs here, shared by
+  every dashboard and source, with environment-appropriate allowlists.
+*/
+
 export function parseDashboardMetricsRequest(payload: unknown): MetricsRequestDto {
-  return parseMetricsRequest(payload);
+  return payload as MetricsRequestDto;
 }
 
 export function parseDashboardTimeseriesRequest(
   payload: unknown,
 ): TimeseriesRequestDto {
-  return parseTimeseriesRequest(payload);
+  return payload as TimeseriesRequestDto;
 }
-

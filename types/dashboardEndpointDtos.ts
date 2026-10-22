@@ -1,5 +1,7 @@
 /* Wire contracts for the planned shared dashboard endpoints. */
 
+export type DashboardId = "product-owner" | "tech-team";
+
 export type DashboardAvailabilityStatus =
   | "OK"
   | "DATA_PENDING"
@@ -23,7 +25,7 @@ export interface DashboardAppliedFiltersDto {
 }
 
 export interface DashboardEndpointMetaDto {
-  dashboard: "product-owner";
+  dashboard: DashboardId;
   requestId: string;
   generatedAt: string;
   appliedFilters: DashboardAppliedFiltersDto;
@@ -41,18 +43,60 @@ export type ProductOwnerChartId =
   | "adoption-and-engagement"
   | "experience-and-response-quality";
 
-export interface MetricsRequestDto {
-  dashboard: "product-owner";
-  sections: ["product-experience-pulse"];
-  metrics: ProductOwnerMetricId[];
+// Identifiers from the Technical Teams Splunk data contract.
+export type TechTeamSectionId =
+  | "request-path-health"
+  | "failure-localization"
+  | "capacity-and-efficiency"
+  | "ai-model-quality"
+  | "evaluator-readiness";
+
+export type TechTeamMetricId =
+  | "request-throughput"
+  | "inference-error-rate"
+  | "pipeline-duration-average"
+  | "indexing-ai-services-latency-average"
+  | "failure-rate-pipeline"
+  | "failure-rate-job"
+  | "failure-rate-inference"
+  | "failure-rate-api-service"
+  | "failure-rate-training"
+  | "failure-rate-indexing"
+  | "failure-rate-transcription"
+  | "failure-rate-translation"
+  | "cost-per-request"
+  | "token-usage-per-request"
+  | "token-throughput"
+  | "available-token-limit"
+  | "cache-hit-ratio"
+  | "safety-evaluation-score"
+  | "mlflow-safety-score"
+  | "pii-leakage-agent-only"
+  | "upia";
+
+export type TechTeamChartId = "request-path-health" | "ai-model-quality";
+
+interface MetricsRequestOptions {
   filters: DashboardEndpointFiltersDto;
   options: { includePending: true; includeCoverage: true };
 }
 
+export type MetricsRequestDto =
+  | (MetricsRequestOptions & {
+      dashboard: "product-owner";
+      sections: ["product-experience-pulse"];
+      metrics: ProductOwnerMetricId[];
+    })
+  | (MetricsRequestOptions & {
+      dashboard: "tech-team";
+      sections: TechTeamSectionId[];
+      metrics: TechTeamMetricId[];
+    });
+
 export type MetricResultDto =
-  | { metricId: ProductOwnerMetricId; status: "OK"; value: unknown }
+  | { metricId: ProductOwnerMetricId | TechTeamMetricId; status: "OK"; value: unknown }
   | {
-      metricId: ProductOwnerMetricId;
+      metricId: ProductOwnerMetricId | TechTeamMetricId;
       status: Exclude<DashboardAvailabilityStatus, "OK">;
       value: null;
       reason: string;
@@ -63,14 +107,22 @@ export interface MetricsResponseDto {
   metrics: MetricResultDto[];
 }
 
-export interface TimeseriesRequestDto {
-  dashboard: "product-owner";
-  chartId: ProductOwnerChartId;
+interface TimeseriesRequestOptions {
   metrics: string[];
   filters: DashboardEndpointFiltersDto;
   granularity: "day";
   options: { includeSupportingStats: true };
 }
+
+export type TimeseriesRequestDto =
+  | (TimeseriesRequestOptions & {
+      dashboard: "product-owner";
+      chartId: ProductOwnerChartId;
+    })
+  | (TimeseriesRequestOptions & {
+      dashboard: "tech-team";
+      chartId: TechTeamChartId;
+    });
 
 export type SeriesResultDto =
   | {
@@ -96,7 +148,7 @@ export type SupportingStatDto =
 
 export interface TimeseriesResponseDto {
   meta: DashboardEndpointMetaDto & {
-    chartId: ProductOwnerChartId;
+    chartId: ProductOwnerChartId | TechTeamChartId;
     granularity: "day";
   };
   series: SeriesResultDto[];
