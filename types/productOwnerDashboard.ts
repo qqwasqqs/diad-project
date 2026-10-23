@@ -6,11 +6,11 @@
   for display; the page only adds presentation such as icons and chart colors.
 */
 
-import type { ProductOwnerAdoptionAndEngagementData } from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerAdoptionAndEngagementDrawer";
-import type { ProductOwnerChannelMixData } from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerChannelMixDrawer";
-import type { ProductOwnerExperienceQualityData } from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerExperienceQualityDrawer";
-import type { ProductExperiencePulseData } from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerProductExperiencePulseDrawer";
-import type { ProductOwnerTrustEvidenceData } from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerTrustEvidenceDrawer";
+import type { ProductOwnerAdoptionAndEngagementData } from "@/components/drawers/product-owner/ProductOwnerAdoptionAndEngagementDrawer";
+import type { ProductOwnerChannelMixData } from "@/components/drawers/product-owner/ProductOwnerChannelMixDrawer";
+import type { ProductOwnerExperienceQualityData } from "@/components/drawers/product-owner/ProductOwnerExperienceQualityDrawer";
+import type { ProductExperiencePulseData } from "@/components/drawers/product-owner/ProductOwnerProductExperiencePulseDrawer";
+import type { ProductOwnerTrustEvidenceData } from "@/components/drawers/product-owner/ProductOwnerTrustEvidenceDrawer";
 import type { MetricRow, PendingState, Series } from "./dashboard";
 
 export interface ProductOwnerApiErrorRateValue {

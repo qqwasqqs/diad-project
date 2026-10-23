@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 
-import DetailDrawer from "../../DetailDrawer";
+import DetailDrawer from "../../shared/dashboard/DetailDrawer";
 import DrawerStatGrid from "../DrawerStatGrid";
 import type { MetricRow } from "@/types/dashboard";
 import type { TechTeamDashboardPayload } from "@/types/techTeamDashboard";

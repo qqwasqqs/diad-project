@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
-import MetricList, { type MetricListVariant } from "../MetricList";
-import PendingStateValue from "../PendingStateValue";
+import MetricList, { type MetricListVariant } from "../shared/dashboard/MetricList";
+import PendingStateValue from "../shared/dashboard/PendingStateValue";
 import type { MetricRow } from "@/types/dashboard";
 
 /*

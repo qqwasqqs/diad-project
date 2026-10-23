@@ -1,7 +1,7 @@
 "use client";
 
-import DetailDrawer from "../../DetailDrawer";
-import MetricContextTable from "../../MetricContextTable";
+import DetailDrawer from "../../shared/dashboard/DetailDrawer";
+import MetricContextTable from "../../shared/dashboard/MetricContextTable";
 import DrawerRowList from "../DrawerRowList";
 import DrawerSection from "../DrawerSection";
 import DrawerStatGrid from "../DrawerStatGrid";

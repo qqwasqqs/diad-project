@@ -1,6 +1,6 @@
 "use client";
 
-import DetailDrawer from "../../DetailDrawer";
+import DetailDrawer from "../../shared/dashboard/DetailDrawer";
 import DrawerRowList from "../DrawerRowList";
 import DrawerSection from "../DrawerSection";
 import type { ExecutiveDrawers } from "@/types/executiveDashboard";

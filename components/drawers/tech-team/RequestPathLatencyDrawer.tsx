@@ -2,9 +2,9 @@
 
 import DashboardLineChart, {
   type DashboardLineSeries,
-} from "../../DashboardLineChart";
-import DetailDrawer from "../../DetailDrawer";
-import PanelFootnote from "../../PanelFootnote";
+} from "../../shared/dashboard/DashboardLineChart";
+import DetailDrawer from "../../shared/dashboard/DetailDrawer";
+import PanelFootnote from "../../shared/dashboard/PanelFootnote";
 import DrawerSection from "../DrawerSection";
 import DrawerStatGrid from "../DrawerStatGrid";
 import type { TechTeamDashboardPayload } from "@/types/techTeamDashboard";

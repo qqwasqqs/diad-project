@@ -26,10 +26,10 @@ import { PositiveNegativeBar } from "@/components/shared/charts/PositiveNegative
 import CostByBusinessUnitChart from "@/components/charts/CostByBusinessUnitChart";
 import { useExecutiveMainView } from "@/hooks/useExecutiveDashboard";
 import DashboardSectionAction from "@/components/shared/dashboard/DashboardSectionAction";
-import ExecutivePulseDrawer from "@/components/shared/dashboard/drawers/executive/ExecutivePulseDrawer";
-import EngagementDrawer from "@/components/shared/dashboard/drawers/executive/EngagementDrawer";
-import CostAllocationDrawer from "@/components/shared/dashboard/drawers/executive/CostAllocationDrawer";
-import SafetyAndRiskDrawer from "@/components/shared/dashboard/drawers/executive/SafetyAndRiskDrawer";
+import ExecutivePulseDrawer from "@/components/drawers/executive/ExecutivePulseDrawer";
+import EngagementDrawer from "@/components/drawers/executive/EngagementDrawer";
+import CostAllocationDrawer from "@/components/drawers/executive/CostAllocationDrawer";
+import SafetyAndRiskDrawer from "@/components/drawers/executive/SafetyAndRiskDrawer";
 import { useSelectedDashboardFilters } from "@/hooks/useSelectedDashboardFilters";
 import type { Series } from "@/types/dashboard";
 import type { ExecutivePulseCard } from "@/types/executiveDashboard";

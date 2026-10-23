@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
-import { MetricCard } from "../MetricCard";
-import PendingStateValue from "../PendingStateValue";
+import { MetricCard } from "../shared/dashboard/MetricCard";
+import PendingStateValue from "../shared/dashboard/PendingStateValue";
 import type { MetricRow } from "@/types/dashboard";
 
 /*

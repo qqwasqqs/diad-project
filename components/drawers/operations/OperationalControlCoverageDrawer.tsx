@@ -1,8 +1,8 @@
 "use client";
 
-import DetailDrawer from "../../DetailDrawer";
-import MetricContextTable from "../../MetricContextTable";
-import PendingStateValue from "../../PendingStateValue";
+import DetailDrawer from "../../shared/dashboard/DetailDrawer";
+import MetricContextTable from "../../shared/dashboard/MetricContextTable";
+import PendingStateValue from "../../shared/dashboard/PendingStateValue";
 import DrawerSection from "../DrawerSection";
 import type { OperationsDrawers } from "@/types/operationsDashboard";
 

@@ -28,25 +28,25 @@ import DashboardSectionInfo, {
 import DataPendingCard from "@/components/shared/dashboard/DataPendingCard";
 import { MetricCard } from "@/components/shared/dashboard/MetricCard";
 import PendingStateValue from "@/components/shared/dashboard/PendingStateValue";
-import ProductOwnerFeedbackSummary from "@/components/shared/dashboard/ProductOwnerFeedbackSummary/ProductOwnerFeedbackSummary";
+import ProductOwnerFeedbackSummary from "@/components/shared/dashboard/ProductOwnerFeedbackSummary";
 import StatusCallout, {
   type StatusCalloutVariant,
 } from "@/components/shared/dashboard/StatusCallout";
 import ProductOwnerAdoptionAndEngagementDrawer, {
   type ProductOwnerAdoptionAndEngagementData,
-} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerAdoptionAndEngagementDrawer";
+} from "@/components/drawers/product-owner/ProductOwnerAdoptionAndEngagementDrawer";
 import ProductOwnerChannelMixDrawer, {
   type ProductOwnerChannelMixData,
-} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerChannelMixDrawer";
+} from "@/components/drawers/product-owner/ProductOwnerChannelMixDrawer";
 import ProductOwnerExperienceQualityDrawer, {
   type ProductOwnerExperienceQualityData,
-} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerExperienceQualityDrawer";
+} from "@/components/drawers/product-owner/ProductOwnerExperienceQualityDrawer";
 import ProductOwnerProductExperiencePulseDrawer, {
   type ProductExperiencePulseData,
-} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerProductExperiencePulseDrawer";
+} from "@/components/drawers/product-owner/ProductOwnerProductExperiencePulseDrawer";
 import ProductOwnerTrustEvidenceDrawer, {
   type ProductOwnerTrustEvidenceData,
-} from "@/components/shared/dashboard/drawers/product-owner/ProductOwnerTrustEvidenceDrawer";
+} from "@/components/drawers/product-owner/ProductOwnerTrustEvidenceDrawer";
 import productOwnerSections from "@/content/dashboards/product-owner-sections.json";
 import { useProductOwnerMainView } from "@/hooks/useProductOwnerDashboardEndpoints";
 import adoptionAndEngagementData from "@/public/mocks/new-pages/product-owner-adoption-and-engagement.json";

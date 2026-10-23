@@ -1,7 +1,7 @@
 "use client";
 
 import HorizontalBarList from "@/components/shared/charts/HorizontalBarList";
-import DetailDrawer from "../../DetailDrawer";
+import DetailDrawer from "../../shared/dashboard/DetailDrawer";
 import type { OperationsDrawers } from "@/types/operationsDashboard";
 
 /*
